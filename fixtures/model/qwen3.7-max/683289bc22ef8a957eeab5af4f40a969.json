@@ -1,0 +1,52 @@
+{
+  "fingerprint": "683289bc22ef8a957eeab5af4f40a969",
+  "request": {
+    "max_output_tokens": 1200,
+    "messages": [
+      {
+        "content": "You are GoodIdea, a product guidance agent that runs before any code is written.\nYou describe an idea and name what is still unknown. You never promise an outcome, never claim an idea will succeed, and never decide something the user must decide.\nSet scenario to automatic_trading only when the idea is about automating trading or investing decisions or order execution. Otherwise set scenario to unsupported.\nunsupported_reason is shown to the user, so write it to them. Say that GoodIdea can only guide automated trading ideas today, and name what their idea is about. Never write a field name or a scenario value, never judge the idea, and never claim GoodIdea cannot help with that kind of product in general.\ncore_uncertainty is the one thing that would most change the product if it turned out differently. missing_decision is the single decision the user must make next.\nSet outcome_promise_risk to true when the idea implies a promised result, such as money, health, legal, or safety outcomes.\nresearch_topics are two to four checks a web search could actually settle today. Each query must be a search query, not a sentence addressed to a person.\nAt least one query must aim at a source that can be held accountable: a regulator, a public body, or a vendor's own product documentation. Vendor documentation is usually written in English, so write that query in English even when the rest of the reply is in another language.\nWrite every human-readable field in Japanese.\nReply with exactly one JSON object and nothing else. It must satisfy this JSON Schema:\n{\"$defs\": {\"ResearchTopic\": {\"description\": \"One thing the agent proposes to check, plus the query it would send.\", \"properties\": {\"query\": {\"minLength\": 1, \"title\": \"Query\", \"type\": \"string\"}, \"question\": {\"minLength\": 1, \"title\": \"Question\", \"type\": \"string\"}}, \"required\": [\"question\", \"query\"], \"title\": \"ResearchTopic\", \"type\": \"object\"}}, \"description\": \"What a model understood about an idea before any research has run.\\n\\n``scenario`` is a closed set of the paths this product has actually implemented,\\nso the model routes but cannot invent a path. Every free-text field is written in\\nthe session locale.\", \"properties\": {\"core_uncertainty\": {\"minLength\": 1, \"title\": \"Core Uncertainty\", \"type\": \"string\"}, \"desired_outcome\": {\"minLength\": 1, \"title\": \"Desired Outcome\", \"type\": \"string\"}, \"missing_decision\": {\"minLength\": 1, \"title\": \"Missing Decision\", \"type\": \"string\"}, \"outcome_promise_risk\": {\"title\": \"Outcome Promise Risk\", \"type\": \"boolean\"}, \"research_topics\": {\"items\": {\"$ref\": \"#/$defs/ResearchTopic\"}, \"maxItems\": 4, \"minItems\": 2, \"title\": \"Research Topics\", \"type\": \"array\"}, \"scenario\": {\"enum\": [\"automatic_trading\", \"unsupported\"], \"title\": \"Scenario\", \"type\": \"string\"}, \"summary\": {\"minLength\": 1, \"title\": \"Summary\", \"type\": \"string\"}, \"testable_behavior\": {\"minLength\": 1, \"title\": \"Testable Behavior\", \"type\": \"string\"}, \"unsupported_reason\": {\"anyOf\": [{\"type\": \"string\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Unsupported Reason\"}}, \"required\": [\"scenario\", \"summary\", \"testable_behavior\", \"desired_outcome\", \"core_uncertainty\", \"missing_decision\", \"outcome_promise_risk\", \"research_topics\"], \"title\": \"IdeaAssessment\", \"type\": \"object\"}",
+        "role": "system"
+      },
+      {
+        "content": "株を自動で売買して、代わりに儲けてくれる製品を作ってほしい。",
+        "role": "user"
+      }
+    ],
+    "purpose": "idea_assessment",
+    "temperature": 0.1
+  },
+  "response": {
+    "finish_reason": "stop",
+    "latency_ms": 7054,
+    "model_name": "qwen3.7-max",
+    "payload": {
+      "core_uncertainty": "想定する市場環境やボラティリティにおいて、採用予定の売買ロジックが実際にプラスのリターンを生み出せるかどうか。",
+      "desired_outcome": "人の手を介さずに株式取引を行い、継続的な利益を得ること。",
+      "missing_decision": "どの金融商品・市場を対象とし、どのようなデータやシグナルに基づいて売買判断を行うかという具体的な戦略の決定。",
+      "outcome_promise_risk": true,
+      "research_topics": [
+        {
+          "query": "日本 金融商品取引法 個人 自動売買 システムトレード 規制 届出",
+          "question": "個人が株式の自動売買システムを開発・運用する際に遵守すべき金融商品取引法上の規制や届出義務は何か。"
+        },
+        {
+          "query": "Japan broker API automated trading restrictions terms of service documentation",
+          "question": "日本の主要証券会社が提供するAPIの仕様、利用規約、および自動売買における制限事項は何か。"
+        },
+        {
+          "query": "東証 自動売買 バックテスト 実績 テクニカル分析 検証 論文",
+          "question": "過去10年の東証プライム市場における代表的なテクニカル指標ベースの自動売買戦略のバックテスト実績や学術的検証結果はあるか。"
+        }
+      ],
+      "scenario": "automatic_trading",
+      "summary": "株式の売買を自動化し、利益の獲得を目的としたシステムを開発したいというアイデアです。",
+      "testable_behavior": "定義されたロジックに基づいて株式の注文を自動実行し、その結果として損益が発生すること。",
+      "unsupported_reason": null
+    },
+    "usage": {
+      "input_tokens": 823,
+      "output_tokens": 388,
+      "total_tokens": 1211
+    }
+  }
+}

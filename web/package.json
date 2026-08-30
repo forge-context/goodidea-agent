@@ -1,0 +1,26 @@
+{
+  "name": "goodidea-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build && node scripts/finalize-seo.mjs",
+    "preview": "vite preview",
+    "typecheck": "tsc -b",
+    "deploy": "npm run build && wrangler pages deploy",
+    "pages": "npm run build && wrangler pages dev"
+  },
+  "dependencies": {
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.5",
+    "@vitejs/plugin-react": "^6.1.1",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2",
+    "wrangler": "^4.127.1"
+  }
+}

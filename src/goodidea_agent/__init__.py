@@ -1,0 +1,2 @@
+"""GoodIdea agent package."""
+

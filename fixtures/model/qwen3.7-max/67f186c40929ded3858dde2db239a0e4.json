@@ -1,0 +1,59 @@
+{
+  "fingerprint": "67f186c40929ded3858dde2db239a0e4",
+  "request": {
+    "max_output_tokens": 1600,
+    "messages": [
+      {
+        "content": "You are GoodIdea, writing the first research answer a user sees.\nUse only the sources listed below. Every confirmed fact must cite at least one source id from that list. Never cite an id that is not listed, and never state a fact the listed excerpts do not support.\ngrounded_encouragement names what is concretely feasible, without predicting success. market_reality summarises what the sources establish.\nhonest_boundary names what the evidence does not show, especially any outcome the user hopes for but nothing here can promise.\nsafe_validation_step is one step the user could take now with no real money, no live account, and no external side effects.\nquestion_prompt asks the one thing the next step cannot proceed without: whether the user already has a rule or strategy they want this product to run, or whether they need help finding and comparing candidates. Phrase it in their own terms and in one short question, but a truthful answer to it must settle that and nothing else. Do not ask about markets, asset classes, budgets, or timelines: an answer to those leaves the next step unable to continue.\nquestion_why explains what changes depending on the answer. Ask one question only, and never answer it yourself.\nWrite every human-readable field in English.\nReply with exactly one JSON object and nothing else. It must satisfy this JSON Schema:\n{\"$defs\": {\"ComposedFact\": {\"description\": \"One claim the agent is prepared to make, with the sources it rests on.\", \"properties\": {\"id\": {\"minLength\": 1, \"pattern\": \"^[a-z0-9][a-z0-9-]*$\", \"title\": \"Id\", \"type\": \"string\"}, \"source_ids\": {\"items\": {\"type\": \"string\"}, \"minItems\": 1, \"title\": \"Source Ids\", \"type\": \"array\"}, \"statement\": {\"minLength\": 1, \"title\": \"Statement\", \"type\": \"string\"}}, \"required\": [\"id\", \"statement\", \"source_ids\"], \"title\": \"ComposedFact\", \"type\": \"object\"}}, \"description\": \"A market reality card written by a model from retained sources only.\", \"properties\": {\"confirmed_facts\": {\"items\": {\"$ref\": \"#/$defs/ComposedFact\"}, \"maxItems\": 4, \"minItems\": 1, \"title\": \"Confirmed Facts\", \"type\": \"array\"}, \"grounded_encouragement\": {\"minLength\": 1, \"title\": \"Grounded Encouragement\", \"type\": \"string\"}, \"honest_boundary\": {\"minLength\": 1, \"title\": \"Honest Boundary\", \"type\": \"string\"}, \"market_reality\": {\"minLength\": 1, \"title\": \"Market Reality\", \"type\": \"string\"}, \"question_prompt\": {\"minLength\": 1, \"title\": \"Question Prompt\", \"type\": \"string\"}, \"question_why\": {\"minLength\": 1, \"title\": \"Question Why\", \"type\": \"string\"}, \"safe_validation_step\": {\"minLength\": 1, \"title\": \"Safe Validation Step\", \"type\": \"string\"}}, \"required\": [\"grounded_encouragement\", \"market_reality\", \"honest_boundary\", \"safe_validation_step\", \"confirmed_facts\", \"question_prompt\", \"question_why\"], \"title\": \"ComposedCard\", \"type\": \"object\"}",
+        "role": "system"
+      },
+      {
+        "content": "{\n  \"idea\": \"Build me a product that trades stocks automatically and makes money.\",\n  \"core_uncertainty\": \"Whether any specific algorithmic strategy can reliably produce net positive returns after accounting for transaction costs, slippage, taxes, and changing market regimes.\",\n  \"missing_decision\": \"Which specific trading strategy or signal source the system will use to determine entry and exit points.\",\n  \"outcome_promise_risk\": true,\n  \"sources\": [\n    {\n      \"id\": \"alpaca-markets-us-docs-paper-trading\",\n      \"publisher\": \"alpaca.markets\",\n      \"source_type\": \"primary\",\n      \"title\": \"Paper Trading\",\n      \"excerpt\": \"Alpaca documents a real-time simulation environment for testing trading code without routing orders to a live exchange.\"\n    },\n    {\n      \"id\": \"github-io-tws-api-introduction-html\",\n      \"publisher\": \"github.io\",\n      \"source_type\": \"secondary\",\n      \"title\": \"TWS API introduction\",\n      \"excerpt\": \"Interactive Brokers documents an API for automated trading and a paper account for testing strategies without risking capital.\"\n    },\n    {\n      \"id\": \"investor-gov-protect-your-investments-fraud-prot\",\n      \"publisher\": \"investor.gov\",\n      \"source_type\": \"authoritative\",\n      \"title\": \"Protect Your Money: How to Avoid Investment Scams\",\n      \"excerpt\": \"Investor.gov explains that every investment involves risk and high guaranteed investment returns do not exist.\"\n    }\n  ]\n}",
+        "role": "user"
+      }
+    ],
+    "purpose": "market_reality_card",
+    "temperature": 0.1
+  },
+  "response": {
+    "finish_reason": "stop",
+    "latency_ms": 7363,
+    "model_name": "qwen3.7-max",
+    "payload": {
+      "confirmed_facts": [
+        {
+          "id": "no-guaranteed-returns",
+          "source_ids": [
+            "investor-gov-protect-your-investments-fraud-prot"
+          ],
+          "statement": "Every investment involves risk and high guaranteed investment returns do not exist."
+        },
+        {
+          "id": "alpaca-paper-trading",
+          "source_ids": [
+            "alpaca-markets-us-docs-paper-trading"
+          ],
+          "statement": "Alpaca provides a real-time simulation environment for testing trading code without routing orders to a live exchange."
+        },
+        {
+          "id": "ibkr-paper-api",
+          "source_ids": [
+            "github-io-tws-api-introduction-html"
+          ],
+          "statement": "Interactive Brokers offers an API for automated trading and a paper account for testing strategies without risking capital."
+        }
+      ],
+      "grounded_encouragement": "You can build and test the automated execution infrastructure for a stock trading system using real-time simulation environments that do not route orders to live exchanges or risk capital.",
+      "honest_boundary": "No source confirms that any specific algorithmic strategy can reliably produce net positive returns after costs, nor can any tool guarantee that an automated product will make money.",
+      "market_reality": "Authoritative guidance establishes that every investment involves risk and high guaranteed returns do not exist, while brokerages like Alpaca and Interactive Brokers provide APIs and paper trading environments specifically for testing automated code without financial exposure.",
+      "question_prompt": "Do you already have a specific trading strategy or signal source defined for this system, or do you need help finding and comparing candidates?",
+      "question_why": "The next step requires either validating your existing logic in a simulator or researching viable strategy options before any technical build can proceed.",
+      "safe_validation_step": "Connect to a paper trading environment via a brokerage API to verify your code executes logic correctly in a real-time simulation without risking funds."
+    },
+    "usage": {
+      "input_tokens": 1079,
+      "output_tokens": 443,
+      "total_tokens": 1522
+    }
+  }
+}

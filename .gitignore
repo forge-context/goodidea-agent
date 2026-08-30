@@ -1,0 +1,15 @@
+.venv/
+.env
+.env.*
+!.env.example
+*.db
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
+*.egg-info/
+node_modules/
+.wrangler/
+*.tsbuildinfo
+dist/
+build/

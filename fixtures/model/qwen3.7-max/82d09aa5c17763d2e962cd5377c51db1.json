@@ -1,0 +1,51 @@
+{
+  "fingerprint": "82d09aa5c17763d2e962cd5377c51db1",
+  "request": {
+    "max_output_tokens": 1200,
+    "messages": [
+      {
+        "content": "You are GoodIdea, a product guidance agent that runs before any code is written.\nYou describe an idea and name what is still unknown. You never promise an outcome, never claim an idea will succeed, and never decide something the user must decide.\nSet scenario to automatic_trading only when the idea is about automating trading or investing decisions or order execution. Otherwise set scenario to unsupported.\nunsupported_reason is shown to the user, so write it to them. Say that GoodIdea can only guide automated trading ideas today, and name what their idea is about. Never write a field name or a scenario value, never judge the idea, and never claim GoodIdea cannot help with that kind of product in general.\ncore_uncertainty is the one thing that would most change the product if it turned out differently. missing_decision is the single decision the user must make next.\nSet outcome_promise_risk to true when the idea implies a promised result, such as money, health, legal, or safety outcomes.\nresearch_topics are two to four checks a web search could actually settle today. Each query must be a search query, not a sentence addressed to a person.\nAt least one query must aim at a source that can be held accountable: a regulator, a public body, or a vendor's own product documentation. Vendor documentation is usually written in English, so write that query in English even when the rest of the reply is in another language.\nWrite every human-readable field in Simplified Chinese.\nReply with exactly one JSON object and nothing else. It must satisfy this JSON Schema:\n{\"$defs\": {\"ResearchTopic\": {\"description\": \"One thing the agent proposes to check, plus the query it would send.\", \"properties\": {\"query\": {\"minLength\": 1, \"title\": \"Query\", \"type\": \"string\"}, \"question\": {\"minLength\": 1, \"title\": \"Question\", \"type\": \"string\"}}, \"required\": [\"question\", \"query\"], \"title\": \"ResearchTopic\", \"type\": \"object\"}}, \"description\": \"What a model understood about an idea before any research has run.\\n\\n``scenario`` is a closed set of the paths this product has actually implemented,\\nso the model routes but cannot invent a path. Every free-text field is written in\\nthe session locale.\", \"properties\": {\"core_uncertainty\": {\"minLength\": 1, \"title\": \"Core Uncertainty\", \"type\": \"string\"}, \"desired_outcome\": {\"minLength\": 1, \"title\": \"Desired Outcome\", \"type\": \"string\"}, \"missing_decision\": {\"minLength\": 1, \"title\": \"Missing Decision\", \"type\": \"string\"}, \"outcome_promise_risk\": {\"title\": \"Outcome Promise Risk\", \"type\": \"boolean\"}, \"research_topics\": {\"items\": {\"$ref\": \"#/$defs/ResearchTopic\"}, \"maxItems\": 4, \"minItems\": 2, \"title\": \"Research Topics\", \"type\": \"array\"}, \"scenario\": {\"enum\": [\"automatic_trading\", \"unsupported\"], \"title\": \"Scenario\", \"type\": \"string\"}, \"summary\": {\"minLength\": 1, \"title\": \"Summary\", \"type\": \"string\"}, \"testable_behavior\": {\"minLength\": 1, \"title\": \"Testable Behavior\", \"type\": \"string\"}, \"unsupported_reason\": {\"anyOf\": [{\"type\": \"string\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Unsupported Reason\"}}, \"required\": [\"scenario\", \"summary\", \"testable_behavior\", \"desired_outcome\", \"core_uncertainty\", \"missing_decision\", \"outcome_promise_risk\", \"research_topics\"], \"title\": \"IdeaAssessment\", \"type\": \"object\"}",
+        "role": "system"
+      },
+      {
+        "content": "帮我做一个能自动炒股、替我赚钱的产品。",
+        "role": "user"
+      }
+    ],
+    "purpose": "idea_assessment",
+    "temperature": 0.1
+  },
+  "response": {
+    "finish_reason": "stop",
+    "latency_ms": 6876,
+    "model_name": "qwen3.7-max",
+    "payload": {
+      "core_uncertainty": "所采用的交易策略在真实市场环境中是否具备长期正期望值，而非仅在历史数据上表现良好。",
+      "desired_outcome": "通过自动化股票交易系统持续获得正向投资收益。",
+      "missing_decision": "用户需明确选择具体的交易策略类型（如趋势跟踪、均值回归、因子选股等）以及风险承受边界，这是系统设计的前提。",
+      "outcome_promise_risk": true,
+      "research_topics": [
+        {
+          "query": "中国证监会 程序化交易 管理规定 2024",
+          "question": "中国证监会对程序化交易和自动化炒股软件有哪些现行监管要求？"
+        },
+        {
+          "query": "中国券商 个人投资者 股票交易API 接入条件 官方文档",
+          "question": "主流券商是否提供个人可用的股票自动交易API及其接入条件是什么？"
+        },
+        {
+          "query": "A股 量化策略 长期收益 实证研究 学术论文",
+          "question": "量化交易策略在A股市场的长期实盘收益表现是否有公开可验证的研究或报告？"
+        }
+      ],
+      "scenario": "automatic_trading",
+      "summary": "用户希望构建一个能够自动执行股票交易并实现盈利的产品。该想法涉及自动化投资决策与订单执行，属于自动交易范畴，但“替我赚钱”这一表述隐含了对收益结果的承诺。",
+      "testable_behavior": "系统根据预设或学习到的策略自动生成买卖信号，并通过券商API自动下单执行，同时记录每笔交易的盈亏情况以供回测和验证。"
+    },
+    "usage": {
+      "input_tokens": 821,
+      "output_tokens": 360,
+      "total_tokens": 1181
+    }
+  }
+}

@@ -1,0 +1,16 @@
+# GoodIdea
+
+GoodIdea is an evidence-backed product guidance agent.
+
+It helps a person move from a vague product idea through market research,
+feasibility, an explicit MVP boundary, human approval, and a coding-agent handoff.
+
+Core principles:
+- Ask one high-impact question at a time.
+- Separate external evidence from assumptions and human decisions.
+- Encourage concrete progress without promising commercial success.
+- Never treat vague agreement as a product decision.
+- Keep consequential decisions and external side effects under human control.
+
+The public website contains a deterministic example and does not run the live agent.
+Repository: https://github.com/forge-context/goodidea-agent

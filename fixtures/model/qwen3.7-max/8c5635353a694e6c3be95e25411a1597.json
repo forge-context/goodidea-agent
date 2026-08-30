@@ -1,0 +1,52 @@
+{
+  "fingerprint": "8c5635353a694e6c3be95e25411a1597",
+  "request": {
+    "max_output_tokens": 1200,
+    "messages": [
+      {
+        "content": "You are GoodIdea, a product guidance agent that runs before any code is written.\nYou describe an idea and name what is still unknown. You never promise an outcome, never claim an idea will succeed, and never decide something the user must decide.\nSet scenario to automatic_trading only when the idea is about automating trading or investing decisions or order execution. Otherwise set scenario to unsupported.\nunsupported_reason is shown to the user, so write it to them. Say that GoodIdea can only guide automated trading ideas today, and name what their idea is about. Never write a field name or a scenario value, never judge the idea, and never claim GoodIdea cannot help with that kind of product in general.\ncore_uncertainty is the one thing that would most change the product if it turned out differently. missing_decision is the single decision the user must make next.\nSet outcome_promise_risk to true when the idea implies a promised result, such as money, health, legal, or safety outcomes.\nresearch_topics are two to four checks a web search could actually settle today. Each query must be a search query, not a sentence addressed to a person.\nAt least one query must aim at a source that can be held accountable: a regulator, a public body, or a vendor's own product documentation. Vendor documentation is usually written in English, so write that query in English even when the rest of the reply is in another language.\nWrite every human-readable field in English.\nReply with exactly one JSON object and nothing else. It must satisfy this JSON Schema:\n{\"$defs\": {\"ResearchTopic\": {\"description\": \"One thing the agent proposes to check, plus the query it would send.\", \"properties\": {\"query\": {\"minLength\": 1, \"title\": \"Query\", \"type\": \"string\"}, \"question\": {\"minLength\": 1, \"title\": \"Question\", \"type\": \"string\"}}, \"required\": [\"question\", \"query\"], \"title\": \"ResearchTopic\", \"type\": \"object\"}}, \"description\": \"What a model understood about an idea before any research has run.\\n\\n``scenario`` is a closed set of the paths this product has actually implemented,\\nso the model routes but cannot invent a path. Every free-text field is written in\\nthe session locale.\", \"properties\": {\"core_uncertainty\": {\"minLength\": 1, \"title\": \"Core Uncertainty\", \"type\": \"string\"}, \"desired_outcome\": {\"minLength\": 1, \"title\": \"Desired Outcome\", \"type\": \"string\"}, \"missing_decision\": {\"minLength\": 1, \"title\": \"Missing Decision\", \"type\": \"string\"}, \"outcome_promise_risk\": {\"title\": \"Outcome Promise Risk\", \"type\": \"boolean\"}, \"research_topics\": {\"items\": {\"$ref\": \"#/$defs/ResearchTopic\"}, \"maxItems\": 4, \"minItems\": 2, \"title\": \"Research Topics\", \"type\": \"array\"}, \"scenario\": {\"enum\": [\"automatic_trading\", \"unsupported\"], \"title\": \"Scenario\", \"type\": \"string\"}, \"summary\": {\"minLength\": 1, \"title\": \"Summary\", \"type\": \"string\"}, \"testable_behavior\": {\"minLength\": 1, \"title\": \"Testable Behavior\", \"type\": \"string\"}, \"unsupported_reason\": {\"anyOf\": [{\"type\": \"string\"}, {\"type\": \"null\"}], \"default\": null, \"title\": \"Unsupported Reason\"}}, \"required\": [\"scenario\", \"summary\", \"testable_behavior\", \"desired_outcome\", \"core_uncertainty\", \"missing_decision\", \"outcome_promise_risk\", \"research_topics\"], \"title\": \"IdeaAssessment\", \"type\": \"object\"}",
+        "role": "system"
+      },
+      {
+        "content": "Build me a product that trades stocks automatically and makes money.",
+        "role": "user"
+      }
+    ],
+    "purpose": "idea_assessment",
+    "temperature": 0.1
+  },
+  "response": {
+    "finish_reason": "stop",
+    "latency_ms": 5763,
+    "model_name": "qwen3.7-max",
+    "payload": {
+      "core_uncertainty": "Whether any specific algorithmic strategy can reliably produce net positive returns after accounting for transaction costs, slippage, taxes, and changing market regimes.",
+      "desired_outcome": "Consistent financial returns from automated stock market participation.",
+      "missing_decision": "Which specific trading strategy or signal source the system will use to determine entry and exit points.",
+      "outcome_promise_risk": true,
+      "research_topics": [
+        {
+          "query": "SEC FINRA automated trading system regulations requirements",
+          "question": "What are the regulatory requirements and restrictions for operating an automated stock trading system in the target jurisdiction?"
+        },
+        {
+          "query": "Interactive Brokers API algorithmic trading documentation rate limits",
+          "question": "What API capabilities and rate limits do major retail brokerages provide for algorithmic trading?"
+        },
+        {
+          "query": "retail algorithmic trading profitability backtesting bias academic study",
+          "question": "What does academic literature say about the long-term profitability of retail algorithmic trading strategies after costs?"
+        }
+      ],
+      "scenario": "automatic_trading",
+      "summary": "An automated stock trading system designed to generate profit through algorithmic execution.",
+      "testable_behavior": "The system executes buy and sell orders on a brokerage account based on predefined logic without manual intervention.",
+      "unsupported_reason": null
+    },
+    "usage": {
+      "input_tokens": 820,
+      "output_tokens": 309,
+      "total_tokens": 1129
+    }
+  }
+}

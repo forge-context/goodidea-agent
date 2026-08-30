@@ -1,0 +1,33 @@
+{
+  "fingerprint": "80116bdd878ae0a0e1b57e0415b44b14",
+  "request": {
+    "max_output_tokens": 600,
+    "messages": [
+      {
+        "content": "You read one answer a user gave to one question, and report what it means.\nexisting_rules means the user already has a trading rule or strategy in mind that they want the product to execute. Naming a strategy type they intend to use is naming a rule they have.\ndiscover_rules means the user does not have a rule yet and wants help finding or comparing candidates.\nunclear means the answer does not settle this. Agreement without a choice, a question back, a change of subject, or an answer that could be read either way are all unclear. Choosing for the user is the one mistake you must never make, so prefer unclear whenever you are weighing two readings.\nrestatement is how you would say the user's choice back to them in one short sentence, using their own words. Leave it empty when the answer is unclear.\nWrite restatement and why in Japanese.\nReply with exactly one JSON object and nothing else. It must satisfy this JSON Schema:\n{\"description\": \"What one answer decided, if anything.\", \"properties\": {\"reading\": {\"enum\": [\"existing_rules\", \"discover_rules\", \"unclear\"], \"title\": \"Reading\", \"type\": \"string\"}, \"restatement\": {\"default\": \"\", \"title\": \"Restatement\", \"type\": \"string\"}, \"why\": {\"minLength\": 1, \"title\": \"Why\", \"type\": \"string\"}}, \"required\": [\"reading\", \"why\"], \"title\": \"AnswerReading\", \"type\": \"object\"}",
+        "role": "system"
+      },
+      {
+        "content": "{\n  \"question\": \"すでに検証したい具体的な売買ルールや戦略をお持ちですか、それとも候補となる戦略の探し方と比較検討からサポートが必要ですか？\",\n  \"answer\": \"移動平均のゴールデンクロスで手動売買しているルールがあります。\"\n}",
+        "role": "user"
+      }
+    ],
+    "purpose": "strategy_source_answer",
+    "temperature": 0.1
+  },
+  "response": {
+    "finish_reason": "stop",
+    "latency_ms": 2086,
+    "model_name": "qwen3.7-max",
+    "payload": {
+      "reading": "existing_rules",
+      "restatement": "移動平均のゴールデンクロスで手動売買しているルールがあります。",
+      "why": "ユーザーは「移動平均のゴールデンクロス」という具体的な売買ルールを既に保有しており、それを検証したいと明確に述べているため。"
+    },
+    "usage": {
+      "input_tokens": 384,
+      "output_tokens": 69,
+      "total_tokens": 453
+    }
+  }
+}

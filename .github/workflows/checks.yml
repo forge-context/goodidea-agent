@@ -1,0 +1,40 @@
+name: checks
+
+# The suite is designed to run with no API key and no network, so CI needs no
+# secrets. If a check here ever starts needing one, that is a regression in the
+# design rather than a missing secret.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  agent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev]"
+      - run: ruff check src tests
+      - run: pytest
+      # State transitions, then the product rules checked against recorded model
+      # output. The second one fails if the fixtures no longer match the prompts.
+      - run: python -m goodidea_agent.evaluation.offline
+      - run: python -m goodidea_agent.evaluation.model_output
+
+  landing-page:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build
