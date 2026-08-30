@@ -2,7 +2,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "goodidea",
   "compatibility_date": "2026-08-16",
-  // The build writes here, so `wrangler pages deploy` needs no directory argument.
-  // Absolute URLs inside the output come from SITE_URL at build time, not from here.
+  // Used by `npm run pages` for a local preview through the Pages runtime.
+  // Production deploys come from a push, not from this file.
   "pages_build_output_dir": "./dist"
 }

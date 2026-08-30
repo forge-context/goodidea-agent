@@ -87,9 +87,9 @@ npm install
 npm run dev
 ```
 
-The production build uses `npm run build`, and `npm run deploy` builds and uploads
-it with Wrangler. The command flow and the `SITE_URL` variable that writes the
-absolute URLs are documented in
+The production build uses `npm run build`. Cloudflare Pages runs it on every push to
+`main`, so what is published always matches a commit here. The project settings and
+the `SITE_URL` variable that writes the absolute URLs are documented in
 [Deploy the landing page to Cloudflare Pages](docs/deployment/cloudflare-pages.md).
 The color, hierarchy, motion, and accessibility decisions are recorded in the
 [LP visual system and rationale](docs/design/lp-visual-system.md). What the agent is

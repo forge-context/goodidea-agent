@@ -73,7 +73,7 @@ npm install
 npm run dev
 ```
 
-Production Build は `npm run build`、`npm run deploy` は Build して Wrangler で Upload します。Command の流れと、絶対 URL を書き出す `SITE_URL` については [Cloudflare Pages への Deploy](docs/deployment/cloudflare-pages.ja.md) を参照してください。
+Production Build は `npm run build` です。`main` への push ごとに Cloudflare Pages が実行するため、公開されるものは常にここにある Commit と一致します。Project 設定と、絶対 URL を書き出す `SITE_URL` については [Cloudflare Pages への Deploy](docs/deployment/cloudflare-pages.ja.md) を参照してください。
 配色、階層、Motion、Accessibility の判断理由は [LP Visual System と設計理由](docs/design/lp-visual-system.ja.md) に記録しています。Agent が何でできていて、各能力の境界がどこにあるかは [Agent の能力](docs/design/agent-capabilities.ja.md) に記録しています。
 
 決定的な Agent Evaluation は次のように実行します。

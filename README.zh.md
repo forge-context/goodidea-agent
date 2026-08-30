@@ -73,7 +73,7 @@ npm install
 npm run dev
 ```
 
-正式构建使用 `npm run build`，`npm run deploy` 会构建并用 Wrangler 上传。命令流程以及写入绝对 URL 的 `SITE_URL` 变量，参见[部署到 Cloudflare Pages](docs/deployment/cloudflare-pages.zh.md)。
+正式构建使用 `npm run build`。每次推送到 `main`，Cloudflare Pages 都会执行它，因此线上内容始终与仓库中的某个 commit 一致。项目设置以及写入绝对 URL 的 `SITE_URL` 变量，参见[部署到 Cloudflare Pages](docs/deployment/cloudflare-pages.zh.md)。
 配色、层级、动效和无障碍决定参见 [LP 视觉系统与设计理由](docs/design/lp-visual-system.zh.md)。Agent 由什么构成、每项能力的边界划在哪里，记录在 [Agent 能力地图](docs/design/agent-capabilities.zh.md)。
 
 确定性的 Agent Evaluation 可以这样运行：
