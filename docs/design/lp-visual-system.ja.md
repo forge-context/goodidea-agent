@@ -25,7 +25,9 @@
 | Motion | Map は一度だけ、約 6.5 秒で走り、最終状態に留まる | 多くの訪問者は三秒で判断するため、どの一拍も単独で意味を背負わせない。点いたものは二度と消えないので、途中で止まった一枚でも読める。 |
 | Reduced Motion | `prefers-reduced-motion: reduce` で Animation、Transition、Smooth Scroll を停止 | Motion がなくても同じ情報を得られ、OS の利用者設定を尊重できる。 |
 | Responsive | Desktop は 2 Column、Tablet は横 Stage、Mobile は 1 Column | Desktop を縮小するだけでなく、各画面で読む順序と Core Action を保つ。 |
+| Content Column | `--shell` は Laptop 幅までは 1180px を保ち、そこから Viewport に合わせて 1360px を上限に伸びる。全 Section が同じ端に揃う | 1180px 固定だと 1920px の Monitor では約 4 割が余白になる。上限は Demo が決めている。1360px を超えると Chat Turn は既に読める行長に達しており、増えた幅は Idea 欄と Primary Action を伸ばすだけになる。 |
 | Typography | Locale 別の System Font Stack、全 Locale 共通の実在する 600 Weight の Display Heading、技術的な Metadata だけに Monospace を使う | 未宣言の Webfont 依存を持たない。中国語 Label には CJK の Metrics を使い、Latin 専用の大文字・字間規則を外し、「开始」のような語を途中で分けない Break Point を置く。 |
+| Type Scale | 6 段階の一つの Scale: 本文 16px、Lead 17px、語や文である限り 14px を下限とし、12〜13px は全て大文字の Monospace Metadata だけに残す | それまでほぼ全てが 8〜13px で組まれており、主要な設計基準のどれよりも小さかった。 |
 | 画像 | 現時点では汎用写真や装飾 Illustration を追加しない | いま最も説得力のある Visual は Interactive Product Behavior。実例が揃ってから Original Visual を検討する。 |
 
 ## First View：Idea Map
@@ -49,6 +51,38 @@ Map は、何かが読まれる前にこの Page が行う主張です。アイ�
 
 Map の高さは幅だけでなく Viewport の高さにも縛られます。Laptop の画面でも下の Demo Section の上端が見えるようにするためで、その端だけが Page の続きを示す手がかりです。
 
+## Type Scale
+
+Page は 6 つの Size だけで組む。`web/src/styles.css` に `--fs-tag` から `--fs-title`
+として宣言してあり、7 つ目を勝手に増やさない。
+
+| Token | Size | 用途 |
+| --- | --- | --- |
+| `--fs-title` | 19px | Demo 内の Agent 回答の一文目と Decision 見出し |
+| `--fs-lead` | 17px | Hero の導入文と Principle の見出し |
+| `--fs-body` | 16px | 既定の本文。段落、List、Idea 入力欄 |
+| `--fs-small` | 14px | Caption、注記、Milestone Label、Sandbox の Log と Code |
+| `--fs-label` | 13px | 大文字 Monospace の Section Label、Eyebrow、用語 |
+| `--fs-tag` | 12px | 大文字 Monospace の Metadata Chip と Status Pill |
+
+**本文は 16px、下限は 14px。** Material 3 は body-large を 16sp、body-medium を 14sp
+と定め、読ませる Text をそこで止める。GOV.UK の Scale は 16px を下限とし、小さい画面
+でも縮めない方針に変わった。Apple iOS の Body は 17pt。操作 Label も同じ規則に従い、
+Button と Navigation は 10px の Monospace ではなく 14〜15px になった。
+
+**12〜13px は全て大文字の Monospace Metadata に限る。** 全て大文字の並びはどの字も
+Cap Height なので、12px の Label は 16px の小文字とほぼ同じ Cap Height を持ち、読む
+負荷は持たない。これらは 1〜4 語の状態表示であって文ではない。12px 未満で残っている
+のは、根拠の上付き記号と `aria-hidden` の装飾記号だけ。
+
+**Size を上げた分、行間は下げた。** 本文は 1.7、小さい Text は 1.6〜1.75 で、WCAG 2.2
+Text Spacing が段落に求める 1.5 を上回りつつ、11px の Text に必要だった 1.85 の緩さを
+避けている。
+
+古い Size に合わせて調整されていた 3 箇所は一緒に動かした。First View の 2 つの操作は
+横並びをやめて縦に積み、Milestone の帯は狭い画面で Label を丸の横ではなく下に置き、
+Idea Map は 980px ではなく 1120px から Page 幅いっぱいを取る。
+
 ## Accessibility Baseline
 
 - 通常 Text の組合せは WCAG 2.2 の最低 Contrast 4.5:1 に照らして確認する。
@@ -56,4 +90,4 @@ Map の高さは幅だけでなく Viewport の高さにも縛られます。Lap
 - Keyboard Focus を見えるままにし、Skip Link を保持する。
 - Motion は OS の Reduced Motion 設定を尊重する。
 
-根拠: [W3C Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)、[W3C Animation from Interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)、[W3C Technique C39](https://www.w3.org/WAI/WCAG22/Techniques/css/C39.html)。
+根拠: [W3C Contrast (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)、[W3C Animation from Interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)、[W3C Technique C39](https://www.w3.org/WAI/WCAG22/Techniques/css/C39.html)、[W3C Text Spacing](https://www.w3.org/WAI/WCAG22/Understanding/text-spacing.html)、[Material 3 Type Scale Tokens](https://m3.material.io/styles/typography/type-scale-tokens)、[GOV.UK Type Scale](https://design-system.service.gov.uk/styles/type-scale/)、[Apple HIG Typography](https://developer.apple.com/design/human-interface-guidelines/typography)。
