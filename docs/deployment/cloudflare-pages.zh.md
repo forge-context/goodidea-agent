@@ -34,10 +34,10 @@ LP 是纯静态的 Vite 构建产物。它不调用任何 API，不持有任何�
 
 ```bash
 cd web
-npm run dev     # Vite
-npm run pages   # 走 Pages 运行时，更接近线上
+npm run dev       # Vite 开发服务器
+npm run preview   # 在本地跑正式构建产物
 ```
 
-`npm run pages` 使用 Wrangler 和 `web/wrangler.jsonc`。这里**刻意没有部署脚本**：发布由推送完成，手动上传会产生一个不对应任何 commit 的部署。
+仓库里**刻意不放 Wrangler 配置和部署脚本**。连接 Git 的 Pages 项目两者都不需要，而手动上传会产生一个不对应任何 commit 的部署。
 
 官方文档：[Git 集成](https://developers.cloudflare.com/pages/get-started/git-integration/)、[构建配置](https://developers.cloudflare.com/pages/configuration/build-configuration/)和[自定义域名](https://developers.cloudflare.com/pages/configuration/custom-domains/)。

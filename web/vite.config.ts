@@ -10,6 +10,7 @@ export default defineConfig({
         en: "en/index.html",
         ja: "ja/index.html",
         "zh-cn": "zh-cn/index.html",
+        lab: "lab/index.html",
       },
     },
   },

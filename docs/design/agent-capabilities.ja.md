@@ -25,6 +25,8 @@ GoodIdea の Agent が何でできているかの地図です。各行は、能�
 | Sandbox：実行 | [`tools/sandbox_exec.py`](../../src/goodidea_agent/tools/sandbox_exec.py)、[`model/sandbox_author.py`](../../src/goodidea_agent/model/sandbox_author.py) | 実行は「何を確かめるか」を伴い、「何は分からないか」も述べます。Container に Network は無く、File System は読み取り専用、Capability は全て外し、Memory・Process 数・時間に上限を置きます。Container を起動できない環境では、弱い隔離で代替せず実行を拒否します。二回の実行が食い違えば、何も確定していません。 | 実装済み |
 | Evaluation | [`evaluation/offline.py`](../../src/goodidea_agent/evaluation/offline.py)、[`model_output.py`](../../src/goodidea_agent/evaluation/model_output.py) | 状態遷移は決定的に検査する。記録した実際の Model 出力を再生し、Key も Network も無しで Product 規則に照らして検査する。 | 実装済み |
 
+LP には別の記録があります。[LP Visual System](lp-visual-system.ja.md) が First View、Motion、Layout の制約を扱います。
+
 ## 残りを決めた三つの選択
 
 **Model は Tool を持たない。** Query は Model が書き、発行は Workflow が行います。一般的な Tool-calling Agent との最も目立つ違いであり、意図的なものです。正しい場所で止まる Product が、同時に「何回調べるか」「もう十分か」を Model に決めさせることはできません。代償は実在します。予想外の手がかりを Agent が自力で追えません。固定的な Research が自由な Agent なら見つけるものを取り逃していると Evaluation が示したときは、Tool 呼び出しは Research Interface の内側に置くべきで、Workflow 全体に散らすべきではありません。

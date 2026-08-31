@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+
+import { IdeaMapHero } from "./IdeaMap";
 import type { ReactNode } from "react";
 
 type Locale = "en" | "ja" | "zh-CN";
@@ -44,10 +46,6 @@ type Copy = {
   navDemo: string;
   navHow: string;
   github: string;
-  eyebrow: string;
-  hero: string;
-  heroAccent: string;
-  intro: string;
   tryDemo: string;
   viewGithub: string;
   demoNote: string;
@@ -113,11 +111,6 @@ const copies: Record<Locale, Copy> = {
     navDemo: "Demo",
     navHow: "How it works",
     github: "GitHub",
-    eyebrow: "One sentence is enough to start",
-    hero: "Make the idea clear.",
-    heroAccent: "Give AI the right start.",
-    intro:
-      "From a rough spark to a testable MVP, every step is grounded in evidence.",
     tryDemo: "Try the fixed demo",
     viewGithub: "View implementation",
     demoNote: "No sign-up. Fixed data.",
@@ -292,10 +285,6 @@ const copies: Record<Locale, Copy> = {
     navDemo: "Demo",
     navHow: "仕組み",
     github: "GitHub",
-    eyebrow: "一文のアイデアから始められます",
-    hero: "アイデアを明確に。",
-    heroAccent: "AI を、\u200B正しく\u200Bスタートさせる。",
-    intro: "曖昧な着想から検証可能な MVP まで。すべての一歩に、根拠を。",
     tryDemo: "固定 Demo を試す",
     viewGithub: "実装を見る",
     demoNote: "登録不要。固定データ。",
@@ -467,10 +456,6 @@ const copies: Record<Locale, Copy> = {
     navDemo: "体验 Demo",
     navHow: "工作方式",
     github: "GitHub",
-    eyebrow: "一句话的想法，就够开始",
-    hero: "让想法\u200B清晰起来，",
-    heroAccent: "让AI\u200B正确地开始。",
-    intro: "从模糊灵感到可验证 MVP，每一步都有依据。",
     tryDemo: "体验固定 Demo",
     viewGithub: "查看产品实现",
     demoNote: "不需要注册，固定数据。",
@@ -709,11 +694,8 @@ function App() {
       </header>
 
       <main id="main">
-        <section className="hero section-shell" id="top">
-          <div className="hero-copy">
-            <p className="eyebrow">{t.eyebrow}</p>
-            <h1><span className="hero-line">{t.hero}</span><span className="hero-line hero-accent">{t.heroAccent}</span></h1>
-            <p className="hero-intro">{t.intro}</p>
+        <IdeaMapHero
+          actions={
             <div className="hero-actions">
               <div>
                 <a className="button button-primary" href="#demo">{t.tryDemo}<ArrowDownIcon /></a>
@@ -724,9 +706,9 @@ function App() {
                 <small>{t.githubNote}</small>
               </div>
             </div>
-          </div>
-          <IdeaField />
-        </section>
+          }
+          locale={locale}
+        />
 
         <section className="demo-section" id="demo">
           <div className="section-shell">
@@ -916,235 +898,6 @@ function App() {
         <a href="https://github.com/forge-context/goodidea-agent">github.com/forge-context/goodidea-agent ↗</a>
       </footer>
     </>
-  );
-}
-
-type IdeaParticle = {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  tx: number;
-  ty: number;
-  size: number;
-  seed: number;
-  color: string;
-  ambient: boolean;
-};
-
-function IdeaField() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    const context = canvas?.getContext("2d");
-    const host = canvas?.parentElement;
-    if (!canvas || !context || !host) return;
-
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const colors = ["#b991ff", "#f67965", "#5ce0bd", "#ffffff", "#8aa7ff"];
-    const pointer = { x: 0, y: 0, active: false };
-    let width = 0;
-    let height = 0;
-    let frame = 0;
-    let visible = true;
-    let particles: IdeaParticle[] = [];
-    let startedAt = performance.now();
-
-    const ease = (value: number) => {
-      const clamped = Math.max(0, Math.min(1, value));
-      return clamped * clamped * (3 - 2 * clamped);
-    };
-
-    const buildParticles = () => {
-      const count = width < 480 ? 72 : 108;
-      const markCount = Math.floor(count * .78);
-      const outerCount = Math.floor(markCount * .78);
-      const innerCount = markCount - outerCount;
-      const horizontalCount = Math.ceil(innerCount * .58);
-      const radius = Math.min(width, height) * .29;
-      const centerX = width * .52;
-      const centerY = height * .49;
-
-      particles = Array.from({ length: count }, (_, index) => {
-        const seed = Math.random() * Math.PI * 2;
-        let tx = centerX;
-        let ty = centerY;
-        const ambient = index >= markCount;
-
-        if (index < outerCount) {
-          const progress = index / Math.max(1, outerCount - 1);
-          const angle = .62 + (Math.PI * 2 - 1.24) * progress;
-          tx = centerX + Math.cos(angle) * radius;
-          ty = centerY + Math.sin(angle) * radius;
-        } else if (index < outerCount + horizontalCount) {
-          const progress = (index - outerCount) / Math.max(1, horizontalCount - 1);
-          tx = centerX + radius * .02 + radius * .72 * progress;
-          ty = centerY;
-        } else if (!ambient) {
-          const progress = (index - outerCount - horizontalCount) / Math.max(1, innerCount - horizontalCount - 1);
-          tx = centerX + radius * .74;
-          ty = centerY + radius * .44 * progress;
-        }
-
-        return {
-          x: Math.random() * width,
-          y: Math.random() * height,
-          vx: (Math.random() - .5) * 1.4,
-          vy: (Math.random() - .5) * 1.4,
-          tx,
-          ty,
-          size: ambient ? 1 + Math.random() * 1.8 : 1.4 + Math.random() * 2.4,
-          seed,
-          color: colors[index % colors.length],
-          ambient,
-        };
-      });
-
-      startedAt = performance.now();
-    };
-
-    const draw = (now: number) => {
-      const elapsed = now - startedAt;
-      const settle = reducedMotion ? 1 : ease((elapsed - 180) / 1800);
-      const time = elapsed * .001;
-      const centerX = width * .52;
-      const centerY = height * .49;
-      const orbitRadius = Math.min(width, height) * .39;
-
-      context.clearRect(0, 0, width, height);
-      context.save();
-      context.globalCompositeOperation = "lighter";
-
-      for (let index = 0; index < particles.length; index += 1) {
-        const particle = particles[index];
-        let targetX = particle.tx + Math.sin(time * .7 + particle.seed) * 2.6;
-        let targetY = particle.ty + Math.cos(time * .6 + particle.seed) * 2.6;
-
-        if (particle.ambient) {
-          const orbit = time * (.14 + index % 3 * .035) + particle.seed;
-          targetX = centerX + Math.cos(orbit) * orbitRadius * (.72 + index % 5 * .055);
-          targetY = centerY + Math.sin(orbit) * orbitRadius * (.52 + index % 4 * .06);
-        }
-
-        const attraction = particle.ambient ? .0045 : .007 + settle * .018;
-        particle.vx += (targetX - particle.x) * attraction;
-        particle.vy += (targetY - particle.y) * attraction;
-
-        if (!particle.ambient && settle < .92) {
-          particle.vx += -(particle.y - centerY) * .00038 * (1 - settle);
-          particle.vy += (particle.x - centerX) * .00038 * (1 - settle);
-        }
-
-        if (pointer.active && !reducedMotion) {
-          const dx = particle.x - pointer.x;
-          const dy = particle.y - pointer.y;
-          const distance = Math.hypot(dx, dy);
-          if (distance < 115 && distance > 0) {
-            const force = (1 - distance / 115) * .22;
-            particle.vx += (dx / distance) * force + (-dy / distance) * force * .7;
-            particle.vy += (dy / distance) * force + (dx / distance) * force * .7;
-          }
-        }
-
-        particle.vx *= .91;
-        particle.vy *= .91;
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-      }
-
-      for (let a = 0; a < particles.length; a += 1) {
-        if (particles[a].ambient) continue;
-        for (let b = a + 1; b < particles.length; b += 1) {
-          if (particles[b].ambient) continue;
-          const dx = particles[a].x - particles[b].x;
-          const dy = particles[a].y - particles[b].y;
-          const distance = Math.hypot(dx, dy);
-          if (distance < 48) {
-            context.beginPath();
-            context.moveTo(particles[a].x, particles[a].y);
-            context.lineTo(particles[b].x, particles[b].y);
-            context.strokeStyle = `rgba(185, 145, 255, ${(1 - distance / 48) * .2 * settle})`;
-            context.lineWidth = .7;
-            context.stroke();
-          }
-        }
-      }
-
-      for (const particle of particles) {
-        context.beginPath();
-        context.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        context.fillStyle = particle.color;
-        context.globalAlpha = particle.ambient ? .32 : .54 + settle * .38;
-        context.fill();
-      }
-
-      context.restore();
-      context.globalAlpha = 1;
-
-      if (!reducedMotion && visible) frame = window.requestAnimationFrame(draw);
-      else frame = 0;
-    };
-
-    const resize = () => {
-      const bounds = host.getBoundingClientRect();
-      width = Math.max(1, Math.round(bounds.width));
-      height = Math.max(1, Math.round(bounds.height));
-      const density = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(width * density);
-      canvas.height = Math.round(height * density);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      context.setTransform(density, 0, 0, density, 0, 0);
-      buildParticles();
-      if (reducedMotion) {
-        particles.forEach((particle) => {
-          particle.x = particle.tx;
-          particle.y = particle.ty;
-        });
-        draw(performance.now() + 2200);
-      }
-    };
-
-    const movePointer = (event: PointerEvent) => {
-      const bounds = canvas.getBoundingClientRect();
-      pointer.x = event.clientX - bounds.left;
-      pointer.y = event.clientY - bounds.top;
-      pointer.active = true;
-    };
-    const leavePointer = () => { pointer.active = false; };
-
-    const observer = new ResizeObserver(resize);
-    const visibilityObserver = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting;
-      if (!reducedMotion && visible && frame === 0) frame = window.requestAnimationFrame(draw);
-      if (!visible && frame !== 0) {
-        window.cancelAnimationFrame(frame);
-        frame = 0;
-      }
-    }, { threshold: .04 });
-    observer.observe(host);
-    visibilityObserver.observe(host);
-    canvas.addEventListener("pointermove", movePointer);
-    canvas.addEventListener("pointerleave", leavePointer);
-    resize();
-    if (!reducedMotion) frame = window.requestAnimationFrame(draw);
-
-    return () => {
-      observer.disconnect();
-      visibilityObserver.disconnect();
-      canvas.removeEventListener("pointermove", movePointer);
-      canvas.removeEventListener("pointerleave", leavePointer);
-      window.cancelAnimationFrame(frame);
-    };
-  }, []);
-
-  return (
-    <div className="idea-stage" aria-hidden="true">
-      <canvas ref={canvasRef} />
-      <div className="idea-orbit idea-orbit-one" />
-      <div className="idea-orbit idea-orbit-two" />
-    </div>
   );
 }
 

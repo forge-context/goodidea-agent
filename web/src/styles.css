@@ -264,53 +264,6 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
   animation: soft-rise .72s .56s var(--ease-out) both;
 }
 
-.idea-stage {
-  position: relative;
-  z-index: 1;
-  justify-self: center;
-  width: min(100%, 520px);
-  aspect-ratio: 5 / 6;
-  overflow: hidden;
-  isolation: isolate;
-  border-radius: 44% 56% 48% 52% / 42% 38% 62% 58%;
-  background:
-    radial-gradient(circle at 52% 48%, rgba(69, 37, 91, .92) 0 18%, rgba(42, 22, 58, .90) 42%, transparent 72%),
-    radial-gradient(circle at 76% 24%, rgba(246, 121, 101, .36), transparent 29%),
-    radial-gradient(circle at 22% 73%, rgba(92, 224, 189, .22), transparent 28%),
-    #1d1229;
-  box-shadow: inset 0 0 90px rgba(185, 145, 255, .10), 0 34px 80px rgba(56, 30, 75, .22);
-  animation: idea-stage-arrive 1.15s .1s var(--ease-out) both;
-}
-.idea-stage::before {
-  position: absolute;
-  inset: 10%;
-  z-index: -2;
-  border-radius: 50%;
-  background: conic-gradient(from 80deg, rgba(185, 145, 255, .42), rgba(138, 167, 255, .12), rgba(246, 121, 101, .38), rgba(92, 224, 189, .18), rgba(185, 145, 255, .42));
-  filter: blur(34px);
-  content: "";
-  animation: aura-turn 18s linear infinite;
-}
-.idea-stage::after {
-  position: absolute;
-  inset: 12% 8% 16% 12%;
-  z-index: -1;
-  border: 1px solid rgba(231, 216, 255, .18);
-  border-radius: 50%;
-  content: "";
-  transform: rotate(-13deg);
-  animation: orbit-breathe 5.5s ease-in-out infinite alternate;
-}
-.idea-stage canvas { position: absolute; inset: 0; z-index: 3; display: block; touch-action: pan-y; }
-.idea-orbit {
-  position: absolute;
-  z-index: 1;
-  border: 1px solid rgba(246, 121, 101, .22);
-  border-radius: 50%;
-  pointer-events: none;
-}
-.idea-orbit-one { inset: 23% 14% 17% 17%; transform: rotate(23deg); animation: orbit-one 9s ease-in-out infinite alternate; }
-.idea-orbit-two { inset: 16% 25% 27% 10%; border-color: rgba(92, 224, 189, .20); transform: rotate(-28deg); animation: orbit-two 11s ease-in-out infinite alternate; }
 
 .progress-panel ol { margin: 0; padding: 0; list-style: none; }
 
@@ -751,15 +704,6 @@ footer > a:last-child:hover { border-color: #bdaeff; color: var(--surface); }
   from { background-position: 0 50%; }
   to { background-position: 100% 50%; }
 }
-@keyframes idea-stage-arrive {
-  from { opacity: 0; filter: blur(18px); transform: scale(.82) rotate(-5deg); }
-  to { opacity: 1; filter: blur(0); transform: scale(1) rotate(0); }
-}
-@keyframes aura-turn { to { transform: rotate(360deg) scale(1.06); } }
-@keyframes orbit-breathe {
-  from { opacity: .38; transform: rotate(-13deg) scale(.94); }
-  to { opacity: .9; transform: rotate(-5deg) scale(1.04); }
-}
 @keyframes orbit-one {
   from { transform: rotate(18deg) scale(.9); }
   to { transform: rotate(31deg) scale(1.06); }
@@ -838,6 +782,7 @@ html[lang="zh-CN"] :is(
 
 html[lang="zh-CN"] :is(
   .hero h1,
+  .map-copy h1,
   .section-heading h2,
   .principles-panel > h2
 ) {
@@ -850,6 +795,7 @@ html[lang="zh-CN"] :is(
    typo. The copy carries the break opportunities; strict kinsoku keeps the rest. */
 html[lang="ja"] :is(
   .hero h1,
+  .map-copy h1,
   .section-heading h2,
   .principles-panel > h2
 ) {
@@ -859,7 +805,7 @@ html[lang="ja"] :is(
 
 /* Scoped to the hero, whose copy carries explicit break points. Elsewhere the
    default kana breaking is needed to keep long headings inside their column. */
-html[lang="ja"] .hero h1 { word-break: keep-all; }
+html[lang="ja"] :is(.hero h1, .map-copy h1) { word-break: keep-all; }
 
 html[lang="zh-CN"] .hero h1 {
   font-size: clamp(42px, 4.35vw, 56px);
@@ -877,7 +823,6 @@ html[lang="zh-CN"] :is(
   .hero::after { display: none; }
   .section-heading { gap: 28px; }
   .section-heading > p { max-width: 620px; }
-  .idea-stage { width: min(100%, 430px); }
   .demo-grid { grid-template-columns: minmax(0, 1fr); }
   .progress-panel { min-width: 0; padding: 19px; border-right: 0; border-bottom: 1px solid var(--line); }
   .progress-panel ol { display: grid; grid-template-columns: repeat(5, minmax(105px, 1fr)); overflow-x: auto; }
@@ -900,7 +845,6 @@ html[lang="zh-CN"] :is(
   .hero h1 { font-size: 42px; }
   html[lang="zh-CN"] .hero h1 { font-size: 40px; text-wrap: wrap; }
   .hero-copy > .eyebrow { margin-bottom: 28px; }
-  .idea-stage { width: min(100%, 320px); margin-top: -12px; }
   .demo-section, .how-section { padding: 88px 0; }
   .section-heading { margin-bottom: 46px; }
   .section-heading h2 { font-size: 34px; }
@@ -934,4 +878,337 @@ html[lang="zh-CN"] :is(
     animation-iteration-count: 1 !important;
     transition-duration: .01ms !important;
   }
+}
+
+/* ---------------------------------------------------------------------------
+   Idea map — first-view review page. Kept at the end of the file while it is a
+   prototype, so removing it is one deletion.
+   --------------------------------------------------------------------------- */
+
+.lab-shell { min-height: 100vh; background: var(--surface-warm, #fffaf7); }
+.lab-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font: 9px var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.lab-bar .locale-switch button {
+  padding: 5px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font: 9px var(--mono);
+}
+.lab-bar .locale-switch button.active { border-color: var(--primary); color: var(--primary-dark); }
+
+.map-hero {
+  position: relative;
+  /* Clipped rather than scrollable: the fog is allowed to bleed past the column, the
+     page is not allowed to move sideways. */
+  overflow-x: clip;
+  display: grid;
+  grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr);
+  align-items: center;
+  gap: 24px;
+  padding: 56px 0 72px;
+}
+.map-copy { position: relative; z-index: 3; }
+.map-copy h1 {
+  max-width: 460px;
+  margin: 0 0 22px;
+  font-size: clamp(34px, 3.5vw, 50px);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -.045em;
+}
+.map-copy .hero-line { display: block; }
+.map-copy .hero-intro { max-width: 380px; }
+.map-closing {
+  margin: 28px 0 0;
+  max-width: 360px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.85;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .6s var(--ease-out), transform .6s var(--ease-out);
+}
+.map-closing[data-visible="true"] { opacity: 1; transform: none; }
+
+.map-stage {
+  position: relative;
+  width: 100%;
+  /* Height is set directly. An aspect ratio would derive the width from it and blow
+     past the column; the drawing stretches to whatever box it is given. The viewport
+     height is part of it so that on a short laptop screen the demo below still shows
+     its top edge, which is the only cue that the page continues. */
+  height: clamp(440px, min(40vw, 58vh), 640px);
+  /* What reaches back under the title is the fog and the contours. The labelled
+     landmarks stay clear of the copy, so nothing readable sits on top of anything
+     else readable. */
+  margin-left: -8%;
+  z-index: 1;
+}
+/* Direct child only: the marker icons and the token carry their own sizing. */
+.map-stage > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+.map-contours path {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke: rgba(122, 63, 159, .07);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+/* Broken where the ground would hide a ridge, so the set never closes into rings. */
+.map-contour-broken { stroke-dasharray: 54 26 96 34; }
+
+/* The ground is lit before the direction is committed to, which is the difference
+   between a route being explored and a line being plotted. */
+.map-glow {
+  fill: none;
+  stroke: rgba(8, 123, 102, .14);
+  stroke-width: 13;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  pathLength: 1;
+  transition: stroke-dashoffset .58s var(--ease-out);
+}
+.map-glow[data-drawn="true"] { stroke-dashoffset: 0; }
+
+.map-route {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke: var(--mint);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  pathLength: 1;
+  transition: stroke-dashoffset .5s var(--ease-out);
+}
+.map-route[data-drawn="true"] { stroke-dashoffset: 0; }
+
+.map-detour {
+  fill: none;
+  vector-effect: non-scaling-stroke;
+  stroke: var(--coral);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 6 8;
+  opacity: 0;
+  transition: opacity .35s ease, stroke-width .35s ease;
+}
+.map-detour[data-state="tempting"] { opacity: .95; stroke-width: 3; animation: detour-breathe 1s ease-in-out infinite; }
+/* Crossed out but still bright: the road is refused a moment before it fades. */
+.map-detour[data-state="crossed"] { opacity: .9; stroke-width: 3; }
+.map-detour[data-state="refused"] { opacity: .2; stroke-width: 2; }
+@keyframes detour-breathe {
+  50% { opacity: .55; }
+}
+
+/* Map markers rather than workflow boxes: a card that hangs above the point it
+   names, with a pin touching the coordinate. */
+.map-mark {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  display: grid;
+  justify-items: center;
+  width: 152px;
+  opacity: 0;
+  transition: opacity .5s var(--ease-out), transform .5s var(--ease-out);
+}
+.map-mark[data-lit="true"],
+.map-mark[data-state="tempting"],
+.map-mark[data-state="crossed"] { opacity: 1; }
+.map-mark[data-state="refused"] { opacity: .34; }
+.map-mark-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 7px 11px 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, .9);
+  box-shadow: 0 8px 22px rgba(50, 31, 79, .08);
+  text-align: center;
+}
+.map-mark-icon {
+  width: 14px;
+  height: 14px;
+  margin-bottom: 1px;
+  fill: none;
+  stroke: var(--mint);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.map-mark strong { color: var(--ink); font-size: 12px; font-weight: 700; line-height: 1.4; }
+.map-mark small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.map-mark-pin {
+  width: 9px;
+  height: 9px;
+  margin-top: -5px;
+  border-radius: 999px;
+  background: var(--mint);
+  box-shadow: 0 0 0 4px rgba(8, 123, 102, .14);
+}
+.map-mark-detour .map-mark-card { border-color: #efd0ca; background: rgba(255, 249, 247, .94); }
+.map-mark-detour strong { color: var(--coral); }
+.map-mark-detour .map-mark-pin { background: var(--coral); box-shadow: 0 0 0 4px rgba(188, 70, 55, .14); }
+/* On the sign, not in its sentence: inline it pushed the label onto a second line. */
+.map-cross {
+  position: absolute;
+  top: -7px;
+  left: -7px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #efd0ca;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--coral);
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(.6);
+  transition: opacity .3s ease, transform .3s var(--ease-out);
+}
+.map-mark[data-state="crossed"] .map-cross,
+.map-mark[data-state="refused"] .map-cross { opacity: 1; transform: none; }
+.map-mark[data-state="refused"] .map-cross { opacity: 1; }
+
+/* The result grows out of the last stretch rather than covering the map. */
+.map-result-card {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(.92);
+  transform-origin: 20% 100%;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  width: 178px;
+  padding: 13px 14px;
+  border: 1px solid #b9ddd4;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 14px 34px rgba(50, 31, 79, .1);
+  text-align: center;
+  opacity: 0;
+  transition: opacity .55s var(--ease-out), transform .55s var(--ease-out);
+}
+.map-result-card[data-arrived="true"] { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+.map-result-card strong { color: var(--ink); font: 800 10px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.map-result-card small { color: var(--muted); font-size: 11px; line-height: 1.5; }
+.map-result-mark {
+  width: 10px;
+  height: 10px;
+  margin-bottom: 3px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--coral));
+  box-shadow: 0 0 0 5px rgba(122, 63, 159, .12);
+  opacity: 0;
+  transform: scale(.4);
+  transition: opacity .4s .25s var(--ease-out), transform .4s .25s var(--ease-out);
+}
+.map-result-card[data-arrived="true"] .map-result-mark { opacity: 1; transform: none; }
+
+.map-token {
+  position: absolute;
+  width: 28px;
+  height: 35px;
+  --lean: 0deg;
+  --squash: 1;
+  --stretch: 1;
+  transform: translate(-50%, -50%) rotate(calc(var(--tilt, 0deg) + var(--lean)))
+    scale(var(--stretch), var(--squash));
+  filter: drop-shadow(0 3px 8px rgba(122, 63, 159, .28));
+  transition: left .5s var(--ease-out), top .5s var(--ease-out), transform .42s var(--ease-out),
+    opacity .4s ease;
+}
+/* It leans into the wrong road and settles, which is what makes the refusal legible. */
+.map-token[data-hesitating="true"] { --lean: 9deg; --squash: .94; --stretch: 1.06; }
+.map-token svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.map-token-core { fill: url(#token-core); opacity: .42; transition: opacity .5s ease; }
+.map-token-shell {
+  fill: rgba(255, 250, 247, .42);
+  vector-effect: non-scaling-stroke;
+  stroke: var(--primary);
+  stroke-width: 2;
+  transition: opacity .45s ease;
+}
+.map-token-cracks path {
+  fill: none;
+  stroke: var(--primary-dark, #5f2f7d);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+.map-token-cracks[data-cracks="1"] path:nth-child(1),
+.map-token-cracks[data-cracks="2"] path:nth-child(-n+2),
+.map-token-cracks[data-cracks="3"] path { opacity: .8; }
+/* Each answered question lets more of the idea show through the shell. */
+.map-token[data-hesitating="true"] .map-token-core { opacity: .58; }
+.map-token[data-hatched="true"] .map-token-shell,
+.map-token[data-hatched="true"] .map-token-cracks { opacity: 0; }
+.map-token[data-hatched="true"] .map-token-core { opacity: 0; }
+.map-token-spark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--primary), var(--coral));
+  box-shadow: 0 0 18px rgba(122, 63, 159, .55);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform .45s var(--ease-out);
+}
+.map-token[data-hatched="true"] .map-token-spark { transform: translate(-50%, -50%) scale(1); }
+.map-token[data-arrived="true"] { opacity: 0; }
+
+.map-fog {
+  position: absolute;
+  inset: -8% -6%;
+  pointer-events: none;
+  background:
+    radial-gradient(closest-side at 28% 60%, rgba(255, 250, 247, .96), rgba(255, 250, 247, 0) 76%),
+    radial-gradient(closest-side at 10% 30%, rgba(238, 230, 250, .92), rgba(238, 230, 250, 0) 74%);
+  transition: opacity 1s var(--ease-out);
+}
+.map-fog-far {
+  background:
+    radial-gradient(closest-side at 74% 36%, rgba(255, 250, 247, .97), rgba(255, 250, 247, 0) 74%),
+    radial-gradient(closest-side at 92% 64%, rgba(238, 230, 250, .94), rgba(238, 230, 250, 0) 72%);
+}
+.map-fog[data-cleared="true"] { opacity: 0; }
+
+@media (max-width: 980px) {
+  .map-hero { grid-template-columns: 1fr; gap: 28px; padding: 48px 0 64px; }
+  .map-stage { margin-left: 0; height: clamp(440px, 62vw, 560px); }
+  .map-mark { width: 124px; }
+  .map-result-card { width: 158px; }
+}
+
+@media (max-width: 720px) {
+  .map-copy h1 { font-size: 32px; }
+  .map-stage { height: 560px; }
+  .map-fog { inset: -4% 0; }
+  .map-mark { width: 108px; }
+  .map-mark strong { font-size: 11px; }
+  .map-mark small { font-size: 9px; }
+  /* The stage questions go before the detour notes do: the roads not taken are what
+     keeps this from being a flowchart, and Japanese labels need the height back. */
+  .map-mark:not(.map-mark-detour) small { display: none; }
+  .map-result-card { width: 132px; padding: 11px; }
 }

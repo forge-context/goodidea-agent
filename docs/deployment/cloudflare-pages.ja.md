@@ -34,10 +34,10 @@ Host は `SITE_URL` から取得し、既定値は `https://goodidea.jianguoding
 
 ```bash
 cd web
-npm run dev     # Vite
-npm run pages   # Pages Runtime 経由。本番に近い
+npm run dev       # Vite Dev Server
+npm run preview   # 本番 Build を Local で配信
 ```
 
-`npm run pages` は Wrangler と `web/wrangler.jsonc` を使います。Deploy Script は**意図的に置いていません**。公開は push で行うものであり、手動 Upload はどの Commit にも対応しない Deployment を作ってしまうためです。
+Wrangler の設定も Deploy Script も**意図的に置いていません**。Git 接続の Pages Project にはどちらも不要で、手動 Upload はどの Commit にも対応しない Deployment を作ってしまうためです。
 
 公式資料: [Git Integration](https://developers.cloudflare.com/pages/get-started/git-integration/) / [Build Configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/) / [Custom Domains](https://developers.cloudflare.com/pages/configuration/custom-domains/)

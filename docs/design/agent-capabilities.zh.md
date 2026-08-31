@@ -25,6 +25,8 @@
 | 沙箱：执行 | [`tools/sandbox_exec.py`](../../src/goodidea_agent/tools/sandbox_exec.py)、[`model/sandbox_author.py`](../../src/goodidea_agent/model/sandbox_author.py) | 每次运行都带着它要回答的问题，并声明它没有回答什么。容器不给网络、只读文件系统、无任何 capability，并限制内存、进程数和时间。无法启动容器时拒绝运行，而不是用更弱的隔离代替。两次运行结果不一致，就等于什么都没有确定。 | 已实装 |
 | 评估 | [`evaluation/offline.py`](../../src/goodidea_agent/evaluation/offline.py)、[`model_output.py`](../../src/goodidea_agent/evaluation/model_output.py) | 状态迁移做确定性检查。真实录制的模型文本被回放并按产品规则检查，无需 key 也无需网络。 | 已实装 |
 
+LP 有自己的记录：[LP 视觉系统](lp-visual-system.zh.md) 覆盖首屏、动效以及布局受到的约束。
+
 ## 决定其余一切的三个选择
 
 **模型不掌握工具。** 它写检索式，workflow 负责发出。这是与常见 tool-calling Agent 最明显的分歧，而且是刻意的：一个要在正确位置停下来的产品，不能同时让模型自己决定查几次、什么时候算查够了。代价是真实存在的——Agent 无法自主追查一条意外线索。如果日后评估显示固定调研确实漏掉了自由 Agent 能找到的东西，工具调用应该放在调研接口之后，而不是散落进 workflow。

@@ -12,7 +12,7 @@ This record explains the current LP design decisions. It does not claim that a c
 | Primary color | Warm grape violet `#7A3F9F` | The previous blue-violet read as blue on a cool surface and across large controls. The warmer violet still means exploration/current action while feeling less like a generic SaaS tool. White text has about 6.91:1 contrast. |
 | Semantic colors | Teal `#087B66` for supported/completed states; coral `#BC4637` for boundaries and caution | Evidence and risk should not collapse into one brand color. Text and symbols always accompany color. |
 | Foundation colors | `#FFFAF7` background and `#241936` text | The warm surface reduces the blue cast and feels less like an audit console while keeping approximately 15.99:1 body contrast and 6.30:1 muted-text contrast. |
-| Hero composition | A clear promise on the left and a generative idea field on the right | The first side explains the outcome; the second makes “rough idea → clear direction” emotionally visible before the visitor reads the product demo. The stage path remains inside the demo where it has functional meaning. |
+| Hero composition | A promise on the left and an explored map on the right | The map argues rather than decorates: it shows an idea refusing three tempting shortcuts before it becomes something buildable. A decorative field looked good and said nothing about the product. |
 | Headline gradient | A restrained violet-to-coral gradient on one large line | It compresses the transition from exploration to action into one visual cue. It is not used for body copy or controls. |
 | Brand mark | An open G-shaped path with a coral spark replaces the letter inside a rounded square | The open path represents an idea that can still be explored; the spark marks the moment it becomes a clear next step. A custom vector mark feels intentional at header, demo, and footer sizes. |
 | Action icons | Matching 16px rounded-stroke SVG icons for scrolling and opening implementation | Font arrow glyphs change weight and geometry across platforms. A shared stroke system keeps the two first-view actions visually related. |
@@ -22,11 +22,57 @@ This record explains the current LP design decisions. It does not claim that a c
 | Evidence interaction | Evidence is attached to key claims; hover or keyboard focus reveals the source and click opens the original | Users do not need to expand a separate evidence drawer and manually map sources back to conclusions. The claim and provenance share one reading position. |
 | Information density | Reality, decision, and boundary appear progressively | Progressive disclosure reduces the amount a user must process and matches the “one valuable question at a time” product principle. |
 | CTA hierarchy | One filled primary action per view; secondary actions are outlined or textual | This keeps the next step unambiguous and prevents the demo, GitHub, approval, and revision actions from competing equally. |
-| Motion | Masked headline reveal plus a pointer-reactive particle field that assembles into the open G mark | The first view should feel like a creative experience, not an animated workflow tutorial. The branded transformation carries the product metaphor, while later motion remains functional and restrained. |
+| Motion | The map runs once, in about six and a half seconds, and stays on the finished state | Most visitors decide within three seconds, so no beat may be load-bearing on its own. Nothing already lit ever goes dark: an interrupted frame still reads. |
 | Reduced motion | Animations, transitions, and smooth scrolling stop under `prefers-reduced-motion: reduce` | The interface remains complete without motion and respects the user's system preference. |
 | Responsive structure | Desktop two-column, tablet horizontal stage strip, mobile single-column | Each size preserves reading order and core action instead of merely shrinking the desktop page. |
 | Typography | Locale-specific system stacks, real 600-weight display headings across all locales, and monospace only where the content is actually technical metadata | The LP has no undeclared webfont dependency. Chinese labels keep CJK metrics, avoid Latin-only uppercase/spacing rules, and use semantic break opportunities instead of splitting words such as “开始”. |
 | Imagery | No generic photography or decorative illustration yet | The interactive product behavior is the strongest current proof. Original brand imagery can be added when real cases exist. |
+
+## The first view: the idea map
+
+The map is the argument the page makes before anything is read. An idea travels a
+route, is tempted three times by a faster-looking shortcut, refuses each one, and
+arrives somewhere buildable. These notes exist so the next change does not
+accidentally undo the reasons.
+
+**The refusal is the point, so it takes three separate beats.** The idea holds still
+and leans toward the wrong road, the sign is crossed out while that road is still
+bright, and only then does it fade and the right one light up. Collapsing these into
+one beat makes the decision invisible, which removes the only thing separating this
+from a flowchart. For the same reason the three wrong signs stay on the finished map
+at reduced opacity, and on a narrow screen the stage questions are dropped before the
+detour notes are.
+
+**The shell is carried, not parked.** An earlier version made the egg a large
+destination; it read as an object pasted onto a drawing made of thin lines. It is now
+the travelling token: whole at the start, cracked by each answered question, open by
+the handoff. The hatching metaphor was a deliberate decision from the beginning and is
+preserved this way rather than by keeping a decorative shape.
+
+**No ambient particles.** A pointer-reactive particle field was removed from this hero
+on purpose. Re-adding drifting specks under another name is the same decoration with a
+new label; faint, irregular contour lines carry the terrain instead. They are
+deliberately open and off-centre, because concentric rings read as radar.
+
+**Two layers per stretch of route.** A wide, soft band lights the ground first and a
+crisp line commits to the direction after. A single line, whatever its colour, reads
+as a chart.
+
+## What constrains the layout
+
+The drawing lives in a fixed 1000×600 space that is stretched to whatever box the
+page gives it, while the labels are real DOM at a fixed type size. So the pixel gaps
+between landmarks shrink on a short screen while the cards do not. Two consequences
+that are easy to forget:
+
+- Positions are spaced for the **shortest** box the map is allowed to take and for the
+  **tallest** language, which is Japanese or English rather than Chinese.
+- The map bleeds left behind the headline, but only the fog and contours may go there.
+  A labelled landmark over the copy puts readable text on readable text.
+
+The map height is bounded by the viewport height as well as its width, so that on a
+laptop screen the demo section below still shows its top edge. That edge is the only
+cue that the page continues.
 
 ## Accessibility baseline
 

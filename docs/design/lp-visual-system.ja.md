@@ -22,11 +22,32 @@
 | Evidence Interaction | 根拠を回答内の重要な主張に結び、Hover または Keyboard Focus で出典を表示し、Click で原文を開く | 別の Evidence Drawer を開いて結論と手作業で対応させる必要をなくす。主張と Provenance を同じ Reading Position に置く。 |
 | 情報量 | Reality、Decision、Boundary を段階的に表示 | 一度に処理する量を減らし、「一度に一つの価値ある質問」という Product Principle と揃える。 |
 | CTA 階層 | 1 View に塗りつぶし Primary Action は一つ | Demo、GitHub、承認、修正が同じ強さで競合しないようにし、次の行動を明確にする。 |
-| Motion | Headline の Mask Reveal と、Pointer に反応しながら開いた G Mark へ集まる Particle Field | First View を Workflow の説明 Animation ではなく Creative Experience にする。Brand の変形で Product Metaphor を示し、以降の Motion は機能的に抑える。 |
+| Motion | Map は一度だけ、約 6.5 秒で走り、最終状態に留まる | 多くの訪問者は三秒で判断するため、どの一拍も単独で意味を背負わせない。点いたものは二度と消えないので、途中で止まった一枚でも読める。 |
 | Reduced Motion | `prefers-reduced-motion: reduce` で Animation、Transition、Smooth Scroll を停止 | Motion がなくても同じ情報を得られ、OS の利用者設定を尊重できる。 |
 | Responsive | Desktop は 2 Column、Tablet は横 Stage、Mobile は 1 Column | Desktop を縮小するだけでなく、各画面で読む順序と Core Action を保つ。 |
 | Typography | Locale 別の System Font Stack、全 Locale 共通の実在する 600 Weight の Display Heading、技術的な Metadata だけに Monospace を使う | 未宣言の Webfont 依存を持たない。中国語 Label には CJK の Metrics を使い、Latin 専用の大文字・字間規則を外し、「开始」のような語を途中で分けない Break Point を置く。 |
 | 画像 | 現時点では汎用写真や装飾 Illustration を追加しない | いま最も説得力のある Visual は Interactive Product Behavior。実例が揃ってから Original Visual を検討する。 |
+
+## First View：Idea Map
+
+Map は、何かが読まれる前にこの Page が行う主張です。アイデアが道を進み、速そうな近道に三度誘われ、三度断り、作れる場所に着きます。以下は、次の変更がその理由を偶然に消してしまわないための記録です。
+
+**断ることこそが主題なので、三拍に分けます。** アイデアが止まって誤った方へ傾き、その道がまだ明るいうちに標識へ × が付き、そのあとで暗くなり正しい道が点きます。一拍にまとめると判断が見えなくなり、これを Flowchart から隔てている唯一のものが失われます。同じ理由で、三つの誤った標識は透明度を下げて最終画面に残し、狭い画面では Detour の一言より先に各段階の問いを落とします。
+
+**殻は運ばれるもので、置かれるものではありません。** 初期版は卵を大きな終点にしましたが、細い線でできた図に貼り付けた立体物のように見えました。今は移動する Token です。始めは無傷、問いに答えるたびにひびが入り、引き渡しで孵ります。孵化の Metaphor は最初からの決定であり、装飾的な形を残すのではなくこの形で保っています。
+
+**環境 Particle は加えません。** この First View の Particle Field は意図して外したものです。名前を変えて漂う粒を戻すのは、同じ装飾に別の Label を付けるだけです。地形はごく淡い不規則な等高線が担います。同心円は Radar に見えるため、意図的に開いていて中心をずらしてあります。
+
+**道の一区間ごとに二層。** 広く柔らかい帯が先に地面を照らし、鮮明な線が後から方向を確定します。単層の線は色が何であれ Chart に見えます。
+
+## Layout を縛るもの
+
+描画は固定の 1000×600 空間にあり、Page が与えた箱に引き伸ばされます。一方 Label は文字サイズの決まった実 DOM です。したがって画面が低いと Landmark 間の Pixel 間隔だけが縮み、Card は縮みません。忘れやすい帰結が二つあります。
+
+- 座標は、Map が取りうる**最も低い**箱と、**最も背の高い**言語に合わせて配置します。後者は中国語ではなく日本語か英語です。
+- Map は見出しの背後へ左に滲み出しますが、そこへ行ってよいのは霧と等高線だけです。Label のある Landmark が本文に重なると、読めるものの上に読めるものを置くことになります。
+
+Map の高さは幅だけでなく Viewport の高さにも縛られます。Laptop の画面でも下の Demo Section の上端が見えるようにするためで、その端だけが Page の続きを示す手がかりです。
 
 ## Accessibility Baseline
 

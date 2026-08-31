@@ -29,6 +29,9 @@ the model is wrong?"
 | Sandbox: execution | [`tools/sandbox_exec.py`](../../src/goodidea_agent/tools/sandbox_exec.py), [`model/sandbox_author.py`](../../src/goodidea_agent/model/sandbox_author.py) | A run carries the question it settles and states what it does not settle. The container is given no network, a read-only filesystem, no capabilities and a memory, process and time limit. Where no container can start, the run is refused rather than performed with weaker isolation. Two executions that disagree have settled nothing. | Built |
 | Evaluation | [`evaluation/offline.py`](../../src/goodidea_agent/evaluation/offline.py), [`model_output.py`](../../src/goodidea_agent/evaluation/model_output.py) | State transitions are checked deterministically. Real recorded model text is replayed and checked against the product rules, with no key and no network. | Built |
 
+The landing page has its own record: [the LP visual system](lp-visual-system.md)
+covers the first view, its motion, and what constrains its layout.
+
 ## Three decisions that shaped the rest
 
 **The model does not hold the tools.** It writes search queries; the workflow issues

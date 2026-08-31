@@ -207,8 +207,16 @@ offline evaluation checks grounding, user authority, language parity, proposal
 identity, and side-effect safety.
 
 The React/Vite landing page is implemented in English, Japanese, and Simplified
-Chinese. Its interactive demo uses fixed browser data and is ready for a static
-Cloudflare Pages build.
+Chinese, and is published from `main` on every push. Its first view is a map of one
+idea refusing three tempting shortcuts on the way to something buildable; the
+reasoning behind it is in [the LP visual system](docs/design/lp-visual-system.md).
+`web/lab/` renders that first view on its own, in all three languages with a replay,
+for working on it without the rest of the page. Its interactive demo uses fixed
+browser data exported from real agent runs.
+
+The page title and the headline differ on purpose: the title carries the product's
+positioning line, which is what belongs in a search result, and the headline is the
+hook on the page itself.
 
 The model boundary is implemented: `ModelAdapter`, an OpenAI-compatible adapter, a
 scripted fake, and recorded fixtures that replay by prompt rather than by provider.

@@ -161,7 +161,9 @@ V1 では意図的に Deep Agents へ依存しません。初期調査は、次�
 
 Offline Workflow は市場調査、人の判断、制約付き実現可能性、MVP 提案、承認、Coding Agent Handoff まで実行できます。曖昧な同意では Path を選ばず、未承認の提案から Handoff を作りません。SQLite は Snapshot、根拠、未解決の問い、Product 判断、承認を分けて保存します。Script、Network、Storage を許可しない Sandbox Adapter で Mock Preview を生成でき、Offline Evaluation が根拠、利用者の権限、言語 Parity、Proposal Identity、副作用の安全性を検査します。
 
-React/Vite の LP は英語、日本語、簡体字中国語で実装済みです。Interactive Demo は Browser 内の固定データだけを使い、Cloudflare Pages の静的 Build ができます。
+React/Vite の LP は英語、日本語、簡体字中国語で実装済みで、`main` への push ごとに公開されます。First View は、作れるものへ向かう途中で三つの速そうな近道を断る一つのアイデアの Map です。その理由は [LP Visual System](docs/design/lp-visual-system.ja.md) にあります。`web/lab/` はその First View だけを三言語と Replay 付きで描画し、Page 全体を触らずに調整するためのものです。Interactive Demo は実際の Agent 実行から書き出した固定データを使います。
+
+Page Title と見出しは意図的に異なります。Title は検索結果に載るべき Product の位置づけの一文を、見出しは Page 上のフックを担います。
 
 Model の境界は実装済みです。`ModelAdapter`、OpenAI 互換 Adapter、Script 化した Fake、そして Provider ではなく Prompt で照合する記録済み Fixture があります。構造化応答は Pydantic Schema で検証し、一度だけ修復するため、Provider 固有の Schema 機能に依存しません。Model を設定するとアイデア評価に使われます。さらに Tavily Key を設定すると Research 全体が実物になります。Model が検索 Query を書き、Tavily が答え、返ってきた内容から Market Reality Card を書きます。Source の信頼度は Model ではなく URL から判断し、帰属を持てない Page は引用せず、取得していない Source を引用した回答は採用前に差し戻します。MVP 境界も同じ方法で書かれます。Feasibility Path、最初の版に入れるものと入れないもの、Acceptance Criteria、実装順序が、この Session の判断と根拠から書かれ、同じ項目を included と excluded の両方に置いた境界は利用者に見せる前に差し戻します。提案を生成しても承認にはなりません。利用者の回答も同じ方法で読みます。自分の言葉で書かれた回答を照合ではなく理解し、その言葉のまま言い返します。選択を伴わない同意は Model に届かないので「はい」が Product Path になることはなく、Model が判断できない回答には、利用者が実際に言ったことに即して問い直します。設定がなければ Keyword 判定のまま決定的に動きます。Broker 接続と公開 Agent Service はまだ有効にしていません。
 

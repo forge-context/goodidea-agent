@@ -48,12 +48,12 @@ normally created during this flow.
 
 ```bash
 cd web
-npm run dev     # Vite
-npm run pages   # through the Pages runtime, closer to production
+npm run dev       # Vite dev server
+npm run preview   # the production build, served locally
 ```
 
-`npm run pages` uses Wrangler and `web/wrangler.jsonc`. There is deliberately no
-deploy script: publishing happens by pushing, and a manual upload would create a
+The repository carries no Wrangler configuration and no deploy script on purpose. A
+Git-connected Pages project needs neither, and a manual upload would create a
 deployment that matches no commit.
 
 Official references: [Git integration](https://developers.cloudflare.com/pages/get-started/git-integration/),
