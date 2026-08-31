@@ -628,8 +628,8 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
 .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
 .how-grid article {
   position: relative;
-  min-height: 260px;
-  padding: 30px;
+  min-height: 232px;
+  padding: 28px 30px 30px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 19px;
@@ -653,7 +653,9 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
 }
 .how-grid article:nth-child(2) > span { background: var(--coral-soft); color: var(--coral); }
 .how-grid article:nth-child(3) > span { background: var(--mint-soft); color: var(--mint); }
-.how-grid h3 { margin: 59px 0 14px; font-size: 24px; font-weight: 600; line-height: 1.4; letter-spacing: -.035em; }
+/* The number belongs to the title. A tall fixed gap between them left a band of
+   nothing across all three cards. */
+.how-grid h3 { margin: 22px 0 12px; font-size: 22px; font-weight: 600; line-height: 1.4; letter-spacing: -.035em; }
 .how-grid p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.8; }
 .principles-panel {
   position: relative;
@@ -864,7 +866,7 @@ html[lang="zh-CN"] :is(
   .boundary-list-grid { grid-template-columns: 1fr; gap: 0; }
   .boundary-list-grid > div { grid-template-columns: 1fr; gap: 7px; padding: 16px 0; }
   .how-grid article { min-height: 220px; }
-  .how-grid h3 { margin-top: 48px; }
+  .how-grid h3 { margin-top: 20px; }
   .principles-panel { padding: 30px 23px; border-radius: 20px; }
   .principles-panel > h2 { font-size: 32px; }
   footer { padding-inline: 16px; }
