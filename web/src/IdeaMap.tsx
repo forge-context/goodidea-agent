@@ -34,7 +34,9 @@ const WIDE: Layout = {
     { x: 615, y: 290 },
     { x: 745, y: 405 },
   ],
-  result: { x: 845, y: 118 },
+  // Nudged out and up from 845,118: at the readable label size the boundary card is
+  // two lines tall and its corner reached the result card.
+  result: { x: 870, y: 105 },
   detours: [
     { from: 0, to: { x: 245, y: 160 } },
     { from: 1, to: { x: 400, y: 590 } },
@@ -52,12 +54,14 @@ const COMPACT: Layout = {
     { x: 470, y: 285 },
     { x: 250, y: 160 },
   ],
-  result: { x: 640, y: 70 },
+  // Pushed further right than the 640,70 this used to be: the readable label size
+  // widens every card, and the handoff landmark sits directly under this one.
+  result: { x: 700, y: 60 },
   detours: [
     // Spaced for the tallest labels, which are Japanese and English rather than Chinese.
-    { from: 0, to: { x: 620, y: 585 } },
+    { from: 0, to: { x: 645, y: 585 } },
     { from: 1, to: { x: 720, y: 375 } },
-    { from: 2, to: { x: 590, y: 215 } },
+    { from: 2, to: { x: 660, y: 215 } },
   ],
 };
 

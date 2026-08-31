@@ -29,7 +29,9 @@ GoodIdea 的产品过程是“发散想法 → 查证现实 → 收敛边界 →
 | 动效 | 地图只播放一次，约六秒半，并永久停留在最终状态 | 多数访客三秒内就决定是否继续，所以任何单独一拍都不能承担全部信息。已经点亮的东西不会再变暗：任何一帧被打断，画面本身都读得懂。 |
 | 减少动态效果 | `prefers-reduced-motion: reduce` 下关闭动画、平滑滚动和过渡 | 系统偏好减少动态效果的用户应得到同样完整的信息。静态界面不依赖动画才能理解。 |
 | 响应式 | 桌面双栏；平板把阶段栏横向展开；手机改为单栏并隐藏次要导航 | 保留各尺寸下的阅读顺序和核心操作，不只是把桌面版等比例缩小。 |
+| 内容列宽 | `--shell` 在笔记本宽度内保持 1180px，之后随视口增长，上限 1360px；所有区块共用同一条边 | 固定 1180px 时，1920px 显示器上约四成是空白。上限由 Demo 决定：超过 1360px 后对话气泡已经达到可读行长，多出来的宽度只会把想法输入框和主操作拉长。 |
 | 字体 | 三种语言使用各自的系统字体栈，大标题统一采用真实存在的 600 字重，等宽字体只保留给真正的技术元数据 | 页面不再依赖实际没有加载的 Inter。中文标签使用中文字体度量，移除只适合拉丁文的大写和字距规则，并设置语义换行点，避免把“开始”这类词从中间拆开。 |
+| 字号阶梯 | 一套六级字号：正文 16px，引导文 17px，凡是成词成句的文字下限 14px，12–13px 只留给全大写等宽的元数据 | 改版前几乎所有文字都在 8–13px，低于任何一套主流设计基准。 |
 | 图像策略 | 当前不增加无关照片或抽象插画 | 现阶段最有说服力的视觉是可交互产品行为。等品牌资产和真实案例成熟后，再评估是否需要原创视觉，而不是用库存图分散焦点。 |
 
 ## 首屏：想法地图
@@ -53,6 +55,36 @@ GoodIdea 的产品过程是“发散想法 → 查证现实 → 收敛边界 →
 
 地图高度同时受视口高度约束，这样在笔记本屏幕上，下方 Demo 区块的顶边仍然露出来。那条边是页面还有内容的唯一提示。
 
+## 字号阶梯
+
+整页只用六级字号，在 `web/src/styles.css` 中声明为 `--fs-tag` 到 `--fs-title`，不再
+另外发明第七级。
+
+| Token | 字号 | 用途 |
+| --- | --- | --- |
+| `--fs-title` | 19px | Demo 中 Agent 回答的第一句和决策小标题 |
+| `--fs-lead` | 17px | 首屏引导文与原则条目标题 |
+| `--fs-body` | 16px | 默认正文：所有段落、列表和想法输入框 |
+| `--fs-small` | 14px | 图注、附注、里程碑标签、沙盒日志与代码 |
+| `--fs-label` | 13px | 全大写等宽的区块标签、眉题和术语 |
+| `--fs-tag` | 12px | 全大写等宽的元数据标签与状态药丸 |
+
+**正文 16px，下限 14px。** Material 3 把 body-large 定为 16sp、body-medium 定为
+14sp，可读文本到此为止；GOV.UK 的字号阶梯最小值是 16px，并且已经明确不再在小屏上
+缩小；Apple iOS 的 Body 是 17pt。可交互的标签遵循同一条规则，所以按钮和导航从原来
+的 10px 等宽提高到 14–15px。
+
+**12–13px 只允许用于全大写等宽的元数据。** 全大写序列里每个字形都是大写高度，因此
+12px 的标签大致相当于 16px 小写文本的大写高度，却不承担阅读负担——它们是一到四个词
+的状态标记，不是句子。页面上小于 12px 的只剩证据角标和几个 `aria-hidden` 的装饰符号。
+
+**字号变大之后行高相应收紧。** 正文行高 1.7，小字 1.6–1.75，既高于 WCAG 2.2 文本间距
+对段落要求的 1.5，又避免了 11px 文字才需要的 1.85。
+
+有三处版式原本是按旧字号调过的，这次一起改：首屏两个操作改为上下堆叠而不是并排；
+里程碑条在窄屏上把标签放到圆点下方而不是右侧；想法地图从 1120px 起就占满页面宽度，
+而不是 980px。
+
 ## 可访问性基线
 
 - 普通文本颜色组合按 WCAG 2.2 的 4.5:1 最低对比度检查；大文本不能成为降低普通正文对比度的借口。
@@ -60,4 +92,4 @@ GoodIdea 的产品过程是“发散想法 → 查证现实 → 收敛边界 →
 - 键盘焦点使用可见的外轮廓，页面保留跳过导航链接。
 - 动效遵从系统的减少动态效果偏好。
 
-设计依据：[W3C 对比度最低要求](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)、[W3C Animation from Interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)、[W3C `prefers-reduced-motion` 技术 C39](https://www.w3.org/WAI/WCAG22/Techniques/css/C39.html)。
+设计依据：[W3C 对比度最低要求](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html)、[W3C Animation from Interactions](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html)、[W3C `prefers-reduced-motion` 技术 C39](https://www.w3.org/WAI/WCAG22/Techniques/css/C39.html)、[W3C 文本间距](https://www.w3.org/WAI/WCAG22/Understanding/text-spacing.html)、[Material 3 字号阶梯](https://m3.material.io/styles/typography/type-scale-tokens)、[GOV.UK 字号阶梯](https://design-system.service.gov.uk/styles/type-scale/)、[Apple HIG 字体规范](https://developer.apple.com/design/human-interface-guidelines/typography)。
