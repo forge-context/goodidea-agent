@@ -211,8 +211,10 @@ Chinese, and is published from `main` on every push. Its first view is a map of 
 idea refusing three tempting shortcuts on the way to something buildable; the
 reasoning behind it is in [the LP visual system](docs/design/lp-visual-system.md).
 `web/lab/` renders that first view on its own, in all three languages with a replay,
-for working on it without the rest of the page. Its interactive demo uses fixed
-browser data exported from real agent runs.
+for working on it without the rest of the page. Its interactive demo is a fixed
+browser-side storyboard: a conversation on the left of an idea map that grows out of
+it, where concepts appear as fragments, gather, and can be opened for a side
+conversation that previews its change before anything is merged.
 
 The page title and the headline differ on purpose: the title carries the product's
 positioning line, which is what belongs in a search result, and the headline is the

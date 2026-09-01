@@ -17,17 +17,17 @@
 | Brand Mark | 角丸 Square の文字 G を、開いた G 型 Path と Coral の Spark に置き換える | 開いた Path は探索の余地がある Idea、Spark は明確な次の一歩へ収束する瞬間を表す。Header、Demo、Footer で同じ Custom Vector を使う。 |
 | Action Icon | Scroll と実装を開く操作に、16px の同じ Rounded Stroke の SVG Icon を使う | Font の矢印 Glyph は OS ごとに太さと形が変わる。同じ Stroke System で First View の二つの Action を揃える。 |
 | Shape | 12–26px の段階的な角丸 | Engineering Console の距離感を弱め、Control、Content Card、Product Demo の階層を半径で区別する。 |
-| Demo の優先度 | Demo を最大の Object にし、状態に応じて上辺の色を変える | Feature List より Product Behavior の方が強い証明になる。配置を動かさず Stage 変化を伝える。 |
-| Agent 回答の構造 | 実現可能性を一つの Chat Turn にまとめ、最初の一文で結論を示し、本文中の根拠と Message 末尾の小さな選択肢を続ける | 回答、説明、次の一歩、判断を別 Card にすると注意が分散する。同じ会話 Context の中で実現可能性を判断し、そのまま返答できるようにする。 |
-| Evidence Interaction | 根拠を回答内の重要な主張に結び、Hover または Keyboard Focus で出典を表示し、Click で原文を開く | 別の Evidence Drawer を開いて結論と手作業で対応させる必要をなくす。主張と Provenance を同じ Reading Position に置く。 |
-| 情報量 | Reality、Decision、Boundary を段階的に表示 | 一度に処理する量を減らし、「一度に一つの価値ある質問」という Product Principle と揃える。 |
+| Demo の優先度 | Demo を Page 最大の Object のままにする。中央は会話、右は会話から育つアイデアマップ、左は静かな道標 | Feature List より Product Behavior の方が強い証明になる。ここで見せる価値があるのは「アイデアが理解されていく」ことで、Report が出てくることではない。重さは中央、右、左の順。 |
+| 会話のリズム | Agent の返答は短く、一度に一つの問いだけ進める。自然な選択肢を二つ置き、実際に送信できる自由入力も残す | 訪問者には Form ではなく会話だと分かってほしい。役割名、Avatar、Status Badge は置かない。言葉そのものが Interface で、固定選択肢はこの体験を最後まで歩けるようにするためだけにある。 |
+| Concept の状態 | 断片、候補、確定、未検証、置き換え済みを、枠線・不透明度・ごく軽い一行で表す | Badge を並べると Map が Dashboard になる。根拠と仮説は Concept の属性であって独立した欄ではないので、何気なく言ったことが確定した結論に化けない。 |
+| 情報量 | Map は一つの Node から始まり、1 ターンにつき目に見える変化は最大一つ。背後の十個の Concept は口に出されて初めて現れる | 空の欄が十個並べば、それは埋めるべき Form になる。方法論は裏に置き、画面に出るのは「ひとつの利用場面ができつつあります」で、「Use Case Unlocked」ではない。 |
 | CTA 階層 | 1 View に塗りつぶし Primary Action は一つ | Demo、GitHub、承認、修正が同じ強さで競合しないようにし、次の行動を明確にする。 |
 | Motion | Map は一度だけ、約 6.5 秒で走り、最終状態に留まる | 多くの訪問者は三秒で判断するため、どの一拍も単独で意味を背負わせない。点いたものは二度と消えないので、途中で止まった一枚でも読める。 |
 | Reduced Motion | `prefers-reduced-motion: reduce` で Animation、Transition、Smooth Scroll を停止 | Motion がなくても同じ情報を得られ、OS の利用者設定を尊重できる。 |
-| Responsive | Desktop は 2 Column、Tablet は横 Stage、Mobile は 1 Column | Desktop を縮小するだけでなく、各画面で読む順序と Core Action を保つ。 |
+| Responsive | Desktop は 3 Column。1080px 以下では道標が上部の Strip に畳まれ、会話と Map の 2 Column を保つ。Mobile では会話が Page そのもので、両側は本物の Panel になる | Desktop を縮小するだけでなく、各画面で読む順序と Core Action を保つ。Map は読めなくなるほど縮めず、代わりに Scroll する。 |
 | Content Column | `--shell` は Laptop 幅までは 1180px を保ち、そこから Viewport に合わせて 1360px を上限に伸びる。全 Section が同じ端に揃う | 1180px 固定だと 1920px の Monitor では約 4 割が余白になる。上限は Demo が決めている。1360px を超えると Chat Turn は既に読める行長に達しており、増えた幅は Idea 欄と Primary Action を伸ばすだけになる。 |
 | Typography | Locale 別の System Font Stack、全 Locale 共通の実在する 600 Weight の Display Heading、技術的な Metadata だけに Monospace を使う | 未宣言の Webfont 依存を持たない。中国語 Label には CJK の Metrics を使い、Latin 専用の大文字・字間規則を外し、「开始」のような語を途中で分けない Break Point を置く。 |
-| Type Scale | 6 段階の一つの Scale: 本文 16px、Lead 17px、語や文である限り 14px を下限とし、12〜13px は全て大文字の Monospace Metadata だけに残す | それまでほぼ全てが 8〜13px で組まれており、主要な設計基準のどれよりも小さかった。 |
+| Type Scale | 5 段階の一つの Scale: 本文 16px、Lead 17px、語や文である限り 14px を下限とし、12〜13px は全て大文字の Monospace Metadata だけに残す | それまでほぼ全てが 8〜13px で組まれており、主要な設計基準のどれよりも小さかった。 |
 | 画像 | 現時点では汎用写真や装飾 Illustration を追加しない | いま最も説得力のある Visual は Interactive Product Behavior。実例が揃ってから Original Visual を検討する。 |
 
 ## First View：Idea Map
@@ -51,17 +51,33 @@ Map は、何かが読まれる前にこの Page が行う主張です。アイ�
 
 Map の高さは幅だけでなく Viewport の高さにも縛られます。Laptop の画面でも下の Demo Section の上端が見えるようにするためで、その端だけが Page の続きを示す手がかりです。
 
+## Demo：育っていくアイデアマップ
+
+Demo は固定シナリオで、裏に Agent はいません。次の変更で守るべきなのは、この Map の
+振る舞いであって、中の文章ではありません。
+
+**Map 全体を窓の中に収める。** Storyboard の各状態は専用の配置を持ち、アイデアが育つ
+たびに Agent が White Board を整え直します。Canvas を縦に伸ばすのではなく、Node を上へ、
+互いに近づけます。Node の高さは実行時に測ります。同じ Node が英語では 1 行、日本語では
+2 行になるからで、上の Node に重なるものは下へ押し出されます。完成した Map がそれでも
+Panel より高いときは、切り落とさず、訪問者が自分で見つける長い Scroll にもせず、全体を
+わずかに縮小します。Mobile では Map が独立した Panel なので、ほぼ原寸のまま Scroll し、
+そのターンで変わった箇所を表示範囲に入れます。
+
+**個別の会話に入れる Node だけが押せるように見える。** 常に見える角の印を持ち（Hover
+でだけ出る Label は Node の高さを変えてしまう）、開くと何が起きるかを述べる Accessible
+Name を持ちます。Canvas のそれ以外は文字なので、Button の見た目は与えません。
+
 ## Type Scale
 
-Page は 6 つの Size だけで組む。`web/src/styles.css` に `--fs-tag` から `--fs-title`
-として宣言してあり、7 つ目を勝手に増やさない。
+Page は 5 つの Size だけで組む。`web/src/styles.css` に `--fs-tag` から `--fs-lead`
+として宣言してあり、6 つ目を勝手に増やさない。
 
 | Token | Size | 用途 |
 | --- | --- | --- |
-| `--fs-title` | 19px | Demo 内の Agent 回答の一文目と Decision 見出し |
-| `--fs-lead` | 17px | Hero の導入文と Principle の見出し |
+| `--fs-lead` | 17px | Hero の導入文、Principle の見出し、Demo で Agent が話す言葉 |
 | `--fs-body` | 16px | 既定の本文。段落、List、Idea 入力欄 |
-| `--fs-small` | 14px | Caption、注記、Milestone Label、Sandbox の Log と Code |
+| `--fs-small` | 14px | Caption、注記、左の道標、選択肢、アイデアマップ上の全ての語 |
 | `--fs-label` | 13px | 大文字 Monospace の Section Label、Eyebrow、用語 |
 | `--fs-tag` | 12px | 大文字 Monospace の Metadata Chip と Status Pill |
 
@@ -73,15 +89,14 @@ Button と Navigation は 10px の Monospace ではなく 14〜15px になった
 **12〜13px は全て大文字の Monospace Metadata に限る。** 全て大文字の並びはどの字も
 Cap Height なので、12px の Label は 16px の小文字とほぼ同じ Cap Height を持ち、読む
 負荷は持たない。これらは 1〜4 語の状態表示であって文ではない。12px 未満で残っている
-のは、根拠の上付き記号と `aria-hidden` の装飾記号だけ。
+のは `aria-hidden` の装飾記号だけ。
 
 **Size を上げた分、行間は下げた。** 本文は 1.7、小さい Text は 1.6〜1.75 で、WCAG 2.2
 Text Spacing が段落に求める 1.5 を上回りつつ、11px の Text に必要だった 1.85 の緩さを
 避けている。
 
-古い Size に合わせて調整されていた 3 箇所は一緒に動かした。First View の 2 つの操作は
-横並びをやめて縦に積み、Milestone の帯は狭い画面で Label を丸の横ではなく下に置き、
-Idea Map は 980px ではなく 1120px から Page 幅いっぱいを取る。
+古い Size に合わせて調整されていた 2 箇所は一緒に動かした。First View の 2 つの操作は
+横並びをやめて縦に積み、Idea Map は 980px ではなく 1120px から Page 幅いっぱいを取る。
 
 ## Accessibility Baseline
 
