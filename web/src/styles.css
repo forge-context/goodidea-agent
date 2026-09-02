@@ -535,6 +535,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
 .change-actions button:hover { border-color: var(--primary); color: var(--primary-dark); }
 .change-actions .primary { border-color: var(--primary); background: var(--primary); color: var(--surface); }
 .change-actions .primary:hover { border-color: var(--primary-dark); background: var(--primary-dark); color: var(--surface); }
+.change-actions .quiet { border-color: transparent; color: var(--muted); }
 .change-done { margin: 14px 0 0; color: var(--muted); font-size: var(--fs-small); }
 .chat-compose {
   display: flex;
@@ -585,7 +586,9 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
   padding: 14px 16px 8px;
   background: linear-gradient(180deg, #fffdfc 0%, #fdf7f3 100%);
 }
-.canvas-title { margin: 0 0 6px; color: #a79dba; font: var(--fs-label) var(--mono); letter-spacing: .06em; }
+.canvas-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.canvas-title { margin: 0; color: #a79dba; font: var(--fs-label) var(--mono); letter-spacing: .06em; }
+.canvas-heading > p:last-child { margin: 0; color: #aaa0b2; font-size: var(--fs-tag); line-height: 1.45; text-align: right; }
 .canvas-viewport { position: relative; flex: 1; min-height: 0; overflow-x: hidden; overflow-y: auto; }
 .canvas-board { position: relative; transform-origin: top center; transition: transform .7s var(--ease-out); }
 .canvas-edges { position: absolute; inset: 0; overflow: visible; }
@@ -604,6 +607,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
   border-radius: 13px;
   background: var(--surface);
   color: var(--ink);
+  font: inherit;
   text-align: left;
   transform: translateX(-50%);
   transition:
@@ -621,7 +625,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
 .canvas-node.is-changed { background: transparent; color: var(--muted); }
 .canvas-node.is-changed .canvas-node-text { text-decoration: line-through; text-decoration-color: var(--line-strong); }
 .canvas-node.is-quiet { opacity: .66; }
-.canvas-node.is-back { opacity: .24; }
+.canvas-node.is-back { opacity: .38; }
 .canvas-node.shape-seed { border-color: #dcc9ea; background: #faf5fd; }
 .canvas-node.shape-hub { padding: 8px 15px; border-radius: 999px; text-align: center; }
 .canvas-node.shape-chip { padding: 7px 11px; }
@@ -655,9 +659,9 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
 }
 .canvas-node-note { display: block; margin-top: 4px; color: #918799; font-size: var(--fs-label); line-height: 1.45; }
 .canvas-node.is-unverified .canvas-node-note { color: var(--amber); }
-/* Only the nodes that really open a side conversation carry an affordance, and it
-   is always on screen: a label that appears on hover would resize the node. */
-.canvas-node.is-open { cursor: pointer; }
+/* Every semantic node can be selected. The arrow has the narrower meaning: this
+   piece can open a focused side discussion. */
+.canvas-node.is-selectable { cursor: pointer; }
 .canvas-node-open {
   position: absolute;
   top: 6px;
@@ -668,9 +672,61 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
   opacity: .55;
   transition: opacity .2s ease;
 }
-.canvas-node.is-open { padding-right: 24px; }
-.canvas-node.is-open:hover { border-color: var(--primary); }
-.canvas-node.is-open:hover .canvas-node-open { opacity: 1; }
+.canvas-node.is-selectable:has(.canvas-node-open) { padding-right: 24px; }
+.canvas-node.is-selectable:hover { border-color: #b998d2; }
+.canvas-node.is-selectable:hover .canvas-node-open { opacity: 1; }
+.canvas-node.is-selected {
+  z-index: 2;
+  border-color: var(--primary);
+  outline: 3px solid rgba(122, 63, 159, .13);
+  opacity: 1;
+}
+.node-inspector {
+  flex: none;
+  margin-top: 8px;
+  padding: 11px 12px 12px;
+  border: 1px solid #d7c7e3;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 8px 22px rgba(59, 31, 73, .08);
+  animation: said-in .22s var(--ease-out) both;
+}
+.node-inspector-title { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.node-inspector-title > span { color: #927aa7; font: var(--fs-tag) var(--mono); letter-spacing: .04em; }
+.node-inspector-title > button {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 18px;
+  cursor: pointer;
+}
+.node-inspector-title > button:hover { background: var(--primary-soft); }
+.node-inspector > p { margin: 5px 0 9px; color: var(--ink); font-size: var(--fs-small); line-height: 1.45; }
+.node-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+.node-actions button, .node-edit button {
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface);
+  color: #5d536c;
+  font-size: var(--fs-tag);
+  cursor: pointer;
+}
+.node-actions button:hover, .node-edit button:hover { border-color: #b998d2; color: var(--primary-dark); }
+.node-actions .deep { margin-left: auto; border-color: #c6aad9; color: var(--primary-dark); }
+.node-edit { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px; margin-top: 7px; }
+.node-edit input {
+  min-width: 0;
+  padding: 7px 9px;
+  border: 1px solid #c6aad9;
+  border-radius: 9px;
+  color: var(--ink);
+  font-size: var(--fs-small);
+}
 .canvas-hint {
   min-height: 22px;
   margin: 6px 0 0;

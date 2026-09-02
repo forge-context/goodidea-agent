@@ -57,14 +57,18 @@ export function ProductCanvas({
   view,
   copy,
   dim,
-  onOpenNode,
+  selectedNodeId,
+  onSelectNode,
+  textOverrides,
   reduceMotion,
   minScale = MIN_SCALE,
 }: {
   view: CanvasView;
   copy: StudioCopy;
   dim: DimLevel;
-  onOpenNode?: (node: Placement) => void;
+  selectedNodeId?: string | null;
+  onSelectNode?: (node: Placement) => void;
+  textOverrides?: Record<string, string>;
   reduceMotion: boolean;
   /** On a phone the map is a panel of its own, so it stays near full size and
    *  scrolls rather than shrinking to an unreadable diagram. */
@@ -115,6 +119,15 @@ export function ProductCanvas({
 
   const byId = new Map(laid.map((item) => [item.node.id, item]));
   const focus = new Set(view.focus);
+  const selectedRelated = useMemo(() => {
+    if (!selectedNodeId) return null;
+    const ids = new Set([selectedNodeId]);
+    view.edges.forEach((edge) => {
+      if (edge.from === selectedNodeId) ids.add(edge.to);
+      if (edge.to === selectedNodeId) ids.add(edge.from);
+    });
+    return ids;
+  }, [selectedNodeId, view.edges]);
 
   // When the map is taller than its panel — a phone, mostly — what just changed
   // has to be the part you are looking at.
@@ -156,7 +169,9 @@ export function ProductCanvas({
             const from = byId.get(edge.from);
             const to = byId.get(edge.to);
             if (!from || !to) return null;
-            const lit = dim !== "strong" || focus.has(edge.from) || focus.has(edge.to);
+            const selectedLit =
+              !selectedRelated || selectedRelated.has(edge.from) || selectedRelated.has(edge.to);
+            const lit = selectedLit && (dim !== "strong" || focus.has(edge.from) || focus.has(edge.to));
             return (
               <line
                 key={edge.id}
@@ -178,8 +193,16 @@ export function ProductCanvas({
             item={item}
             boardWidth={box.width || 360}
             copy={copy}
-            dim={focus.has(item.node.id) ? "none" : dim}
-            onOpenNode={onOpenNode}
+            dim={
+              selectedRelated && !selectedRelated.has(item.node.id)
+                ? "strong"
+                : focus.has(item.node.id)
+                  ? "none"
+                  : dim
+            }
+            selected={selectedNodeId === item.node.id}
+            onSelectNode={onSelectNode}
+            textOverride={textOverrides?.[item.node.id]}
             reduceMotion={reduceMotion}
             setNodeRef={setNodeRef}
           />
@@ -194,7 +217,9 @@ function CanvasNodeView({
   boardWidth,
   copy,
   dim,
-  onOpenNode,
+  selected,
+  onSelectNode,
+  textOverride,
   reduceMotion,
   setNodeRef,
 }: {
@@ -202,7 +227,9 @@ function CanvasNodeView({
   boardWidth: number;
   copy: StudioCopy;
   dim: DimLevel;
-  onOpenNode?: (node: Placement) => void;
+  selected: boolean;
+  onSelectNode?: (node: Placement) => void;
+  textOverride?: string;
   reduceMotion: boolean;
   setNodeRef: (id: string, element: HTMLElement | null) => void;
 }) {
@@ -227,7 +254,8 @@ function CanvasNodeView({
     opacity: settled ? undefined : 0,
   };
 
-  const text = copy.nodes[node.content];
+  const original = copy.nodes[node.content];
+  const text = textOverride ? { ...original, text: textOverride } : original;
   const body = <NodeBody text={text} />;
   const className = [
     "canvas-node",
@@ -235,27 +263,31 @@ function CanvasNodeView({
     `shape-${node.shape}`,
     dim === "soft" ? "is-quiet" : "",
     dim === "strong" ? "is-back" : "",
+    selected ? "is-selected" : "",
   ]
     .filter(Boolean)
     .join(" ");
 
-  if (node.branch && onOpenNode) {
+  if (onSelectNode) {
     return (
       <button
         type="button"
-        className={`${className} is-open`}
+        className={`${className} is-selectable`}
         style={style}
         ref={(element) => setNodeRef(node.id, element)}
-        onClick={() => onOpenNode(node)}
-        aria-label={`${text.text} — ${copy.ui.openNode}`}
+        onClick={() => onSelectNode(node)}
+        aria-pressed={selected}
+        aria-label={`${text.text} — ${copy.ui.selectNode}`}
       >
         {body}
         {/* A corner mark rather than a line of label: the affordance has to be
             visible without touch users hovering, and without making the node
             taller than the layout budgeted for it. */}
-        <span className="canvas-node-open" aria-hidden="true">
-          ↗
-        </span>
+        {node.branch && (
+          <span className="canvas-node-open" aria-hidden="true">
+            ↗
+          </span>
+        )}
       </button>
     );
   }

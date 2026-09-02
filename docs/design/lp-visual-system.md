@@ -90,10 +90,11 @@ the panel it is scaled down slightly — never cut off, never turned into a long
 the visitor has to discover. On a phone the map is a panel of its own, so it stays
 near full size and scrolls, and whatever changed this turn is scrolled into view.
 
-**Only nodes that open a side conversation look clickable.** They carry a corner mark
-that is always visible — a hover-only label would resize the node — and an accessible
-name that says what opening it does. Everything else on the canvas is text, so it is
-not a button.
+**Every semantic node can be selected, but `↗` only means it can open a branch.**
+Selecting a node highlights it and its neighbours and reveals lightweight actions
+below the canvas; it does not create a conversation by itself. Only nodes carrying
+`↗` offer an explicit deep discussion. A branch result can be merged, kept visibly
+as a candidate, or discarded.
 
 ## The type scale
 

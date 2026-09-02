@@ -49,6 +49,9 @@ export type CanvasVars = {
   grown: 1 | 2 | 3 | 4 | 5 | 6;
   people: null | "a" | "b";
   help: null | "a" | "b";
+  /** A branch result can stay visible without becoming the product decision. */
+  peopleCandidate: null | "a" | "b";
+  helpCandidate: null | "a" | "b";
   firstStep: boolean;
 };
 
@@ -56,6 +59,8 @@ export const initialCanvas: CanvasVars = {
   grown: 1,
   people: null,
   help: null,
+  peopleCandidate: null,
+  helpCandidate: null,
   firstStep: false,
 };
 
@@ -120,6 +125,7 @@ const SPOTS: Record<number, Record<string, Spot>> = {
     outcome: { x: 77, y: 258, w: 42 },
     help: { x: 26, y: 286, w: 50, from: { x: 40, y: 250 } },
     feasible: { x: 77, y: 340, w: 40, from: { x: 77, y: 296 } },
+    helpCandidate: { x: 25, y: 408, w: 48, from: { x: 32, y: 350 } },
   },
   /* Once the first step is named the map is complete, so the agent tightens the
    * board one last time to keep all of it on screen at once. */
@@ -135,7 +141,8 @@ const SPOTS: Record<number, Record<string, Spot>> = {
     outcome: { x: 77, y: 250, w: 42 },
     help: { x: 26, y: 280, w: 50 },
     feasible: { x: 77, y: 348, w: 40 },
-    firstStep: { x: 50, y: 470, w: 68, from: { x: 50, y: 430 } },
+    helpCandidate: { x: 25, y: 414, w: 48 },
+    firstStep: { x: 50, y: 494, w: 68, from: { x: 50, y: 452 } },
   },
 };
 
@@ -170,6 +177,7 @@ export function buildCanvas(vars: CanvasVars): CanvasView {
 
   if (grown >= 2) {
     const merged = vars.people !== null;
+    const candidate = !merged && vars.peopleCandidate !== null;
     add(
       place(
         layout,
@@ -184,18 +192,32 @@ export function buildCanvas(vars: CanvasVars): CanvasView {
       place(
         layout,
         "fragA",
-        merged ? "fragAAside" : "fragA",
-        "chip",
-        merged ? "changed" : "fragment",
+        merged && vars.peopleCandidate === "a"
+          ? "earlyUserA"
+          : merged && vars.peopleCandidate === "b"
+            ? "earlyUserB"
+            : merged
+              ? "fragAAside"
+              : "fragA",
+        merged && vars.peopleCandidate ? "card" : "chip",
+        merged && vars.peopleCandidate ? "candidate" : merged ? "changed" : "fragment",
       ),
     );
     add(
       place(
         layout,
         "fragC",
-        vars.people === "a" ? "earlyUserA" : vars.people === "b" ? "earlyUserB" : "fragC",
-        merged ? "card" : "chip",
-        merged ? "confirmed" : "fragment",
+        vars.people === "a"
+          ? "earlyUserA"
+          : vars.people === "b"
+            ? "earlyUserB"
+            : vars.peopleCandidate === "a"
+              ? "earlyUserA"
+              : vars.peopleCandidate === "b"
+                ? "earlyUserB"
+                : "fragC",
+        merged || candidate ? "card" : "chip",
+        merged ? "confirmed" : candidate ? "candidate" : "fragment",
       ),
     );
     add(
@@ -250,6 +272,18 @@ export function buildCanvas(vars: CanvasVars): CanvasView {
     );
     link("outcome", "help");
     link("help", "feasible", true);
+    if (vars.helpCandidate) {
+      add(
+        place(
+          layout,
+          "helpCandidate",
+          vars.helpCandidate === "a" ? "helpCandidateA" : "helpCandidateB",
+          "card",
+          "candidate",
+        ),
+      );
+      link("help", "helpCandidate", true);
+    }
     if (vars.firstStep) {
       add(place(layout, "firstStep", "firstStep", "card", "confirmed"));
       link("help", "firstStep");
@@ -286,7 +320,7 @@ export const branchFocus: Record<BranchId, string[]> = {
 /* ------------------------------- conversation ------------------------------ */
 
 export type StepId = "s0" | "s1" | "s2" | "s3" | "s4" | "s5" | "s6" | "bp0" | "bh0";
-export type HintId = "scene" | "shape" | "updated";
+export type HintId = "scene" | "shape" | "updated" | "candidate" | "edited";
 
 export type OptionDef = {
   id: string;

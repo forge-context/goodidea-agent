@@ -7,7 +7,7 @@
  * trying to look like.
  */
 
-import type { HintId, StudioLocale } from "./ideaStudioFlow";
+import type { HintId, NodeStatus, StudioLocale } from "./ideaStudioFlow";
 
 export type NodeCopy = {
   caption?: string;
@@ -35,6 +35,16 @@ export type StudioCopy = {
     placeholder: string;
     send: string;
     openNode: string;
+    selectNode: string;
+    selectedNode: string;
+    canvasGuide: string;
+    continueDiscuss: string;
+    discussUser: string;
+    discussReply: string[];
+    editNode: string;
+    saveEdit: string;
+    cancelEdit: string;
+    status: Record<NodeStatus, string>;
     exploreTab: string;
     mapTab: string;
     close: string;
@@ -43,9 +53,11 @@ export type StudioCopy = {
     previewAdded: string;
     previewOpen: string;
     merge: string;
-    keep: string;
+    keepCandidate: string;
+    discard: string;
     merged: string;
-    kept: string;
+    candidateKept: string;
+    discarded: string;
     optionsLabel: string;
     conversationLabel: string;
     canvasLabel: string;
@@ -62,10 +74,12 @@ export type StudioCopy = {
       crumbs: string[];
       opening: string[];
       merged: string[];
-      kept: string[];
+      candidate: string[];
+      discarded: string[];
       /** Said when the visitor keeps typing after this piece is settled. */
       more: string[];
       back: string[];
+      backCandidate: string[];
       backKept: string[];
     }
   >;
@@ -86,7 +100,23 @@ const zh: StudioCopy = {
     branchLead: "现在只看这一块",
     placeholder: "也可以直接说你的想法…",
     send: "发送",
-    openNode: "展开聊这一块",
+    openNode: "深入讨论",
+    selectNode: "查看这张卡片",
+    selectedNode: "已选中的想法",
+    canvasGuide: "点一下查看；↗ 表示可以单独深入",
+    continueDiscuss: "继续聊",
+    discussUser: "我想继续聊聊「{node}」。",
+    discussReply: ["可以。关于「{node}」，你想补充、改变，还是质疑哪一点？"],
+    editNode: "改一下",
+    saveEdit: "保存",
+    cancelEdit: "取消",
+    status: {
+      fragment: "刚记下的片段",
+      candidate: "候选，还没定",
+      confirmed: "当前共识",
+      unverified: "等待验证",
+      changed: "暂时放下",
+    },
     exploreTab: "探索",
     mapTab: "想法地图",
     close: "关闭",
@@ -95,9 +125,11 @@ const zh: StudioCopy = {
     previewAdded: "加了",
     previewOpen: "还不确定",
     merge: "合入想法",
-    keep: "先不改",
+    keepCandidate: "保留为候选",
+    discard: "这次不保留",
     merged: "已合入想法。",
-    kept: "这次没有改动。",
+    candidateKept: "已保留为候选，尚未改变当前结论。",
+    discarded: "这次没有保留。",
     optionsLabel: "可以这样回答",
     conversationLabel: "与 GoodIdea 的对话",
     canvasLabel: "想法地图：跟着对话长出来的产品轮廓",
@@ -114,6 +146,8 @@ const zh: StudioCopy = {
     scene: "一个使用场景正在成形",
     shape: "产品的样子清楚了一些",
     updated: "想法已经更新",
+    candidate: "新方向作为候选留在地图上",
+    edited: "卡片已经更新",
   },
   nodes: {
     seed: { caption: "最初的想法", text: "一个自动帮普通投资者执行美股交易策略的 Agent" },
@@ -147,6 +181,8 @@ const zh: StudioCopy = {
       detail: ["随时能停，并说明停在哪一步", "读懂已有规则", "解释每一次动作", "先模拟执行"],
       note: "第一版先保证第一条",
     },
+    helpCandidateA: { caption: "候选优先级", text: "执行前先解释要做什么", note: "尚未合入产品定义" },
+    helpCandidateB: { caption: "候选优先级", text: "随时能停，并说明停在哪里", note: "尚未合入产品定义" },
     feasible: { caption: "如何成立", text: "券商权限与模拟执行是否够用", note: "待验证" },
     feasibleA: { caption: "如何成立", text: "解释到什么程度算讲清楚", note: "待验证" },
     feasibleB: { caption: "如何成立", text: "停下来之后的状态怎么显示", note: "待验证" },
@@ -179,8 +215,8 @@ const zh: StudioCopy = {
     s2b: ["那如果这件事真的被解决了，你希望变成什么样？"],
     s3a: ["那它具体要替你做哪几件事？"],
     s3b: ["那它具体要替你做哪几件事？"],
-    s4a: ["现在整体有形状了。", "不过「可能会用的人」还是三个猜测。点开它可以单独聊，也可以先说第一步。"],
-    s4b: ["那模拟执行先留着，等你放心再打开。", "「可能会用的人」还是三个猜测。点开它可以单独聊，也可以先说第一步。"],
+    s4a: ["现在整体有形状了。", "不过「可能会用的人」还是三个猜测。可以在地图里选中它，再决定要不要深入；也可以先说第一步。"],
+    s4b: ["那模拟执行先留着，等你放心再打开。", "「可能会用的人」还是三个猜测。可以在地图里选中它，再决定要不要深入；也可以先说第一步。"],
     s5b: ["那就先让一个人把自己的规则完整跑完一次模拟执行，其余的都可以等。"],
   },
   branches: {
@@ -188,18 +224,22 @@ const zh: StudioCopy = {
       crumbs: ["产品整体", "目标用户", "最早期用户"],
       opening: ["只看这一块。三类人里，谁会最早真的用起来？"],
       merged: ["已经合到想法里了。回到整体看看？"],
-      kept: ["那先放着，想法保持原样。"],
+      candidate: ["先作为候选留在地图上，不改变现在的目标用户。"],
+      discarded: ["好，这次不保留，想法保持原样。"],
       more: ["这一块先聊到这里。回到整体，还可以继续往下走。"],
       back: ["回到整体。目标用户已经更新了。"],
+      backCandidate: ["回到整体。新方向还只是候选，原来的结论没有变。"],
       backKept: ["回到整体。这次没有改动。"],
     },
     help: {
       crumbs: ["产品整体", "产品怎么帮助"],
       opening: ["只看这一块。它替你做的这几件事里，第一版最不能少的是哪一件？"],
       merged: ["已经合到想法里了。回到整体看看？"],
-      kept: ["那先放着，想法保持原样。"],
+      candidate: ["先作为候选留在地图上，不改变现在的产品定义。"],
+      discarded: ["好，这次不保留，想法保持原样。"],
       more: ["这一块先聊到这里。回到整体，还可以继续往下走。"],
       back: ["回到整体。产品要做的事已经排过序了。"],
+      backCandidate: ["回到整体。新优先级还是候选，产品定义没有变。"],
       backKept: ["回到整体。这次没有改动。"],
     },
   },
@@ -241,7 +281,23 @@ const en: StudioCopy = {
     branchLead: "Looking at this one piece",
     placeholder: "Or just say it in your own words…",
     send: "Send",
-    openNode: "Open this piece",
+    openNode: "Explore in depth",
+    selectNode: "Inspect this card",
+    selectedNode: "Selected idea",
+    canvasGuide: "Select a card to act on it; ↗ can open a focused thread",
+    continueDiscuss: "Keep talking",
+    discussUser: "I want to keep talking about “{node}.”",
+    discussReply: ["Sure. What about “{node}” do you want to add to, change, or challenge?"],
+    editNode: "Edit",
+    saveEdit: "Save",
+    cancelEdit: "Cancel",
+    status: {
+      fragment: "Fresh fragment",
+      candidate: "Candidate, not decided",
+      confirmed: "Current decision",
+      unverified: "Needs validation",
+      changed: "Parked for now",
+    },
     exploreTab: "Steps",
     mapTab: "Idea map",
     close: "Close",
@@ -250,9 +306,11 @@ const en: StudioCopy = {
     previewAdded: "Added",
     previewOpen: "Still open",
     merge: "Merge into the idea",
-    keep: "Leave it for now",
+    keepCandidate: "Keep as a candidate",
+    discard: "Do not keep this",
     merged: "Merged into the idea.",
-    kept: "Nothing changed this time.",
+    candidateKept: "Kept as a candidate; the current decision is unchanged.",
+    discarded: "Not kept this time.",
     optionsLabel: "Ways to answer",
     conversationLabel: "Conversation with GoodIdea",
     canvasLabel: "Idea map: the product shape growing out of the conversation",
@@ -269,6 +327,8 @@ const en: StudioCopy = {
     scene: "A real situation is taking shape",
     shape: "The product is getting clearer",
     updated: "The idea has been updated",
+    candidate: "A new direction is staying on the map as a candidate",
+    edited: "The card has been updated",
   },
   nodes: {
     seed: { caption: "The first idea", text: "An agent that runs US-stock strategies for ordinary investors" },
@@ -302,6 +362,16 @@ const en: StudioCopy = {
       detail: ["Stop anytime, show where", "Read the rule I have", "Explain each action", "Simulate it first"],
       note: "version one guarantees the first line",
     },
+    helpCandidateA: {
+      caption: "Candidate priority",
+      text: "Explain what will happen before acting",
+      note: "not merged into the product definition",
+    },
+    helpCandidateB: {
+      caption: "Candidate priority",
+      text: "Stop anytime and show exactly where",
+      note: "not merged into the product definition",
+    },
     feasible: { caption: "What has to hold", text: "Is broker access plus simulation enough", note: "unverified" },
     feasibleA: { caption: "What has to hold", text: "How much explaining is clear enough", note: "unverified" },
     feasibleB: { caption: "What has to hold", text: "What the screen shows after a stop", note: "unverified" },
@@ -334,8 +404,8 @@ const en: StudioCopy = {
     s2b: ["If that were really solved, what would it look like instead?"],
     s3a: ["So what exactly should it do for you?"],
     s3b: ["So what exactly should it do for you?"],
-    s4a: ["The whole thing has a shape now.", "“People who might use it” is still three guesses, though. Open it to talk about that alone, or tell me the first step."],
-    s4b: ["Then simulated execution stays parked until you want it.", "“People who might use it” is still three guesses. Open it to talk about that alone, or tell me the first step."],
+    s4a: ["The whole thing has a shape now.", "“People who might use it” is still three guesses. Select it on the map, then decide whether to go deeper — or name the first step."],
+    s4b: ["Then simulated execution stays parked until you want it.", "“People who might use it” is still three guesses. Select it on the map, then decide whether to go deeper — or name the first step."],
     s5b: ["Then start with one person running their own rule through a full simulation. The rest can wait."],
   },
   branches: {
@@ -343,18 +413,22 @@ const en: StudioCopy = {
       crumbs: ["The whole idea", "The user we mean", "Earliest user"],
       opening: ["Just this piece, then. Of the three, who would actually pick it up first?"],
       merged: ["Merged into the idea. Want to go back to the whole thing?"],
-      kept: ["Then we'll leave it. The idea stays as it was."],
+      candidate: ["We'll keep it on the map as a candidate without changing the current user."],
+      discarded: ["Okay. We won't keep this one; the idea stays as it was."],
       more: ["That is this piece covered. Head back to the whole idea to keep going."],
       back: ["Back to the whole idea. The user we mean has been updated."],
+      backCandidate: ["Back to the whole idea. The new direction is still a candidate."],
       backKept: ["Back to the whole idea. Nothing changed."],
     },
     help: {
       crumbs: ["The whole idea", "How the product helps"],
       opening: ["Just this piece. Of the things it does for you, which one can version one not do without?"],
       merged: ["Merged into the idea. Want to go back to the whole thing?"],
-      kept: ["Then we'll leave it. The idea stays as it was."],
+      candidate: ["We'll keep it on the map as a candidate without changing the product definition."],
+      discarded: ["Okay. We won't keep this one; the idea stays as it was."],
       more: ["That is this piece covered. Head back to the whole idea to keep going."],
       back: ["Back to the whole idea. What the product does has been reordered."],
+      backCandidate: ["Back to the whole idea. The new priority is still only a candidate."],
       backKept: ["Back to the whole idea. Nothing changed."],
     },
   },
@@ -396,7 +470,23 @@ const ja: StudioCopy = {
     branchLead: "いまはこの部分だけ",
     placeholder: "自分の言葉で続けても大丈夫です…",
     send: "送信",
-    openNode: "ここだけ話す",
+    openNode: "深く話す",
+    selectNode: "このカードを見る",
+    selectedNode: "選んだアイデア",
+    canvasGuide: "カードを選ぶと操作できます。↗ は個別に深掘りできます",
+    continueDiscuss: "続きを話す",
+    discussUser: "「{node}」について、もう少し話したいです。",
+    discussReply: ["いいですね。「{node}」の何を足す、変える、または疑ってみたいですか？"],
+    editNode: "少し直す",
+    saveEdit: "保存",
+    cancelEdit: "キャンセル",
+    status: {
+      fragment: "出てきた断片",
+      candidate: "候補・未決定",
+      confirmed: "現在の合意",
+      unverified: "要検証",
+      changed: "いったん保留",
+    },
     exploreTab: "探索",
     mapTab: "アイデアマップ",
     close: "閉じる",
@@ -405,9 +495,11 @@ const ja: StudioCopy = {
     previewAdded: "増えたこと",
     previewOpen: "まだ不確か",
     merge: "アイデアに反映",
-    keep: "まだ変えない",
+    keepCandidate: "候補として残す",
+    discard: "今回は残さない",
     merged: "アイデアに反映しました。",
-    kept: "今回は変更なしです。",
+    candidateKept: "候補として残しました。現在の結論は変わりません。",
+    discarded: "今回は残しませんでした。",
     optionsLabel: "こう答えられます",
     conversationLabel: "GoodIdea との対話",
     canvasLabel: "アイデアマップ：対話から育っていく Product の輪郭",
@@ -424,6 +516,8 @@ const ja: StudioCopy = {
     scene: "ひとつの利用場面ができつつあります",
     shape: "Product の輪郭が少し見えてきました",
     updated: "アイデアを更新しました",
+    candidate: "新しい方向を候補としてマップに残しました",
+    edited: "カードを更新しました",
   },
   nodes: {
     seed: { caption: "最初のアイデア", text: "個人投資家の代わりに米国株の戦略を執行する Agent" },
@@ -457,6 +551,16 @@ const ja: StudioCopy = {
       detail: ["いつでも止まり、どこで止まったか示す", "すでにあるルールを読む", "動作の理由を説明する", "まず模擬実行で動かす"],
       note: "初版はここだけは守る",
     },
+    helpCandidateA: {
+      caption: "優先候補",
+      text: "実行前に何をするか説明する",
+      note: "Product 定義にはまだ反映していない",
+    },
+    helpCandidateB: {
+      caption: "優先候補",
+      text: "いつでも止まり、どこで止まったか示す",
+      note: "Product 定義にはまだ反映していない",
+    },
     feasible: { caption: "成立条件", text: "証券会社の権限と模擬実行で足りるか", note: "未検証" },
     feasibleA: { caption: "成立条件", text: "どこまで説明すれば伝わるか", note: "未検証" },
     feasibleB: { caption: "成立条件", text: "止めた後の状態をどう見せるか", note: "未検証" },
@@ -489,8 +593,8 @@ const ja: StudioCopy = {
     s2b: ["それが本当に解決したら、どうなっていてほしいですか？"],
     s3a: ["では、具体的に何を代わりにやってほしいですか？"],
     s3b: ["では、具体的に何を代わりにやってほしいですか？"],
-    s4a: ["全体の形が見えてきました。", "ただ「使いそうな人」はまだ三つの推測のままです。そこだけ開いて話すこともできますし、先に最初の一歩でも構いません。"],
-    s4b: ["では模擬実行は置いておいて、安心できたら開けましょう。", "「使いそうな人」はまだ三つの推測です。そこだけ開いて話すか、先に最初の一歩か、選べます。"],
+    s4a: ["全体の形が見えてきました。", "ただ「使いそうな人」はまだ三つの推測です。マップで選び、深掘りするか決めてもいいし、先に最初の一歩でも構いません。"],
+    s4b: ["では模擬実行は置いておいて、安心できたら開けましょう。", "「使いそうな人」はまだ三つの推測です。マップで選んでから深掘りするか、先に最初の一歩か、選べます。"],
     s5b: ["では、まず一人が自分のルールを最後まで模擬実行するところから。ほかは待てます。"],
   },
   branches: {
@@ -498,18 +602,22 @@ const ja: StudioCopy = {
       crumbs: ["Product 全体", "対象ユーザー", "最初のユーザー"],
       opening: ["ここだけ見ます。三つのうち、実際に最初に使い始めるのは誰でしょう？"],
       merged: ["アイデアに反映しました。全体に戻って見てみますか？"],
-      kept: ["では置いておきます。アイデアはこのままです。"],
+      candidate: ["今の対象ユーザーは変えず、候補としてマップに残します。"],
+      discarded: ["分かりました。今回は残さず、アイデアはこのままです。"],
       more: ["この部分はここまでです。全体に戻ると、続きを進められます。"],
       back: ["全体に戻りました。対象ユーザーが更新されています。"],
+      backCandidate: ["全体に戻りました。新しい方向はまだ候補です。"],
       backKept: ["全体に戻りました。今回は変更ありません。"],
     },
     help: {
       crumbs: ["Product 全体", "Product の役割"],
       opening: ["ここだけ見ます。代わりにやることのうち、初版で外せないのはどれですか？"],
       merged: ["アイデアに反映しました。全体に戻って見てみますか？"],
-      kept: ["では置いておきます。アイデアはこのままです。"],
+      candidate: ["今の Product 定義は変えず、候補としてマップに残します。"],
+      discarded: ["分かりました。今回は残さず、アイデアはこのままです。"],
       more: ["この部分はここまでです。全体に戻ると、続きを進められます。"],
       back: ["全体に戻りました。Product の役割の順番が変わっています。"],
+      backCandidate: ["全体に戻りました。新しい優先順位はまだ候補です。"],
       backKept: ["全体に戻りました。今回は変更ありません。"],
     },
   },

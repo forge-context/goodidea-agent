@@ -21,9 +21,19 @@ import {
 type Message =
   | { id: string; role: "user"; text: string }
   | { id: string; role: "agent"; lines: string[] }
-  | { id: string; role: "preview"; option: string; branch: BranchId; resolved?: "merged" | "kept" };
+  | {
+      id: string;
+      role: "preview";
+      option: string;
+      branch: BranchId;
+      resolved?: "merged" | "candidate" | "discarded";
+    };
 
-type Branch = { id: BranchId; returnStep: StepId; merged: boolean };
+type Branch = {
+  id: BranchId;
+  returnStep: StepId;
+  outcome: null | "merged" | "candidate" | "discarded";
+};
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -60,6 +70,8 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
   const [announcement, setAnnouncement] = useState("");
   const [draft, setDraft] = useState("");
   const [sheet, setSheet] = useState<null | "rail" | "map">(null);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [nodeEdits, setNodeEdits] = useState<Record<string, string>>({});
 
   const timers = useRef<number[]>([]);
   const later = useCallback((run: () => void, delay: number) => {
@@ -113,7 +125,7 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
         const meta = copy.branches[opened];
         const from = step ?? "s5";
         later(() => {
-          setBranch({ id: opened, returnStep: from, merged: false });
+          setBranch({ id: opened, returnStep: from, outcome: null });
           setBranchThread([{ id: nextId(), role: "agent", lines: meta.opening }]);
           setAnnouncement(meta.opening.join(" "));
         }, beat);
@@ -148,7 +160,7 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
       setBranch({
         id: node.branch,
         returnStep: step && step !== "bp0" && step !== "bh0" ? step : canvas.firstStep ? "s6" : "s5",
-        merged: false,
+        outcome: null,
       });
       setBranchThread([{ id: nextId(), role: "agent", lines: meta.opening }]);
       setAnnouncement(meta.opening.join(" "));
@@ -159,25 +171,44 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
   );
 
   const resolvePreview = useCallback(
-    (messageId: string, option: string, branchId: BranchId, action: "merged" | "kept") => {
+    (
+      messageId: string,
+      option: string,
+      branchId: BranchId,
+      action: "merged" | "candidate" | "discarded",
+    ) => {
       setBranchThread((prev) =>
         prev.map((message) =>
           message.id === messageId && message.role === "preview" ? { ...message, resolved: action } : message,
         ),
       );
       const meta = copy.branches[branchId];
+      const variant = option.endsWith("a") ? "a" : "b";
       if (action === "merged") {
-        const variant = option.endsWith("a") ? "a" : "b";
         later(() => {
           setCanvas((prev) =>
-            branchId === "people" ? { ...prev, people: variant } : { ...prev, help: variant },
+            branchId === "people"
+              ? { ...prev, people: variant, peopleCandidate: null }
+              : { ...prev, help: variant, helpCandidate: null },
           );
           setHint(copy.hints.updated);
         }, settle);
-        setBranch((prev) => (prev ? { ...prev, merged: true } : prev));
+        setBranch((prev) => (prev ? { ...prev, outcome: "merged" } : prev));
         later(() => say(meta.merged, true), beat);
+      } else if (action === "candidate") {
+        later(() => {
+          setCanvas((prev) =>
+            branchId === "people"
+              ? { ...prev, peopleCandidate: variant }
+              : { ...prev, helpCandidate: variant },
+          );
+          setHint(copy.hints.candidate);
+        }, settle);
+        setBranch((prev) => (prev ? { ...prev, outcome: "candidate" } : prev));
+        later(() => say(meta.candidate, true), beat);
       } else {
-        later(() => say(meta.kept, true), beat);
+        setBranch((prev) => (prev ? { ...prev, outcome: "discarded" } : prev));
+        later(() => say(meta.discarded, true), beat);
       }
       setStep(null);
     },
@@ -187,7 +218,14 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
   const leaveBranch = useCallback(() => {
     if (!branch) return;
     const meta = copy.branches[branch.id];
-    say(branch.merged ? meta.back : meta.backKept, false);
+    say(
+      branch.outcome === "merged"
+        ? meta.back
+        : branch.outcome === "candidate"
+          ? meta.backCandidate
+          : meta.backKept,
+      false,
+    );
     setBranch(null);
     setBranchThread([]);
     setStep(branch.returnStep);
@@ -221,8 +259,43 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
     setHint(null);
     setDraft("");
     setSheet(null);
+    setSelectedNodeId(null);
+    setNodeEdits({});
     setAnnouncement(copy.ui.restarted);
   }, [clearTimers, copy, openingThread]);
+
+  const selectNode = useCallback((node: Placement) => {
+    setSelectedNodeId((current) => (current === node.id ? null : node.id));
+  }, []);
+
+  const discussNode = useCallback(
+    (node: Placement) => {
+      const text = nodeEdits[node.id] ?? copy.nodes[node.content].text;
+      const said: Message = {
+        id: nextId(),
+        role: "user",
+        text: copy.ui.discussUser.replace("{node}", text),
+      };
+      const response = copy.ui.discussReply.map((line) => line.replace("{node}", text));
+      if (branch) setBranchThread((prev) => [...prev, said]);
+      else setThread((prev) => [...prev, said]);
+      later(() => say(response, branch !== null), beat);
+      setSelectedNodeId(null);
+      setSheet(null);
+    },
+    [beat, branch, copy, later, nextId, nodeEdits, say],
+  );
+
+  const saveNodeEdit = useCallback(
+    (node: Placement, text: string) => {
+      const cleaned = text.trim();
+      if (!cleaned) return;
+      setNodeEdits((prev) => ({ ...prev, [node.id]: cleaned }));
+      setHint(copy.hints.edited);
+      setAnnouncement(copy.hints.edited);
+    },
+    [copy],
+  );
 
   const view = useMemo(() => {
     const built = buildCanvas(canvas);
@@ -248,7 +321,19 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
 
   const rail = <StageRail copy={copy} stage={stage} />;
   const canvasPanel = (
-    <CanvasPanel copy={copy} view={view} dim={dim} hint={hint} onOpenNode={openNode} reduceMotion={reduceMotion} />
+    <CanvasPanel
+      copy={copy}
+      view={view}
+      dim={dim}
+      hint={hint}
+      selectedNodeId={selectedNodeId}
+      nodeEdits={nodeEdits}
+      onSelectNode={selectNode}
+      onDiscussNode={discussNode}
+      onEditNode={saveNodeEdit}
+      onOpenNode={branch ? undefined : openNode}
+      reduceMotion={reduceMotion}
+    />
   );
   const canvasSheet = (
     <CanvasPanel
@@ -256,7 +341,12 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
       view={view}
       dim={dim}
       hint={hint}
-      onOpenNode={openNode}
+      selectedNodeId={selectedNodeId}
+      nodeEdits={nodeEdits}
+      onSelectNode={selectNode}
+      onDiscussNode={discussNode}
+      onEditNode={saveNodeEdit}
+      onOpenNode={branch ? undefined : openNode}
       reduceMotion={reduceMotion}
       minScale={0.92}
     />
@@ -349,7 +439,11 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
                     </dl>
                     {message.resolved ? (
                       <p className="change-done">
-                        {message.resolved === "merged" ? copy.ui.merged : copy.ui.kept}
+                        {message.resolved === "merged"
+                          ? copy.ui.merged
+                          : message.resolved === "candidate"
+                            ? copy.ui.candidateKept
+                            : copy.ui.discarded}
                       </p>
                     ) : (
                       <div className="change-actions">
@@ -362,9 +456,20 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
                         </button>
                         <button
                           type="button"
-                          onClick={() => resolvePreview(message.id, message.option, message.branch, "kept")}
+                          onClick={() =>
+                            resolvePreview(message.id, message.option, message.branch, "candidate")
+                          }
                         >
-                          {copy.ui.keep}
+                          {copy.ui.keepCandidate}
+                        </button>
+                        <button
+                          type="button"
+                          className="quiet"
+                          onClick={() =>
+                            resolvePreview(message.id, message.option, message.branch, "discarded")
+                          }
+                        >
+                          {copy.ui.discard}
                         </button>
                       </div>
                     )}
@@ -453,6 +558,11 @@ function CanvasPanel({
   view,
   dim,
   hint,
+  selectedNodeId,
+  nodeEdits,
+  onSelectNode,
+  onDiscussNode,
+  onEditNode,
   onOpenNode,
   reduceMotion,
   minScale,
@@ -461,25 +571,115 @@ function CanvasPanel({
   view: CanvasView;
   dim: "none" | "soft" | "strong";
   hint: string | null;
-  onOpenNode: (node: Placement) => void;
+  selectedNodeId: string | null;
+  nodeEdits: Record<string, string>;
+  onSelectNode: (node: Placement) => void;
+  onDiscussNode: (node: Placement) => void;
+  onEditNode: (node: Placement, text: string) => void;
+  onOpenNode?: (node: Placement) => void;
   reduceMotion: boolean;
   minScale?: number;
 }) {
+  const selectedNode = view.nodes.find((node) => node.id === selectedNodeId) ?? null;
+
   return (
     <aside className="studio-canvas" aria-label={copy.ui.canvasLabel}>
-      <p className="canvas-title">{copy.ui.canvasTitle}</p>
+      <div className="canvas-heading">
+        <p className="canvas-title">{copy.ui.canvasTitle}</p>
+        <p>{copy.ui.canvasGuide}</p>
+      </div>
       <ProductCanvas
         view={view}
         copy={copy}
         dim={dim}
-        onOpenNode={onOpenNode}
+        selectedNodeId={selectedNodeId}
+        onSelectNode={onSelectNode}
+        textOverrides={nodeEdits}
         reduceMotion={reduceMotion}
         minScale={minScale}
       />
+      {selectedNode && (
+        <NodeInspector
+          key={selectedNode.id}
+          node={selectedNode}
+          text={nodeEdits[selectedNode.id] ?? copy.nodes[selectedNode.content].text}
+          copy={copy}
+          onClose={() => onSelectNode(selectedNode)}
+          onDiscuss={() => onDiscussNode(selectedNode)}
+          onSave={(text) => onEditNode(selectedNode, text)}
+          onOpen={selectedNode.branch && onOpenNode ? () => onOpenNode(selectedNode) : undefined}
+        />
+      )}
       <p className="canvas-hint" data-shown={hint ? "true" : "false"}>
         {hint}
       </p>
     </aside>
+  );
+}
+
+function NodeInspector({
+  node,
+  text,
+  copy,
+  onClose,
+  onDiscuss,
+  onSave,
+  onOpen,
+}: {
+  node: Placement;
+  text: string;
+  copy: StudioCopy;
+  onClose: () => void;
+  onDiscuss: () => void;
+  onSave: (text: string) => void;
+  onOpen?: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState(text);
+
+  return (
+    <section className="node-inspector" aria-label={copy.ui.selectedNode}>
+      <div className="node-inspector-title">
+        <span>{copy.ui.status[node.status]}</span>
+        <button type="button" onClick={onClose} aria-label={copy.ui.close}>
+          ×
+        </button>
+      </div>
+      {editing ? (
+        <form
+          className="node-edit"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (!value.trim()) return;
+            onSave(value);
+            setEditing(false);
+          }}
+        >
+          <input value={value} onChange={(event) => setValue(event.target.value)} autoFocus />
+          <button type="submit">{copy.ui.saveEdit}</button>
+          <button type="button" onClick={() => setEditing(false)}>
+            {copy.ui.cancelEdit}
+          </button>
+        </form>
+      ) : (
+        <>
+          <p>{text}</p>
+          <div className="node-actions">
+            <button type="button" onClick={onDiscuss}>
+              {copy.ui.continueDiscuss}
+            </button>
+            <button type="button" onClick={() => setEditing(true)}>
+              {copy.ui.editNode}
+            </button>
+            {onOpen && (
+              <button type="button" className="deep" onClick={onOpen}>
+                {copy.ui.openNode} <span aria-hidden="true">↗</span>
+              </button>
+            )}
+          </div>
+        </>
+      )}
+    </section>
   );
 }
 
