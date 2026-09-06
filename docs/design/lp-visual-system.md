@@ -4,6 +4,8 @@
 
 This record explains the current LP design decisions. It does not claim that a color has a universal psychological meaning. It defines a consistent interface language for the product behavior: divergent idea, grounded evidence, converged boundary, and action.
 
+The Demo and live workspace now share design tokens, Studio styles and the map renderer in `shared/studio/`. `web/src/styles.css` retains landing-page-specific styles. Change the shared module first when updating the product interface.
+
 ## Decisions
 
 | Decision | Implementation | Reason |

@@ -41,3 +41,7 @@ npm run preview   # 本番 Build を Local で配信
 Wrangler の設定も Deploy Script も**意図的に置いていません**。Git 接続の Pages Project にはどちらも不要で、手動 Upload はどの Commit にも対応しない Deployment を作ってしまうためです。
 
 公式資料: [Git Integration](https://developers.cloudflare.com/pages/get-started/git-integration/) / [Build Configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/) / [Custom Domains](https://developers.cloudflare.com/pages/configuration/custom-domains/)
+
+## Shared UI build boundary
+
+Keep the repository root available during the `web` build: the Demo imports `shared/studio/` from its parent directory. If Cloudflare build watch paths are customized, include both `web/**` and `shared/studio/**`; otherwise keep the default all-path trigger. No private repository token or model key is required.

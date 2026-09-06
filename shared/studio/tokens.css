@@ -1,0 +1,60 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #241936;
+  background: #fffaf7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --ink: #241936;
+  --muted: #625a70;
+  --line: #ddd7e7;
+  --line-strong: #c9c0d8;
+  --paper: #fffaf7;
+  --surface: #ffffff;
+  --primary: #7a3f9f;
+  --primary-dark: #5b2b7f;
+  --primary-soft: #f3eafa;
+  --coral: #bc4637;
+  --coral-soft: #fff0ed;
+  --mint: #087b66;
+  --mint-soft: #e8f7f2;
+  --amber: #7c590e;
+  --amber-soft: #fff5d9;
+  --dark: #20152f;
+  --dark-line: #443455;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  /* Type scale. 16px is the body default and 14px is the floor for anything that is
+     a word or a sentence, which is where Material 3 (body-large 16sp, body-medium
+     14sp), the GOV.UK scale (16px small body) and Apple's iOS body of 17pt all sit.
+     12-13px is reserved for all-caps monospace metadata: every glyph is cap height
+     there, so 12px carries roughly the cap height of 16px lowercase. Nothing on the
+     page may be smaller than --fs-tag except a superscript or a bare symbol. The
+     idea map is the one place a size is scaled: when the whole map cannot fit the
+     panel it is scaled down as a picture rather than cut off or stretched taller. */
+  --fs-tag: 12px;
+  --fs-label: 13px;
+  --fs-small: 14px;
+  --fs-body: 16px;
+  --fs-lead: 17px;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --shadow-small: 0 10px 28px rgba(50, 31, 79, 0.08);
+  --shadow-large: 0 28px 70px rgba(58, 36, 91, 0.13);
+  --ease-out: cubic-bezier(0.2, 0.75, 0.25, 1);
+  /* The content column. It holds at 1180px through laptop widths, where that is
+     already close to the full window, and then grows with the viewport so a large
+     monitor is not mostly margin. The 1360px cap is set by the demo: past it the
+     chat turn has already reached its reading measure and the extra width only
+     stretches the idea field and the primary action. Every section shares this one
+     edge, which matters more than the last hundred pixels of a wide monitor. */
+  --shell: min(1360px, max(1180px, 86vw), calc(100% - 48px));
+}
+
+html[lang="en"] {
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+html[lang="ja"] {
+  --sans:
+    "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Noto Sans JP", sans-serif;
+}
+html[lang="zh-CN"] {
+  --sans: "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+}

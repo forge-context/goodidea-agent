@@ -4,6 +4,8 @@
 
 この記録は、現在の LP における Design 判断と理由を説明する。色に普遍的な心理効果があるとは決めず、「発散した Idea → 現実の根拠 → 収束した境界 → 行動」という Product Behavior に一貫した Interface Language を定める。
 
+Demo と実際のワークスペースは `shared/studio/` のデザイン Token、Studio スタイル、マップ描画を共用します。`web/src/styles.css` には LP 固有のスタイルを残しています。製品 UI の変更はまず共通モジュールに反映してください。
+
 ## Design 判断
 
 | 判断 | 実装 | 理由 |

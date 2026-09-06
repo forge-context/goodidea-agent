@@ -59,3 +59,7 @@ deployment that matches no commit.
 Official references: [Git integration](https://developers.cloudflare.com/pages/get-started/git-integration/),
 [build configuration](https://developers.cloudflare.com/pages/configuration/build-configuration/),
 and [custom domains](https://developers.cloudflare.com/pages/configuration/custom-domains/).
+
+## Shared UI build boundary
+
+Keep the repository root available during the `web` build: the Demo imports `shared/studio/` from its parent directory. If Cloudflare build watch paths are customized, include both `web/**` and `shared/studio/**`; otherwise keep the default all-path trigger. No private repository token or model key is required.

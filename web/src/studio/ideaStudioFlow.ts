@@ -13,36 +13,12 @@
 
 export type StudioLocale = "en" | "ja" | "zh-CN";
 
-export type NodeStatus = "fragment" | "candidate" | "confirmed" | "unverified" | "changed";
-export type NodeShape = "seed" | "hub" | "card" | "chip";
+import type { CanvasView as SharedView, Placement as SharedPlacement } from "../../../shared/studio/types";
+export type { NodeStatus, NodeShape, CanvasEdge } from "../../../shared/studio/types";
+import type { NodeStatus, NodeShape, CanvasEdge } from "../../../shared/studio/types";
 export type BranchId = "people" | "help";
-
-export type Placement = {
-  /** Identity across states, so a node moves instead of being replaced. */
-  id: string;
-  /** Which copy entry this node currently shows; a node can change what it says. */
-  content: string;
-  shape: NodeShape;
-  status: NodeStatus;
-  /** Centre, as a percentage of the board width. */
-  x: number;
-  /** Top, in pixels of the board's design space. */
-  y: number;
-  /** Width, as a percentage of the board width. */
-  w: number;
-  /** Where the node drifts in from the first time it appears. */
-  from?: { x: number; y: number };
-  branch?: BranchId;
-};
-
-export type CanvasEdge = { id: string; from: string; to: string; soft?: boolean };
-
-export type CanvasView = {
-  nodes: Placement[];
-  edges: CanvasEdge[];
-  /** What the current turn is about; everything else fades back. */
-  focus: string[];
-};
+export type Placement = SharedPlacement<BranchId>;
+export type CanvasView = SharedView<BranchId>;
 
 export type CanvasVars = {
   /** How far the idea has grown, 1 to 6. */

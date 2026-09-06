@@ -1,2 +1,0 @@
-"""Explicit, testable GoodIdea workflows."""
-

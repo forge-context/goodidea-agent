@@ -13,3 +13,8 @@ node_modules/
 *.tsbuildinfo
 dist/
 build/
+
+.claude/
+*.db-*
+*.sqlite*
+*.log

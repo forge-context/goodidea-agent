@@ -59,6 +59,10 @@ export type StudioCopy = {
     candidateKept: string;
     discarded: string;
     optionsLabel: string;
+    replyGuide: string;
+    earlierTurns: string;
+    currentFocus: string;
+    openLoops: string;
     conversationLabel: string;
     canvasLabel: string;
     statusLabel: string;
@@ -131,6 +135,10 @@ const zh: StudioCopy = {
     candidateKept: "已保留为候选，尚未改变当前结论。",
     discarded: "这次没有保留。",
     optionsLabel: "可以这样回答",
+    replyGuide: "接着当前问题",
+    earlierTurns: "前面的讨论 · {count} 条",
+    currentFocus: "当前焦点",
+    openLoops: "待确认",
     conversationLabel: "与 GoodIdea 的对话",
     canvasLabel: "想法地图：跟着对话长出来的产品轮廓",
     statusLabel: "对话进展",
@@ -312,6 +320,10 @@ const en: StudioCopy = {
     candidateKept: "Kept as a candidate; the current decision is unchanged.",
     discarded: "Not kept this time.",
     optionsLabel: "Ways to answer",
+    replyGuide: "Continue the current question",
+    earlierTurns: "Earlier discussion · {count} messages",
+    currentFocus: "Current focus",
+    openLoops: "Still open",
     conversationLabel: "Conversation with GoodIdea",
     canvasLabel: "Idea map: the product shape growing out of the conversation",
     statusLabel: "Conversation progress",
@@ -501,6 +513,10 @@ const ja: StudioCopy = {
     candidateKept: "候補として残しました。現在の結論は変わりません。",
     discarded: "今回は残しませんでした。",
     optionsLabel: "こう答えられます",
+    replyGuide: "いまの問いに続ける",
+    earlierTurns: "前の会話 · {count} 件",
+    currentFocus: "いまの焦点",
+    openLoops: "未確定",
     conversationLabel: "GoodIdea との対話",
     canvasLabel: "アイデアマップ：対話から育っていく Product の輪郭",
     statusLabel: "対話の進み方",

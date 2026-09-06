@@ -41,3 +41,7 @@ npm run preview   # 在本地跑正式构建产物
 仓库里**刻意不放 Wrangler 配置和部署脚本**。连接 Git 的 Pages 项目两者都不需要，而手动上传会产生一个不对应任何 commit 的部署。
 
 官方文档：[Git 集成](https://developers.cloudflare.com/pages/get-started/git-integration/)、[构建配置](https://developers.cloudflare.com/pages/configuration/build-configuration/)和[自定义域名](https://developers.cloudflare.com/pages/configuration/custom-domains/)。
+
+## Shared UI build boundary
+
+Keep the repository root available during the `web` build: the Demo imports `shared/studio/` from its parent directory. If Cloudflare build watch paths are customized, include both `web/**` and `shared/studio/**`; otherwise keep the default all-path trigger. No private repository token or model key is required.

@@ -35,6 +35,14 @@ type Branch = {
   outcome: null | "merged" | "candidate" | "discarded";
 };
 
+type PreviewAction = "merged" | "candidate" | "discarded";
+type ResolvePreview = (
+  messageId: string,
+  option: string,
+  branchId: BranchId,
+  action: PreviewAction,
+) => void;
+
 const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -175,7 +183,7 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
       messageId: string,
       option: string,
       branchId: BranchId,
-      action: "merged" | "candidate" | "discarded",
+      action: PreviewAction,
     ) => {
       setBranchThread((prev) =>
         prev.map((message) =>
@@ -304,6 +312,8 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
 
   const options = step ? steps[step].options : [];
   const messages = branch ? branchThread : thread;
+  const archivedMessages = !branch && messages.length > 6 ? messages.slice(0, -4) : [];
+  const activeMessages = archivedMessages.length > 0 ? messages.slice(-4) : messages;
   const dim: "none" | "soft" | "strong" = branch ? "strong" : canvas.grown > 2 ? "soft" : "none";
 
   // The newest turn is the only one that has to be on screen, and it has to be
@@ -319,7 +329,10 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
     return () => window.cancelAnimationFrame(frame);
   }, [messages, options, branch]);
 
-  const rail = <StageRail copy={copy} stage={stage} />;
+  const openLoops = view.nodes.filter(
+    (node) => node.status === "candidate" || node.status === "unverified",
+  ).length;
+  const rail = <StageRail copy={copy} stage={stage} openLoops={openLoops} />;
   const canvasPanel = (
     <CanvasPanel
       copy={copy}
@@ -402,82 +415,39 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
                 </p>
               )}
 
-              {messages.map((message) => {
-                if (message.role === "user") {
-                  return (
-                    <p className="chat-said" key={message.id}>
-                      {message.text}
-                    </p>
-                  );
-                }
-                if (message.role === "agent") {
-                  return (
-                    <div className="chat-asked" key={message.id}>
-                      {message.lines.map((line) => (
-                        <p key={line}>{line}</p>
-                      ))}
-                    </div>
-                  );
-                }
-                const preview = copy.previews[message.option];
-                return (
-                  <div className="change-preview" key={message.id}>
-                    <p className="change-lead">{copy.ui.previewLead}</p>
-                    <dl>
-                      <div>
-                        <dt>{copy.ui.previewChanged}</dt>
-                        <dd>{preview.changed}</dd>
-                      </div>
-                      <div>
-                        <dt>{copy.ui.previewAdded}</dt>
-                        <dd>{preview.added}</dd>
-                      </div>
-                      <div className="open">
-                        <dt>{copy.ui.previewOpen}</dt>
-                        <dd>{preview.open}</dd>
-                      </div>
-                    </dl>
-                    {message.resolved ? (
-                      <p className="change-done">
-                        {message.resolved === "merged"
-                          ? copy.ui.merged
-                          : message.resolved === "candidate"
-                            ? copy.ui.candidateKept
-                            : copy.ui.discarded}
-                      </p>
-                    ) : (
-                      <div className="change-actions">
-                        <button
-                          type="button"
-                          className="primary"
-                          onClick={() => resolvePreview(message.id, message.option, message.branch, "merged")}
-                        >
-                          {copy.ui.merge}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            resolvePreview(message.id, message.option, message.branch, "candidate")
-                          }
-                        >
-                          {copy.ui.keepCandidate}
-                        </button>
-                        <button
-                          type="button"
-                          className="quiet"
-                          onClick={() =>
-                            resolvePreview(message.id, message.option, message.branch, "discarded")
-                          }
-                        >
-                          {copy.ui.discard}
-                        </button>
-                      </div>
-                    )}
+              {archivedMessages.length > 0 && (
+                <details className="chat-history">
+                  <summary>
+                    {copy.ui.earlierTurns.replace("{count}", String(archivedMessages.length))}
+                  </summary>
+                  <div className="chat-history-list">
+                    {archivedMessages.map((message) => (
+                      <ConversationMessage
+                        key={message.id}
+                        message={message}
+                        copy={copy}
+                        resolvePreview={resolvePreview}
+                      />
+                    ))}
                   </div>
-                );
-              })}
+                </details>
+              )}
 
-              {options.length > 0 && (
+              {activeMessages.map((message) => (
+                <ConversationMessage
+                  key={message.id}
+                  message={message}
+                  copy={copy}
+                  resolvePreview={resolvePreview}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="chat-dock">
+            {options.length > 0 && (
+              <div className="prompt-tray">
+                <p>{copy.ui.replyGuide}</p>
                 <div className="chat-options" role="group" aria-label={copy.ui.optionsLabel}>
                   {options.map((option) => (
                     <button type="button" key={option.id} onClick={() => pick(option)}>
@@ -485,35 +455,34 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
                     </button>
                   ))}
                 </div>
-              )}
-            </div>
-          </div>
-
-          <form
-            className="chat-compose"
-            onSubmit={(event) => {
-              event.preventDefault();
-              send();
-            }}
-          >
-            <textarea
-              value={draft}
-              rows={1}
-              placeholder={copy.ui.placeholder}
-              onChange={(event) => setDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  send();
-                }
+              </div>
+            )}
+            <form
+              className="chat-compose"
+              onSubmit={(event) => {
+                event.preventDefault();
+                send();
               }}
-            />
-            <button type="submit" disabled={draft.trim().length === 0} aria-label={copy.ui.send}>
-              <svg viewBox="0 0 20 20" aria-hidden="true">
-                <path d="M10 16.5V4.2m0 0-4.6 4.6M10 4.2l4.6 4.6" />
-              </svg>
-            </button>
-          </form>
+            >
+              <textarea
+                value={draft}
+                rows={1}
+                placeholder={copy.ui.placeholder}
+                onChange={(event) => setDraft(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.shiftKey) {
+                    event.preventDefault();
+                    send();
+                  }
+                }}
+              />
+              <button type="submit" disabled={draft.trim().length === 0} aria-label={copy.ui.send}>
+                <svg viewBox="0 0 20 20" aria-hidden="true">
+                  <path d="M10 16.5V4.2m0 0-4.6 4.6M10 4.2l4.6 4.6" />
+                </svg>
+              </button>
+            </form>
+          </div>
         </section>
 
         {canvasPanel}
@@ -536,7 +505,83 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
   );
 }
 
-function StageRail({ copy, stage }: { copy: StudioCopy; stage: number }) {
+function ConversationMessage({
+  message,
+  copy,
+  resolvePreview,
+}: {
+  message: Message;
+  copy: StudioCopy;
+  resolvePreview: ResolvePreview;
+}) {
+  if (message.role === "user") {
+    return <p className="chat-said">{message.text}</p>;
+  }
+  if (message.role === "agent") {
+    return (
+      <div className="chat-asked">
+        {message.lines.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
+      </div>
+    );
+  }
+
+  const preview = copy.previews[message.option];
+  return (
+    <div className="change-preview">
+      <p className="change-lead">{copy.ui.previewLead}</p>
+      <dl>
+        <div>
+          <dt>{copy.ui.previewChanged}</dt>
+          <dd>{preview.changed}</dd>
+        </div>
+        <div>
+          <dt>{copy.ui.previewAdded}</dt>
+          <dd>{preview.added}</dd>
+        </div>
+        <div className="open">
+          <dt>{copy.ui.previewOpen}</dt>
+          <dd>{preview.open}</dd>
+        </div>
+      </dl>
+      {message.resolved ? (
+        <p className="change-done">
+          {message.resolved === "merged"
+            ? copy.ui.merged
+            : message.resolved === "candidate"
+              ? copy.ui.candidateKept
+              : copy.ui.discarded}
+        </p>
+      ) : (
+        <div className="change-actions">
+          <button
+            type="button"
+            className="primary"
+            onClick={() => resolvePreview(message.id, message.option, message.branch, "merged")}
+          >
+            {copy.ui.merge}
+          </button>
+          <button
+            type="button"
+            onClick={() => resolvePreview(message.id, message.option, message.branch, "candidate")}
+          >
+            {copy.ui.keepCandidate}
+          </button>
+          <button
+            type="button"
+            className="quiet"
+            onClick={() => resolvePreview(message.id, message.option, message.branch, "discarded")}
+          >
+            {copy.ui.discard}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StageRail({ copy, stage, openLoops }: { copy: StudioCopy; stage: number; openLoops: number }) {
   return (
     <aside className="studio-rail" aria-label={copy.ui.statusLabel}>
       <p className="rail-title">{copy.ui.railTitle}</p>
@@ -549,6 +594,15 @@ function StageRail({ copy, stage }: { copy: StudioCopy; stage: number }) {
           </li>
         ))}
       </ol>
+      <div className="rail-summary">
+        <p>{copy.ui.currentFocus}</p>
+        <strong>{copy.stages[stage].label}</strong>
+        <span>{copy.stages[stage].hint}</span>
+        <div>
+          <span>{copy.ui.openLoops}</span>
+          <b>{openLoops}</b>
+        </div>
+      </div>
     </aside>
   );
 }
