@@ -1,14 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+
+import type { SiteCopy } from "./siteCopy";
 
 export type MapLocale = "en" | "ja" | "zh-CN";
 
 type Point = { x: number; y: number };
 
 type MapCopy = {
-  eyebrow: string;
-  title: string[];
-  description: string;
-  closing: string;
   nodes: { label: string; question: string }[];
   detours: { label: string; note: string }[];
   result: { label: string; note: string };
@@ -44,133 +42,172 @@ const WIDE: Layout = {
   ],
 };
 
-// A narrow screen gets a route that climbs instead of spreading, so eight labels
-// still have room not to touch.
+/* Narrow screens read top to bottom, so the route does too: the first idea is the
+ * first thing scrolled past and the finished plan is the last. The earlier compact
+ * layout climbed upward, which put the result on screen before the work that earned
+ * it. Two columns rather than three, because one card is more than a third of a
+ * phone's width; and one detour rather than three, because the roads not taken are
+ * what compresses first when the alternative is dropping what a landmark means. */
 const COMPACT: Layout = {
+  // Two columns that alternate down the page, with a gap wide enough that a left card
+  // and a right card can never touch whatever language they are in. `y` values are
+  // spaced for the tallest cards, which are English and Japanese rather than Chinese.
   nodes: [
-    { x: 230, y: 575 },
-    { x: 430, y: 485 },
-    { x: 250, y: 385 },
-    { x: 470, y: 285 },
-    { x: 250, y: 160 },
+    { x: 250, y: 125 },
+    { x: 730, y: 225 },
+    { x: 250, y: 310 },
+    { x: 250, y: 430 },
+    { x: 730, y: 500 },
   ],
-  // Pushed further right than the 640,70 this used to be: the readable label size
-  // widens every card, and the handoff landmark sits directly under this one.
-  result: { x: 700, y: 60 },
-  detours: [
-    // Spaced for the tallest labels, which are Japanese and English rather than Chinese.
-    { from: 0, to: { x: 645, y: 585 } },
-    { from: 1, to: { x: 720, y: 375 } },
-    { from: 2, to: { x: 660, y: 215 } },
-  ],
+  // Last, and on its own side, so the finished plan is the bottom of the scroll.
+  result: { x: 250, y: 530 },
+  detours: [{ from: 2, to: { x: 730, y: 390 } }],
 };
 
 const COPY: Record<MapLocale, MapCopy> = {
   en: {
-    eyebrow: "GOODIDEA / FROM IDEA TO MVP",
-    title: ["An idea is not a straight line.", "The next step can still be clear."],
-    description:
-      "You do not have to answer everything at once. Each turn lights the one stretch that is worth walking.",
-    closing: "Do not look for every answer. Find the next one that matters.",
     nodes: [
       { label: "A rough idea", question: "One sentence is enough" },
-      { label: "Evidence", question: "Is the market real?" },
-      { label: "Decision", question: "What do we test first?" },
-      { label: "Boundary", question: "What this version will not do" },
-      { label: "Handoff", question: "Coding agent" },
+      { label: "Who has the problem", question: "And when does it hit them" },
+      { label: "See a prototype", question: "Something you can click" },
+      { label: "Version one's scope", question: "What it will not do" },
+      { label: "Handoff", question: "Coding AI, with acceptance" },
     ],
     detours: [
       { label: "Start writing code", note: "Looks fastest" },
-      { label: "Design the screens first", note: "Looks like a product" },
+      { label: "Pick the stack first", note: "Feels like progress" },
       { label: "Build every feature", note: "Looks more complete" },
     ],
-    result: { label: "Buildable MVP", note: "A path lit by evidence" },
+    result: { label: "First-version plan", note: "Prototype, scope, acceptance" },
   },
   ja: {
-    eyebrow: "GOODIDEA / FROM IDEA TO MVP",
-    title: ["アイデアは​直線ではない。", "それでも​次の一歩は​決められる。"],
-    description:
-      "すべてに一度で答える必要はありません。毎回、歩く価値のある一区間だけを照らします。",
-    closing: "すべての答えを探さない。次に効く答えを一つ見つける。",
     nodes: [
       { label: "曖昧なアイデア", question: "一文あれば足ります" },
-      { label: "根拠", question: "市場は実在するか" },
-      { label: "判断", question: "まず何を検証するか" },
-      { label: "境界", question: "この版でやらないこと" },
-      { label: "引き渡し", question: "Coding Agent" },
+      { label: "誰の困りごとか", question: "いつ起きるのか" },
+      { label: "試作を見る", question: "触れるものを先に" },
+      { label: "初版の範囲", question: "この版でやらないこと" },
+      { label: "引き渡し", question: "完了条件つきで AI へ" },
     ],
     detours: [
       { label: "すぐコードを書く", note: "一番速く見える" },
-      { label: "先に画面を作る", note: "製品らしく見える" },
+      { label: "先に技術を選ぶ", note: "進んで見える" },
       { label: "機能を全部入れる", note: "完成して見える" },
     ],
-    result: { label: "Buildable MVP", note: "根拠に照らされた一本の道" },
+    result: { label: "初版の計画", note: "試作・範囲・完了条件" },
   },
   "zh-CN": {
-    eyebrow: "GOODIDEA / FROM IDEA TO MVP",
-    title: ["想法不是直线。", "但下一步可以很清楚。"],
-    description: "不需要一次回答所有问题。每次只点亮一段真正有价值的路。",
-    closing: "不要一次寻找全部答案。找到下一个最重要的答案。",
     nodes: [
-      { label: "模糊想法", question: "一句话就够" },
-      { label: "证据", question: "市场真实吗？" },
-      { label: "决定", question: "先验证什么？" },
-      { label: "边界", question: "这一版不做什么？" },
-      { label: "交接", question: "Coding Agent" },
+      { label: "一句模糊想法", question: "先说出来就够" },
+      { label: "谁遇到这个问题", question: "什么时候遇到" },
+      { label: "看见原型", question: "先看到能点的东西" },
+      { label: "第一版的范围", question: "这一版不做什么" },
+      { label: "交给编程 AI", question: "带着验收条件开工" },
     ],
     detours: [
       { label: "直接开始写代码", note: "看起来最快" },
-      { label: "先做漂亮页面", note: "看起来像产品" },
+      { label: "先挑技术栈", note: "看起来在推进" },
       { label: "把功能全部做上", note: "看起来更完整" },
     ],
-    result: { label: "Buildable MVP", note: "一条被证据照亮的路径" },
+    result: { label: "第一版方案", note: "原型、范围、验收条件" },
   },
 };
 
-// Eighteen beats over about six and a half seconds. Every beat only ever adds
-// something: nothing already lit goes dark again, so an interrupted frame still reads.
-//
-// Refusing a detour is three separate moments rather than one: the idea holds still,
-// the sign is crossed out, and only then does the wrong road fade and the right one
-// light up. Collapsing them made the decision invisible.
-const BEATS = [
-  0, 620, 1040, 1340, 1560, 1830, 2340, 2760, 3060, 3280, 3550, 4060, 4480, 4780, 5000,
-  5270, 5820, 6480,
-];
-const FINAL = BEATS.length - 1;
+/* The route is generated from the layout rather than hand-timed, because the phone
+ * shows one detour and the desktop shows three, and a hand-written beat table can
+ * only be right for one of them.
+ *
+ * Every beat only ever adds something: nothing already lit goes dark again, so an
+ * interrupted frame still reads. Refusing a detour is three separate moments rather
+ * than one — the idea holds still, the sign is crossed out, and only then does the
+ * wrong road fade. Collapsing them made the decision invisible.
+ *
+ * The whole run finishes in under five seconds, so nothing a visitor needs to
+ * understand is behind a wait, and there is a replay control besides. */
+type Beat =
+  | { kind: "node"; index: number }
+  | { kind: "tempt" | "hold" | "cross" | "dim"; detour: number };
 
-const NODE_STAGE = [0, 5, 10, 15, 16];
-const DETOUR_TEMPT = [1, 6, 11];
-const DETOUR_HOLD = [2, 7, 12];
-const DETOUR_CROSS = [3, 8, 13];
-const DETOUR_DIM = [4, 9, 14];
+const DURATION: Record<Beat["kind"], number> = {
+  node: 300,
+  tempt: 260,
+  hold: 210,
+  cross: 250,
+  dim: 190,
+};
+const RESULT_MS = 340;
 
-/** Where the idea sits at each beat, including the three times it wanders off. */
-function tokenAt(stage: number, layout: Layout): Point {
-  const { nodes, detours, result } = layout;
-  const toward = (from: Point, to: Point, amount: number): Point => ({
-    x: from.x + (to.x - from.x) * amount,
-    y: from.y + (to.y - from.y) * amount,
+type Script = {
+  /** Where the idea sits at each beat, including the times it wanders off. */
+  positions: Point[];
+  /** Beat index at which each landmark lights. */
+  nodeAt: number[];
+  detourAt: { tempt: number; cross: number; dim: number }[];
+  resultAt: number;
+  hesitating: boolean[];
+  /** Cumulative offsets from the start, one per beat after the first. */
+  times: number[];
+};
+
+function toward(from: Point, to: Point, amount: number): Point {
+  return { x: from.x + (to.x - from.x) * amount, y: from.y + (to.y - from.y) * amount };
+}
+
+function buildScript(layout: Layout): Script {
+  const beats: Beat[] = [];
+  layout.nodes.forEach((_, index) => {
+    beats.push({ kind: "node", index });
+    layout.detours.forEach((detour, at) => {
+      if (detour.from !== index) return;
+      beats.push({ kind: "tempt", detour: at });
+      beats.push({ kind: "hold", detour: at });
+      beats.push({ kind: "cross", detour: at });
+      beats.push({ kind: "dim", detour: at });
+    });
   });
-  if (stage >= 17) return result;
-  if (stage >= 16) return nodes[4];
-  if (stage >= 15) return nodes[3];
-  if (stage >= 14) return nodes[2];
-  if (stage >= 11) return toward(nodes[2], detours[2].to, 0.4);
-  if (stage >= 10) return nodes[2];
-  if (stage >= 9) return nodes[1];
-  if (stage >= 6) return toward(nodes[1], detours[1].to, 0.42);
-  if (stage >= 5) return nodes[1];
-  if (stage >= 4) return nodes[0];
-  if (stage >= 1) return toward(nodes[0], detours[0].to, 0.46);
-  return nodes[0];
+
+  const positions: Point[] = [];
+  const nodeAt: number[] = [];
+  const detourAt: { tempt: number; cross: number; dim: number }[] = layout.detours.map(() => ({
+    tempt: Number.POSITIVE_INFINITY,
+    cross: Number.POSITIVE_INFINITY,
+    dim: Number.POSITIVE_INFINITY,
+  }));
+  const hesitating: boolean[] = [];
+  const times: number[] = [];
+  let clock = 0;
+
+  beats.forEach((beat, index) => {
+    if (index > 0) {
+      clock += DURATION[beats[index - 1].kind];
+      times.push(clock);
+    }
+    hesitating.push(beat.kind === "hold" || beat.kind === "cross");
+    if (beat.kind === "node") {
+      nodeAt[beat.index] = index;
+      positions.push(layout.nodes[beat.index]);
+      return;
+    }
+    const detour = layout.detours[beat.detour];
+    const anchor = layout.nodes[detour.from];
+    if (beat.kind === "tempt") detourAt[beat.detour].tempt = index;
+    if (beat.kind === "cross") detourAt[beat.detour].cross = index;
+    if (beat.kind === "dim") detourAt[beat.detour].dim = index;
+    positions.push(beat.kind === "dim" ? anchor : toward(anchor, detour.to, beat.kind === "tempt" ? 0.42 : 0.46));
+  });
+
+  clock += DURATION[beats[beats.length - 1].kind] + RESULT_MS;
+  times.push(clock);
+  hesitating.push(false);
+  positions.push(layout.result);
+
+  return { positions, nodeAt, detourAt, resultAt: positions.length - 1, hesitating, times };
 }
 
 /** A tilt in the direction of travel. Full rotation would read as tumbling. */
-function tiltAt(stage: number, layout: Layout): number {
+function tiltAt(stage: number, positions: Point[]): number {
   if (stage === 0) return 0;
-  const from = tokenAt(stage - 1, layout);
-  const to = tokenAt(stage, layout);
+  const from = positions[stage - 1];
+  const to = positions[stage];
   const degrees = (Math.atan2(to.y - from.y, to.x - from.x) * 180) / Math.PI;
   return Math.max(-24, Math.min(24, degrees * 0.28));
 }
@@ -200,18 +237,17 @@ function StageMark({ index }: { index: number }) {
   const marks = [
     // A rough idea: an outline that has not closed yet.
     <circle cx="7" cy="7" r="5" strokeDasharray="3 2.6" key="idea" />,
-    // Evidence: something checked off a source.
+    // Who has it: a person-shaped mark rather than another box.
+    <g key="who">
+      <circle cx="7" cy="4.6" r="2.6" />
+      <path d="M 2.2 12.4 C 2.9 9 11.1 9 11.8 12.4" />
+    </g>,
+    // What already exists: something checked off a source.
     <g key="evidence">
       <rect x="1.6" y="1.6" width="10.8" height="10.8" rx="2.4" />
       <path d="M 4.4 7.2 L 6.4 9.2 L 9.8 5" />
     </g>,
-    // Decision: one road becomes two, and one is taken.
-    <g key="decision">
-      <path d="M 7 12.6 L 7 7.4" />
-      <path d="M 7 7.4 L 3 2.6" />
-      <path d="M 7 7.4 L 11 2.6" />
-    </g>,
-    // Boundary: a line this version does not cross.
+    // Scope: a line this version does not cross.
     <g key="boundary">
       <path d="M 1.6 7 L 12.4 7" strokeDasharray="2.6 2.2" />
       <path d="M 4 3.4 L 4 10.6" />
@@ -232,15 +268,24 @@ function StageMark({ index }: { index: number }) {
 
 export function IdeaMapHero({
   locale,
+  copy: site,
   actions,
 }: {
   locale: MapLocale;
+  copy: SiteCopy;
   actions?: ReactNode;
 }) {
   const copy = COPY[locale];
   const [compact, setCompact] = useState(false);
   const [stage, setStage] = useState(0);
+  const [run, setRun] = useState(0);
+  const [replayed, setReplayed] = useState(false);
+  const reduceMotion = useRef(
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  ).current;
   const layout = compact ? COMPACT : WIDE;
+  const script = useMemo(() => buildScript(layout), [layout]);
+  const final = script.resultAt;
 
   useEffect(() => {
     const query = window.matchMedia("(max-width: 720px)");
@@ -251,51 +296,51 @@ export function IdeaMapHero({
   }, []);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setStage(FINAL);
+    if (reduceMotion) {
+      setStage(final);
       return;
     }
-    const timers = BEATS.slice(1).map((at, index) =>
+    setStage(0);
+    const timers = script.times.map((at, index) =>
       window.setTimeout(() => setStage(index + 1), at),
     );
     return () => timers.forEach(window.clearTimeout);
+  }, [final, reduceMotion, run, script]);
+
+  const replay = useCallback(() => {
+    setReplayed(true);
+    setRun((value) => value + 1);
   }, []);
 
-  const token = tokenAt(stage, layout);
+  const token = script.positions[Math.min(stage, final)];
   const percent = (point: Point) => ({
     left: `${(point.x / VIEW.width) * 100}%`,
     top: `${(point.y / VIEW.height) * 100}%`,
   });
-  const cracks = stage >= 15 ? 3 : stage >= 10 ? 2 : stage >= 5 ? 1 : 0;
-  const hatched = stage >= 16;
-  const arrived = stage >= FINAL;
+  const lit = script.nodeAt.filter((at) => stage >= at).length;
+  const cracks = Math.max(0, Math.min(3, lit - 1));
+  const hatched = stage >= script.nodeAt[4];
+  const arrived = stage >= final;
   // The held beat before each refusal: the idea leans into the wrong road and stops.
-  const hesitating = DETOUR_HOLD.includes(stage) || DETOUR_CROSS.includes(stage);
+  const hesitating = script.hesitating[Math.min(stage, final)];
 
-  const detourState = (index: number) =>
-    stage >= DETOUR_DIM[index]
-      ? "refused"
-      : stage >= DETOUR_CROSS[index]
-        ? "crossed"
-        : stage >= DETOUR_TEMPT[index]
-          ? "tempting"
-          : "hidden";
+  const detourState = (index: number) => {
+    const beats = script.detourAt[index];
+    if (stage >= beats.dim) return "refused";
+    if (stage >= beats.cross) return "crossed";
+    if (stage >= beats.tempt) return "tempting";
+    return "hidden";
+  };
 
   return (
     <section className="map-hero section-shell" id="top" data-stage={stage}>
       <div className="map-copy">
-        <p className="eyebrow">{copy.eyebrow}</p>
-        <h1>
-          {copy.title.map((row, index) => (
-            <span className={index ? "hero-line hero-accent" : "hero-line"} key={row}>
-              {row}
-            </span>
-          ))}
-        </h1>
-        <p className="hero-intro">{copy.description}</p>
+        <p className="eyebrow">{site.heroEyebrow}</p>
+        <h1>{site.heroTitle}</h1>
+        <p className="hero-intro">{site.heroIntro}</p>
         {actions}
         <p className="map-closing" data-visible={arrived}>
-          {copy.closing}
+          {site.heroBrandLine}
         </p>
       </div>
 
@@ -336,20 +381,20 @@ export function IdeaMapHero({
             <path
               className="map-glow"
               d={curve(layout.nodes[index], node)}
-              data-drawn={stage >= NODE_STAGE[index + 1] - 1}
+              data-drawn={stage >= script.nodeAt[index + 1] - 1}
               key={`glow-${index}`}
             />
           ))}
           <path
             className="map-glow"
             d={curve(layout.nodes[4], layout.result)}
-            data-drawn={stage >= FINAL - 1}
+            data-drawn={stage >= final - 1}
           />
           {layout.nodes.slice(1).map((node, index) => (
             <path
               className="map-route"
               d={curve(layout.nodes[index], node)}
-              data-drawn={stage >= NODE_STAGE[index + 1]}
+              data-drawn={stage >= script.nodeAt[index + 1]}
               key={`route-${index}`}
             />
           ))}
@@ -360,13 +405,13 @@ export function IdeaMapHero({
           />
         </svg>
 
-        <div className="map-fog" data-cleared={stage >= 7} />
+        <div className="map-fog" data-cleared={stage >= script.nodeAt[1]} />
         <div className="map-fog map-fog-far" data-cleared={arrived} />
 
         {copy.nodes.map((node, index) => (
           <div
             className="map-mark"
-            data-lit={stage >= NODE_STAGE[index]}
+            data-lit={stage >= script.nodeAt[index]}
             key={node.label}
             style={percent(layout.nodes[index])}
           >
@@ -379,26 +424,29 @@ export function IdeaMapHero({
           </div>
         ))}
 
-        {copy.detours.map((detour, index) => (
-          <div
-            className="map-mark map-mark-detour"
-            data-state={detourState(index)}
-            key={detour.label}
-            style={percent(layout.detours[index].to)}
-          >
-            <div className="map-mark-card">
-              <strong>
-                {/* The refusal belongs to the sign, not to the air above it. */}
-                <span className="map-cross" aria-hidden="true">
-                  ×
-                </span>
-                {detour.label}
-              </strong>
-              <small>{detour.note}</small>
+        {layout.detours.map((detour, index) => {
+          const sign = copy.detours[index];
+          return (
+            <div
+              className="map-mark map-mark-detour"
+              data-state={detourState(index)}
+              key={sign.label}
+              style={percent(detour.to)}
+            >
+              <div className="map-mark-card">
+                <strong>
+                  {/* The refusal belongs to the sign, not to the air above it. */}
+                  <span className="map-cross" aria-hidden="true">
+                    ×
+                  </span>
+                  {sign.label}
+                </strong>
+                <small>{sign.note}</small>
+              </div>
+              <span className="map-mark-pin" />
             </div>
-            <span className="map-mark-pin" />
-          </div>
-        ))}
+          );
+        })}
 
         <div className="map-result-card" data-arrived={arrived} style={percent(layout.result)}>
           <span className="map-result-mark" />
@@ -413,7 +461,7 @@ export function IdeaMapHero({
           data-hatched={hatched}
           data-hesitating={hesitating}
           data-arrived={arrived}
-          style={{ ...percent(token), ["--tilt" as string]: `${tiltAt(stage, layout)}deg` }}
+          style={{ ...percent(token), ["--tilt" as string]: `${tiltAt(Math.min(stage, final), script.positions)}deg` }}
         >
           <svg viewBox="0 0 24 30" aria-hidden="true">
             <defs>
@@ -432,6 +480,17 @@ export function IdeaMapHero({
           </svg>
           <span className="map-token-spark" />
         </div>
+
+        {/* The route is short and every landmark stays lit once it appears, so this is
+            for a second look rather than for catching up. */}
+        {!reduceMotion && (
+          <button type="button" className="map-replay" onClick={replay}>
+            {site.mapReplay}
+          </button>
+        )}
+        <p className="sr-only" aria-live="polite">
+          {replayed ? site.mapReplayed : ""}
+        </p>
       </div>
     </section>
   );

@@ -13,9 +13,9 @@
 
 export type StudioLocale = "en" | "ja" | "zh-CN";
 
-import type { CanvasView as SharedView, Placement as SharedPlacement } from "../../../shared/studio/types";
-export type { NodeStatus, NodeShape, CanvasEdge } from "../../../shared/studio/types";
-import type { NodeStatus, NodeShape, CanvasEdge } from "../../../shared/studio/types";
+import type { CanvasView as SharedView, Placement as SharedPlacement } from "../../../../shared/studio/types";
+export type { NodeStatus, NodeShape, CanvasEdge } from "../../../../shared/studio/types";
+import type { NodeStatus, NodeShape, CanvasEdge } from "../../../../shared/studio/types";
 export type BranchId = "people" | "help";
 export type Placement = SharedPlacement<BranchId>;
 export type CanvasView = SharedView<BranchId>;
@@ -295,7 +295,7 @@ export const branchFocus: Record<BranchId, string[]> = {
 
 /* ------------------------------- conversation ------------------------------ */
 
-export type StepId = "s0" | "s1" | "s2" | "s3" | "s4" | "s5" | "s6" | "bp0" | "bh0";
+export type StepId = "s0" | "s1" | "s2" | "s3" | "s4" | "sh" | "s5" | "s6" | "bp0" | "bh0";
 export type HintId = "scene" | "shape" | "updated" | "candidate" | "edited";
 
 export type OptionDef = {
@@ -349,8 +349,18 @@ export const steps: Record<StepId, StepDef> = {
     id: "s4",
     stage: 2,
     options: [
-      { id: "s4a", next: "s5", canvas: { grown: 6 }, stage: 3, hint: "shape" },
-      { id: "s4b", next: "s5", canvas: { grown: 6 }, stage: 3, hint: "shape" },
+      { id: "s4a", next: "sh", canvas: { grown: 6 }, stage: 3, hint: "shape" },
+      { id: "s4b", next: "sh", canvas: { grown: 6 }, stage: 3, hint: "shape" },
+    ],
+  },
+  /* The turn where the shape is pulled back rather than agreed with. Both answers
+   * are a scope decision, so both reorder what version one guarantees. */
+  sh: {
+    id: "sh",
+    stage: 3,
+    options: [
+      { id: "sha", next: "s5", canvas: { help: "a" }, hint: "updated" },
+      { id: "shb", next: "s5", canvas: { help: "b" }, hint: "updated" },
     ],
   },
   s5: {

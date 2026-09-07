@@ -1,7 +1,27 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import { ProductCanvas } from "./ProductCanvas";
+import { ProductCanvas } from "../../studio/ProductCanvas";
+import {
+  autoInitial,
+  autoReducer,
+  shouldAdvance,
+  type AutoAction,
+  type Beat,
+  type PlayMode,
+} from "../../studio/autoDemo";
+import {
+  beatMs,
+  buildScenes,
+  chapterEntries,
+  demoSeconds,
+  longestLine,
+  playbackPlan,
+  stateAt,
+  threadAt,
+} from "./legacyScript";
 import { studioCopy, type StudioCopy } from "./ideaStudioCopy";
+import { siteCopy, withSeconds } from "../../siteCopy";
+import { legacyCopy } from "./legacyCopy";
 import {
   branchEntryStep,
   branchFocus,
@@ -43,11 +63,16 @@ type ResolvePreview = (
   action: PreviewAction,
 ) => void;
 
+/** A stable empty override map, so the memoised canvas is not redrawn per keystroke. */
+const NO_EDITS: Record<string, string> = Object.freeze({});
+
 const prefersReducedMotion = () =>
   typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
+export function LegacyWalkthrough({ locale }: { locale: StudioLocale }) {
   const copy = studioCopy[locale];
+  const site = siteCopy[locale];
+  const chapterCopy = legacyCopy[locale].chapters;
   const reduceMotion = useRef(prefersReducedMotion()).current;
   const beat = reduceMotion ? 0 : 240;
   // The canvas moves a beat after the answer lands, so a turn reads as one change
@@ -305,20 +330,137 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
     [copy],
   );
 
-  const view = useMemo(() => {
-    const built = buildCanvas(canvas);
-    return branch ? { ...built, focus: branchFocus[branch.id] } : built;
-  }, [branch, canvas]);
+  /* ------------------------------- watch mode ------------------------------ */
 
-  const options = step ? steps[step].options : [];
-  const messages = branch ? branchThread : thread;
-  const archivedMessages = !branch && messages.length > 6 ? messages.slice(0, -4) : [];
-  const activeMessages = archivedMessages.length > 0 ? messages.slice(-4) : messages;
-  const dim: "none" | "soft" | "strong" = branch ? "strong" : canvas.grown > 2 ? "soft" : "none";
+  const scenes = useMemo(() => buildScenes(locale), [locale]);
+  const plan = useMemo(() => playbackPlan(scenes, locale), [locale, scenes]);
+  const chapters = useMemo(() => chapterEntries(scenes), [scenes]);
+  const seconds = useMemo(() => demoSeconds(locale), [locale]);
+  const [mode, setMode] = useState<PlayMode>("intro");
+  const [auto, setAuto] = useState(autoInitial);
+  const [visible, setVisible] = useState(true);
+  const watching = mode !== "manual";
+
+  const dispatchAuto = useCallback(
+    (action: AutoAction) => setAuto((state) => autoReducer(state, action, plan)),
+    [plan],
+  );
+
+  // A visitor who leaves the tab should come back to the scene they left, not to a
+  // walkthrough that finished without them. `playing` is untouched, so returning
+  // resumes on its own.
+  useEffect(() => {
+    const sync = () => setVisible(!document.hidden);
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+
+  // Exactly one timeout exists at a time: the effect owns it and clears it on every
+  // change, so pausing, seeking, switching mode or unmounting can never leave a
+  // second one running against the same scene.
+  useEffect(() => {
+    if (!shouldAdvance(auto, { mode, visible, reduceMotion })) return;
+    const timer = window.setTimeout(
+      () => dispatchAuto({ type: "advance" }),
+      beatMs(auto, scenes[auto.index]),
+    );
+    return () => window.clearTimeout(timer);
+  }, [auto, dispatchAuto, mode, reduceMotion, scenes, visible]);
+
+  /* Watching is driven entirely by the scene index and the beat inside it, so it
+   * never writes into the hand-driven state below it, and the simulated draft never
+   * reaches the field the visitor types into. Switching back returns them to their
+   * own turns. Before playback starts, scene 0 is shown whole: that is the
+   * conversation a visitor arrives on. */
+  const playIndex = mode === "auto" ? auto.index : 0;
+  const playBeat: Beat = mode === "auto" ? auto.beat : "reply";
+  const chapterNow = scenes[playIndex].chapter;
+  // What the map and the rail show belongs to the last answer, not to the line being
+  // typed against it.
+  const scene = stateAt(scenes, playIndex, playBeat);
+  const watchMessages = useMemo(
+    (): Message[] =>
+      threadAt(scenes, playIndex, playBeat).map((message, index) =>
+        message.role === "user"
+          ? { id: `w${index}`, role: "user", text: message.text }
+          : { id: `w${index}`, role: "agent", lines: message.lines },
+      ),
+    [playBeat, playIndex, scenes],
+  );
+  /* The line the demo is typing, cut on visible characters so a Chinese glyph or an
+   * emoji is never split in half. Only the visitor's turns are typed; answers land
+   * whole, because a walkthrough that types both halves of a conversation is a
+   * walkthrough nobody finishes. */
+  const typedLine = useMemo(() => {
+    if (mode !== "auto" || (auto.beat !== "typing" && auto.beat !== "pending")) return "";
+    return scenes[auto.index].typed.slice(0, auto.typed).join("");
+  }, [auto.beat, auto.index, auto.typed, mode, scenes]);
+  // Not this scene's line but the longest one in the script: the field is as tall as
+  // it will ever need to be from the first frame, so playback moves nothing but text.
+  const reserved = useMemo(() => longestLine(scenes), [scenes]);
+
+  useEffect(() => {
+    if (mode !== "auto") return;
+    const entry = chapterCopy[chapterNow];
+    setAnnouncement(`${entry.label} — ${entry.point}`);
+  }, [chapterNow, mode, site]);
+
+  /* Coming back from the hand-driven walkthrough resumes the scene playback was left
+   * on. Only the play control starts it over, so the switch is never a hidden reset. */
+  const started = auto.index > 0 || auto.playing || auto.finished;
+  const backToWatching = useCallback(() => {
+    setSheet(null);
+    setSelectedNodeId(null);
+    setMode(started ? "auto" : "intro");
+  }, [started]);
+
+  const startWatching = useCallback(() => {
+    setSheet(null);
+    setSelectedNodeId(null);
+    setMode("auto");
+    // With reduced motion nothing advances on a timer, so playback opens on the first
+    // scene with the step controls instead of a play state that never moves.
+    dispatchAuto(reduceMotion ? { type: "seek", index: 0, whole: true } : { type: "play" });
+  }, [dispatchAuto, reduceMotion]);
+
+  const replayWatching = useCallback(() => {
+    setSheet(null);
+    setSelectedNodeId(null);
+    setMode("auto");
+    dispatchAuto(reduceMotion ? { type: "seek", index: 0, whole: true } : { type: "replay" });
+  }, [dispatchAuto, reduceMotion]);
+
+  /* Replaying resets the walkthrough only. The hand-driven walkthrough is restarted
+   * by its own button, because a visitor's own choices are not ours to clear. */
+  const startManual = useCallback(() => {
+    setSheet(null);
+    setSelectedNodeId(null);
+    dispatchAuto({ type: "pause" });
+    setMode("manual");
+  }, [dispatchAuto]);
+
+  /* --------------------------------- view ---------------------------------- */
+
+  const shownCanvas = watching ? scene.canvas : canvas;
+  const shownStage = watching ? scene.stage : stage;
+  const view = useMemo(() => {
+    const built = buildCanvas(shownCanvas);
+    return !watching && branch ? { ...built, focus: branchFocus[branch.id] } : built;
+  }, [branch, shownCanvas, watching]);
+
+  const options = !watching && step ? steps[step].options : [];
+  const messages = watching ? watchMessages : branch ? branchThread : thread;
+  const archivedMessages =
+    !branch && messages.length > 6 ? messages.slice(0, watching ? -6 : -4) : [];
+  const activeMessages = archivedMessages.length > 0 ? messages.slice(archivedMessages.length) : messages;
+  const dim: "none" | "soft" | "strong" =
+    !watching && branch ? "strong" : shownCanvas.grown > 2 ? "soft" : "none";
 
   // The newest turn is the only one that has to be on screen, and it has to be
   // there before the next click: a smooth scroll that is still travelling reads as
-  // a conversation that swallowed the answer.
+  // a conversation that swallowed the answer. This moves the demo's own box, never
+  // the page, so a visitor reading further down is not dragged along.
   const scrollRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const box = scrollRef.current;
@@ -332,65 +474,194 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
   const openLoops = view.nodes.filter(
     (node) => node.status === "candidate" || node.status === "unverified",
   ).length;
-  const rail = <StageRail copy={copy} stage={stage} openLoops={openLoops} />;
-  const canvasPanel = (
-    <CanvasPanel
-      copy={copy}
-      view={view}
-      dim={dim}
-      hint={hint}
-      selectedNodeId={selectedNodeId}
-      nodeEdits={nodeEdits}
-      onSelectNode={selectNode}
-      onDiscussNode={discussNode}
-      onEditNode={saveNodeEdit}
-      onOpenNode={branch ? undefined : openNode}
-      reduceMotion={reduceMotion}
-    />
-  );
-  const canvasSheet = (
-    <CanvasPanel
-      copy={copy}
-      view={view}
-      dim={dim}
-      hint={hint}
-      selectedNodeId={selectedNodeId}
-      nodeEdits={nodeEdits}
-      onSelectNode={selectNode}
-      onDiscussNode={discussNode}
-      onEditNode={saveNodeEdit}
-      onOpenNode={branch ? undefined : openNode}
-      reduceMotion={reduceMotion}
-      minScale={0.92}
-    />
-  );
-  const crumbs = branch ? copy.branches[branch.id].crumbs : [];
+  const rail = <StageRail copy={copy} stage={shownStage} openLoops={openLoops} />;
+  const canvasProps = {
+    copy,
+    view,
+    dim,
+    hint: watching ? null : hint,
+    selectedNodeId: watching ? null : selectedNodeId,
+    // The walkthrough shows its own script. A card the visitor rewrote by hand is
+    // theirs and stays in their walkthrough; it must not turn up in the fixed one.
+    nodeEdits: watching ? NO_EDITS : nodeEdits,
+    onSelectNode: selectNode,
+    onDiscussNode: discussNode,
+    onEditNode: saveNodeEdit,
+    onOpenNode: branch ? undefined : openNode,
+    reduceMotion,
+    // While watching, the map is something to read rather than something to poke:
+    // acting on a card would write into the walkthrough the visitor has not started.
+    interactive: !watching,
+  };
+  const canvasPanel = <CanvasPanel {...canvasProps} />;
+  const canvasSheet = <CanvasPanel {...canvasProps} minScale={0.92} />;
+  const crumbs = !watching && branch ? copy.branches[branch.id].crumbs : [];
+  const status = auto.finished
+    ? site.demo.finished
+    : auto.playing && !reduceMotion
+      ? site.demo.playing
+      : site.demo.paused;
 
   return (
-    <div className="studio" data-branch={branch ? "true" : "false"}>
+    <div className="studio" data-branch={!watching && branch ? "true" : "false"} data-mode={mode}>
       <div className="studio-bar">
         <span className="studio-mode">
           <span aria-hidden="true">●</span>
           {copy.ui.fixedNote}
         </span>
         <div className="studio-bar-actions">
+          <div className="demo-modes" role="group" aria-label={site.demo.modeLabel}>
+            <button
+              type="button"
+              data-active={watching}
+              aria-pressed={watching}
+              onClick={backToWatching}
+            >
+              {site.demo.modeWatch}
+            </button>
+            <button
+              type="button"
+              data-active={mode === "manual"}
+              aria-pressed={mode === "manual"}
+              onClick={startManual}
+            >
+              {site.demo.modeTry}
+            </button>
+          </div>
           <button type="button" className="studio-tab" onClick={() => setSheet("rail")}>
             {copy.ui.exploreTab}
           </button>
           <button type="button" className="studio-tab" onClick={() => setSheet("map")}>
             {copy.ui.mapTab}
           </button>
-          <button type="button" className="studio-restart" onClick={restart}>
-            {copy.ui.restart}
-          </button>
         </div>
+      </div>
+
+      {/* The transport keeps one position across every playback state, so pausing
+          never moves the button out from under the pointer. */}
+      <div className="demo-transport">
+        {watching ? (
+          <>
+            <div className="transport-controls">
+              {reduceMotion ? (
+                <>
+                  {/* Nothing advances on a timer here, so the walkthrough becomes a set
+                      of steps the visitor moves through — same scenes, same order. */}
+                  {mode === "auto" && (
+                    <button
+                      type="button"
+                      className="transport-step"
+                      onClick={() => dispatchAuto({ type: "step", by: -1 })}
+                      disabled={auto.index === 0}
+                    >
+                      {site.demo.prevStep}
+                    </button>
+                  )}
+                  {/* At the end there is no next step, so the same button becomes the
+                      way back to step one rather than a dead control with no replay
+                      beside it. */}
+                  <button
+                    type="button"
+                    className="transport-play"
+                    onClick={
+                      mode !== "auto"
+                        ? startWatching
+                        : auto.finished
+                          ? replayWatching
+                          : () => dispatchAuto({ type: "step", by: 1 })
+                    }
+                  >
+                    {mode !== "auto"
+                      ? site.demo.watch
+                      : auto.finished
+                        ? site.demo.restartSteps
+                        : site.demo.nextStep}
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  className="transport-play"
+                  onClick={mode === "auto" ? () => dispatchAuto({ type: "toggle" }) : startWatching}
+                >
+                  <PlayIcon paused={!auto.playing || mode !== "auto"} />
+                  {mode !== "auto"
+                    ? site.demo.play
+                    : auto.finished
+                      ? site.demo.replay
+                      : auto.playing
+                        ? site.demo.pause
+                        : site.demo.resume}
+                </button>
+              )}
+              {/* Replay only exists once there is something to replay, and disappears
+                  again at the end, where the play button is already the replay. */}
+              {mode === "auto" && !auto.finished && (
+                <button
+                  type="button"
+                  className="transport-step"
+                  onClick={replayWatching}
+                  disabled={auto.index === 0 && !auto.playing}
+                >
+                  {reduceMotion ? site.demo.restartSteps : site.demo.replay}
+                </button>
+              )}
+              <span className="transport-status" data-state={mode === "auto" ? status : "idle"}>
+                {mode === "auto"
+                  ? `${status} · ${site.demo.stepOf
+                      .replace("{current}", String(auto.index + 1))
+                      .replace("{total}", String(scenes.length))}`
+                  : withSeconds(site.demo.lengthNote, seconds)}
+              </span>
+            </div>
+            <ol className="transport-chapters" aria-label={site.demo.stageLabel}>
+              {chapterCopy.map((chapter, index) => (
+                <li key={chapter.label}>
+                  <button
+                    type="button"
+                    data-state={
+                      mode !== "auto"
+                        ? "ahead"
+                        : chapterNow === index
+                          ? "now"
+                          : chapterNow > index
+                            ? "past"
+                            : "ahead"
+                    }
+                    aria-current={mode === "auto" && chapterNow === index ? "step" : undefined}
+                    onClick={() => {
+                      setSheet(null);
+                      setSelectedNodeId(null);
+                      setMode("auto");
+                      // The one timeout is re-armed from the state this produces, so
+                      // nothing from the scene being left can still land afterwards.
+                      dispatchAuto({ type: "seek", index: chapters[index], whole: reduceMotion });
+                    }}
+                  >
+                    <b>{String(index + 1).padStart(2, "0")}</b>
+                    {chapter.label}
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </>
+        ) : (
+          <div className="transport-controls">
+            <button type="button" className="transport-step" onClick={restart}>
+              {copy.ui.restart}
+            </button>
+            <span className="transport-status" data-state="idle">
+              {copy.ui.replyGuide} · {copy.stages[shownStage].label}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="studio-grid">
         {rail}
 
         <section className="studio-chat" aria-label={copy.ui.conversationLabel}>
-          {branch && (
+          {!watching && branch && (
             <div className="branch-bar">
               <p className="branch-crumbs">
                 {crumbs.map((crumb, index) => (
@@ -406,9 +677,16 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
             </div>
           )}
 
+          {mode === "auto" && (
+            <p className="scene-point">
+              <span>{chapterCopy[chapterNow].label}</span>
+              {chapterCopy[chapterNow].point}
+            </p>
+          )}
+
           <div className="chat-scroll" ref={scrollRef}>
             <div className="chat-inner">
-              {branch && (
+              {!watching && branch && (
                 <p className="branch-context">
                   <span>{copy.ui.branchLead}</span>
                   {copy.nodes[branch.id === "people" ? (canvas.people ? "whoHubMerged" : "whoHub") : "help"].text}
@@ -445,7 +723,37 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
           </div>
 
           <div className="chat-dock">
-            {options.length > 0 && (
+            {mode === "intro" && (
+              <div className="demo-start">
+                <h3>{site.demo.startTitle}</h3>
+                <p>{withSeconds(site.demo.startText, seconds)}</p>
+                <div className="demo-start-actions">
+                  <button type="button" className="demo-cta" onClick={startWatching}>
+                    {reduceMotion ? site.demo.nextStep : site.demo.watch}
+                  </button>
+                  <button type="button" className="demo-cta quiet" onClick={startManual}>
+                    {site.demo.tryIt}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {mode === "auto" && auto.finished && (
+              <div className="demo-start demo-done">
+                <h3>{site.demo.finishedTitle}</h3>
+                <p>{site.demo.finishedText}</p>
+                <div className="demo-start-actions">
+                  <button type="button" className="demo-cta" onClick={startManual}>
+                    {site.demo.finishedTry}
+                  </button>
+                  <a className="demo-cta quiet" href="#brief">
+                    {site.demo.finishedBrief}
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {!watching && options.length > 0 && (
               <div className="prompt-tray">
                 <p>{copy.ui.replyGuide}</p>
                 <div className="chat-options" role="group" aria-label={copy.ui.optionsLabel}>
@@ -457,31 +765,44 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
                 </div>
               </div>
             )}
-            <form
-              className="chat-compose"
-              onSubmit={(event) => {
-                event.preventDefault();
-                send();
-              }}
-            >
-              <textarea
-                value={draft}
-                rows={1}
-                placeholder={copy.ui.placeholder}
-                onChange={(event) => setDraft(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" && !event.shiftKey) {
-                    event.preventDefault();
-                    send();
-                  }
-                }}
+            {/* Watching gets the same dock in the same place, but as a screen the
+                demo types into: a field nobody can put a cursor in, saying so. */}
+            {watching && (
+              <DemoCompose
+                copy={copy}
+                beat={mode === "auto" ? auto.beat : "reply"}
+                text={typedLine}
+                full={reserved}
+                reduceMotion={reduceMotion}
               />
-              <button type="submit" disabled={draft.trim().length === 0} aria-label={copy.ui.send}>
-                <svg viewBox="0 0 20 20" aria-hidden="true">
-                  <path d="M10 16.5V4.2m0 0-4.6 4.6M10 4.2l4.6 4.6" />
-                </svg>
-              </button>
-            </form>
+            )}
+            {!watching && (
+              <form
+                className="chat-compose"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  send();
+                }}
+              >
+                <textarea
+                  value={draft}
+                  rows={1}
+                  placeholder={copy.ui.placeholder}
+                  onChange={(event) => setDraft(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                      event.preventDefault();
+                      send();
+                    }
+                  }}
+                />
+                <button type="submit" disabled={draft.trim().length === 0} aria-label={copy.ui.send}>
+                  <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M10 16.5V4.2m0 0-4.6 4.6M10 4.2l4.6 4.6" />
+                  </svg>
+                </button>
+              </form>
+            )}
           </div>
         </section>
 
@@ -501,6 +822,67 @@ export function IdeaStudioDemo({ locale }: { locale: StudioLocale }) {
       <p className="sr-only" aria-live="polite">
         {announcement}
       </p>
+    </div>
+  );
+}
+
+function PlayIcon({ paused }: { paused: boolean }) {
+  return (
+    <svg className="transport-icon" viewBox="0 0 16 16" aria-hidden="true">
+      {paused ? <path d="M4 2.6 13 8l-9 5.4z" /> : <path d="M4.6 2.8h2.6v10.4H4.6zm4.2 0h2.6v10.4H8.8z" />}
+    </svg>
+  );
+}
+
+
+/* The composer while the walkthrough is watched.
+ *
+ * It is not a disabled textarea: a disabled textarea reads as "you could type here,
+ * but not yet", and a visitor who clicks it learns nothing. It is a labelled panel
+ * that says the typing is part of the demo, and it holds the height of the finished
+ * line from the first character on, so the conversation above it does not shuffle
+ * upward as the line grows.
+ */
+function DemoCompose({
+  copy,
+  beat,
+  text,
+  full,
+  reduceMotion,
+}: {
+  copy: StudioCopy;
+  beat: Beat;
+  text: string;
+  full: string;
+  reduceMotion: boolean;
+}) {
+  const typing = beat === "typing";
+  const pending = beat === "pending";
+  return (
+    <div className="chat-compose chat-compose-demo" data-beat={beat}>
+      <p className="compose-demo">
+        <span className="compose-demo-tag">
+          {typing ? copy.ui.composeTyping : pending ? copy.ui.composeSending : copy.ui.composeWatch}
+        </span>
+        <span className="compose-demo-line">
+          {/* Reserves the height the finished line will need, so the box changes size
+              once per turn — while it is empty — instead of on every character. */}
+          <span className="compose-demo-ghost" aria-hidden="true">
+            {full || copy.ui.placeholder}
+          </span>
+          <span className="compose-demo-text">
+            {text}
+            {(typing || pending) && (
+              <i className="compose-caret" data-still={reduceMotion || pending} aria-hidden="true" />
+            )}
+          </span>
+        </span>
+      </p>
+      <span className="compose-demo-send" data-armed={pending} aria-hidden="true">
+        <svg viewBox="0 0 20 20">
+          <path d="M10 16.5V4.2m0 0-4.6 4.6M10 4.2l4.6 4.6" />
+        </svg>
+      </span>
     </div>
   );
 }
@@ -607,7 +989,10 @@ function StageRail({ copy, stage, openLoops }: { copy: StudioCopy; stage: number
   );
 }
 
-function CanvasPanel({
+/* Wrapped in `memo` because the demo re-renders on every typing tick: the board
+ * measures its own nodes, and remeasuring it 200 times per run would be the one
+ * expensive thing in an otherwise cheap animation. */
+const CanvasPanel = memo(function CanvasPanel({
   copy,
   view,
   dim,
@@ -620,6 +1005,7 @@ function CanvasPanel({
   onOpenNode,
   reduceMotion,
   minScale,
+  interactive = true,
 }: {
   copy: StudioCopy;
   view: CanvasView;
@@ -633,21 +1019,23 @@ function CanvasPanel({
   onOpenNode?: (node: Placement) => void;
   reduceMotion: boolean;
   minScale?: number;
+  /** While the walkthrough is being watched the map is read-only. */
+  interactive?: boolean;
 }) {
-  const selectedNode = view.nodes.find((node) => node.id === selectedNodeId) ?? null;
+  const selectedNode = interactive ? view.nodes.find((node) => node.id === selectedNodeId) ?? null : null;
 
   return (
     <aside className="studio-canvas" aria-label={copy.ui.canvasLabel}>
       <div className="canvas-heading">
         <p className="canvas-title">{copy.ui.canvasTitle}</p>
-        <p>{copy.ui.canvasGuide}</p>
+        <p>{interactive ? copy.ui.canvasGuide : copy.ui.canvasWatch}</p>
       </div>
       <ProductCanvas
         view={view}
         copy={copy}
         dim={dim}
-        selectedNodeId={selectedNodeId}
-        onSelectNode={onSelectNode}
+        selectedNodeId={interactive ? selectedNodeId : null}
+        onSelectNode={interactive ? onSelectNode : undefined}
         textOverrides={nodeEdits}
         reduceMotion={reduceMotion}
         minScale={minScale}
@@ -669,7 +1057,7 @@ function CanvasPanel({
       </p>
     </aside>
   );
-}
+});
 
 function NodeInspector({
   node,

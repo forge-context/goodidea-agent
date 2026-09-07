@@ -1,16 +1,31 @@
 # GoodIdea
 
-GoodIdea is an evidence-backed product guidance agent.
+GoodIdea helps a person turn a vague product idea into something they can act on: a
+product direction, a concept prototype they can click, a first version with a scope
+and acceptance conditions, and a package a coding agent can be handed.
 
-It helps a person move from a vague product idea through market research,
-feasibility, an explicit MVP boundary, human approval, and a coding-agent handoff.
+It is for people who can already get AI to write the code, but have not settled what
+the first version should be.
 
-Core principles:
-- Ask one high-impact question at a time.
-- Separate external evidence from assumptions and human decisions.
-- Encourage concrete progress without promising commercial success.
-- Never treat vague agreement as a product decision.
-- Keep consequential decisions and external side effects under human control.
+How it works:
+- Start from something that happened, not from a feature list.
+- Ask one question at a time — the one that would change the direction.
+- Get to a prototype early, so a new request changes the screen instead of the plan.
+- Show a change before it moves a conclusion, and let the person accept or refuse it.
+- Never treat a vague yes as a product decision.
+- Make every line of version one traceable to something the person said.
+- Say plainly what has not been verified, and keep real-world side effects outside.
 
-The public website contains a deterministic example and does not run the live agent.
-Repository: https://github.com/forge-context/goodidea-agent
+Scope of this website: a 70-second paper stop-motion concept film follows one fixed
+example. A freelance designer's quoting problem becomes an idea; three specialist
+agents — research (Mira), UX (Luca) and engineering (Kai) — each hand in one signed
+contribution, and each of the later two answers the one before it; GoodIdea states
+where they agree and what is still a trade-off, and turns that into a single decision;
+the product draft changes only after the creator confirms it. The canonical handoff
+package can be downloaded from the output section. Earlier walkthroughs are retained
+at /lab/?view=story and /lab/?view=legacy. Nothing on the site calls a live model or a
+backend, no software is generated, and no package is really sent to a coding agent;
+the live workspace is not open yet. The agents, their names and their contributions
+are a demonstration of how the product works, not records of real research.
+
+Public repository (demo and shared interface): https://github.com/forge-context/goodidea-agent

@@ -22,9 +22,32 @@ LP 是纯静态的 Vite 构建产物。它不调用任何 API，不持有任何�
 
 ## 正式 URL
 
-`npm run build` 结束时会运行 `scripts/finalize-seo.mjs`，写入只有确定域名后才存在的绝对 URL：`hreflang` 备用链接、`canonical`、`og:url`、`dist/sitemap.xml`，以及 `dist/robots.txt` 里的 `Sitemap:` 行。根路径声明 `/en/` 为 canonical，因此两者不会作为重复内容互相竞争。
+`npm run build` 结束时会运行 `scripts/finalize-seo.mjs`，写入只有确定域名后才存在的绝对 URL：`hreflang` 备用链接、`canonical`、`og:url`、`dist/sitemap.xml`，以及 `dist/robots.txt` 里的 `Sitemap:` 行。英文的规范页是 `/`：`/en/` 提供同一份文案并指回 `/`，两者因此被合并，而不是作为重复内容互相竞争。出于同样的原因，sitemap 列出 `/`、`/ja/`、`/zh-cn/` 而不含 `/en/`，页面里每一条英文链接——品牌标识和语言切换——也都指向 `/`。canonical 指向别的 URL 的页面，Search Console 会算作那个 URL 的；换句话说，一个不指向自己的页面，是在主动要求不要被收录。
 
 域名来自 `SITE_URL`，默认是 `https://goodidea.jianguoding.com`，所以只要用这个域名就不需要设任何变量。要换域名，在 Pages 的环境变量里加上 `SITE_URL` 并重新部署——这些 URL 是构建时写进文件的，换域名必须重新构建。
+
+## 爬虫最先读到的东西
+
+同一个脚本会在构建收尾时，通过 `scripts/prerenderShell.mjs` 把页面文案写进
+`<div id="root">`。Google 先索引第一次响应，渲染排在之后，空容器等于让它收录一个没有
+标题、没有正文、没有内部链接的页面。这段 shell 只是标记，React 挂载时会整体替换；两边
+都读 `src/siteCopy.ts`，文案仍然只有一处来源。
+
+如果构建以 `no empty #root to prerender into` 失败，说明 Vite 的 HTML 输出结构变了，
+文案没能进入容器。请修正匹配，而不是去掉这个检查——去掉之后页面会重新以空壳发布，而且
+不会有任何东西提醒你。
+
+## 不存在的路径
+
+匹配不到任何文件的请求由 `public/404.html` 响应。没有它时，Cloudflare 对所有未知路径都
+返回一份首页副本、状态码 200，也就是软 404：等于给爬虫无限多个看起来都是同一页重复品的
+URL。部署之后确认状态码确实是 404：
+
+```bash
+curl -sI https://goodidea.jianguoding.com/no-such-page | head -1
+```
+
+如果这里返回 `200`，说明 Cloudflare 侧仍在回退到 `index.html`，去检查项目的重定向规则。
 
 ## 自定义域名
 

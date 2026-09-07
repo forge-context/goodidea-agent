@@ -5,28 +5,35 @@ import { readFile, writeFile, appendFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
+import { loadCopy, renderShell } from "./prerenderShell.mjs";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const dist = join(here, "..", "dist");
 
 const siteUrl = (process.env.SITE_URL ?? "https://goodidea.jianguoding.com").replace(/\/$/, "");
 
-// The root page serves the English copy. It points at /en/ so the two are not
-// indexed as competing duplicates.
+// `/` is where a visitor lands and what a link to the project points at, so it is the
+// page that gets indexed. `/en/` serves the same copy and points back at it, which
+// consolidates the pair instead of letting them compete as duplicates.
+const HOME = "/";
+
 const pages = [
-  { file: "index.html", path: "/", canonical: "/en/" },
-  { file: "en/index.html", path: "/en/", canonical: "/en/" },
-  { file: "ja/index.html", path: "/ja/", canonical: "/ja/" },
-  { file: "zh-cn/index.html", path: "/zh-cn/", canonical: "/zh-cn/" },
+  { file: "index.html", path: "/", canonical: HOME, locale: "en" },
+  { file: "en/index.html", path: "/en/", canonical: HOME, locale: "en" },
+  { file: "ja/index.html", path: "/ja/", canonical: "/ja/", locale: "ja" },
+  { file: "zh-cn/index.html", path: "/zh-cn/", canonical: "/zh-cn/", locale: "zh-CN" },
 ];
 
 const alternates = [
-  { hreflang: "en", path: "/en/" },
+  { hreflang: "en", path: HOME },
   { hreflang: "ja", path: "/ja/" },
   { hreflang: "zh-CN", path: "/zh-cn/" },
-  { hreflang: "x-default", path: "/en/" },
+  { hreflang: "x-default", path: HOME },
 ];
 
 const absolute = (path) => `${siteUrl}${path}`;
+
+const { siteCopy, withSeconds, seconds } = await loadCopy();
 
 for (const page of pages) {
   const target = join(dist, page.file);
@@ -46,6 +53,20 @@ for (const page of pages) {
     `<meta property="og:url" content="${absolute(page.path)}" />`,
   ].join("\n    ");
   html = html.replace("</head>", `  ${head}\n  </head>`);
+
+  // A crawler that indexes the first response and renders later would otherwise file
+  // an empty page, so the container ships with the copy already in it.
+  const container = '<div id="root"></div>';
+  if (!html.includes(container)) {
+    throw new Error(`${page.file}: no empty #root to prerender into — did the shell markup change?`);
+  }
+  const shell = renderShell(siteCopy[page.locale], {
+    locale: page.locale,
+    homePath: HOME,
+    seconds,
+    withSeconds,
+  });
+  html = html.replace(container, `<div id="root">${shell}</div>`);
 
   await writeFile(target, html, "utf8");
 }

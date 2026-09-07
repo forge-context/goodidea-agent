@@ -1,0 +1,74 @@
+<!doctype html>
+<!--
+  Without this file every unknown path answered 200 with a copy of the home page, which
+  is a soft 404: a crawler sees unlimited duplicates of one page and spends its budget
+  on them. This answers 404 and asks not to be indexed. Styles are inline because a
+  static file cannot name the hashed stylesheet the build produces.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#fffaf7" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Page not found — GoodIdea</title>
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 32px;
+        background:
+          radial-gradient(circle at 86% 8%, rgba(122, 63, 159, .11), transparent 28rem),
+          radial-gradient(circle at 8% 34%, rgba(255, 129, 105, .08), transparent 25rem),
+          #fffaf7;
+        color: #241936;
+        font: 17px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      main { max-width: 34rem; }
+      p.eyebrow {
+        margin: 0 0 14px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: #625a70;
+      }
+      h1 {
+        margin: 0 0 18px;
+        font-size: clamp(30px, 4vw, 44px);
+        font-weight: 600;
+        line-height: 1.18;
+        letter-spacing: -.045em;
+      }
+      p.lead { margin: 0 0 28px; color: #625a70; }
+      nav { display: flex; flex-wrap: wrap; gap: 10px; }
+      a {
+        padding: 11px 19px;
+        border-radius: 11px;
+        border: 1px solid rgba(36, 25, 54, .16);
+        color: inherit;
+        text-decoration: none;
+      }
+      a.primary { background: #20152f; border-color: #20152f; color: #fffaf7; }
+      a:focus-visible { outline: 3px solid rgba(122, 63, 159, .38); outline-offset: 3px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">404</p>
+      <h1>That page is not here.</h1>
+      <p class="lead">The link may be out of date, or the address may have a typo. The site is one page in three languages — start from any of them.</p>
+      <nav>
+        <a class="primary" href="/">English</a>
+        <a href="/ja/" hreflang="ja" lang="ja">日本語</a>
+        <a href="/zh-cn/" hreflang="zh-CN" lang="zh-CN">中文</a>
+        <a href="https://github.com/forge-context/goodidea-agent">GitHub</a>
+      </nav>
+    </main>
+  </body>
+</html>
