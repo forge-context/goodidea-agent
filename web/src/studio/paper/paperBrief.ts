@@ -167,7 +167,10 @@ export function buildPaperBrief(locale: Locale): PaperBrief {
   const film = paperCopy[locale];
   const c = CONTENT[locale];
   return {
-    input: film.product.original.join(""),
+    /* The draft prints that sentence on two lines because the sheet is that wide.
+     * Read back as one sentence it needs whatever joins words in this language, which
+     * in English is a space and in Chinese and Japanese is nothing. */
+    input: film.product.original.join(locale === "en" ? " " : ""),
     blocks: [
       { label: label.direction, items: c.direction },
       { label: label.prototype, items: c.prototype, note: c.prototypeNote },

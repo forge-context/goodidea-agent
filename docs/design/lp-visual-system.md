@@ -6,6 +6,96 @@ This record explains the current LP design decisions. It does not claim that a c
 
 The detailed walkthrough and live workspace share tokens, Studio styles and the map renderer in `shared/studio/`. The public concept film lives separately in `web/src/studio/paper/`, under its own `gip-` class and custom-property prefix, and does not change the shared product interface.
 
+## 2026-09-08 (later): one page language, and the demo first
+
+The page was carrying three visual systems at once — a purple-and-coral marketing
+skin, a sage-and-paper film inside it, and a dark closing band — and the order asked a
+visitor to read seven output cards before reaching the thing that explains them. Both
+are now one.
+
+- **One palette, defined in `web/`.** Warm white ground, graphite text, and a sage
+  green dark enough to be a real primary at text size. Light sage carries selection,
+  proposals and quiet emphasis; the three professional identities (research ochre, UX
+  blue-grey, engineering brown) stay identities rather than a colour per section. The
+  outer purple glows, the purple explanation box and the dark purple closing gradient
+  are gone. The semantic tokens are re-pointed in `web/src/styles.css`, not in
+  `shared/studio/`, which the private product also consumes.
+- **One mark.** The site's G path is now drawn in the page header, the footer, the
+  workspace bar inside the film, GoodIdea's own card and the closing frame. The film's
+  italic lowercase `g` is gone. One shape, one colour, three sizes.
+- **One typeface for the interface.** Body, navigation, status, the decision card and
+  every control are the system sans. The handwritten face is left to the idea in the
+  creator's own words, real annotations and ink.
+- **Order: position → demo → output → who decides → close.** The film is the argument,
+  so nothing stands between the hero and it. The hero carries a short live panel
+  instead: three signed contributions arriving, GoodIdea combining them, one decision
+  that is the visitor's, and a draft filling in behind it — the product's shape, not
+  the case. The case belongs to the demo and to the output section under it; in the
+  hero its title and its prices made the page read as the website of a quoting tool.
+  The panel runs once and rests; it is not the old route map and it never loops.
+- **The output is a draft and two groups.** One sheet carrying the first sentence, the
+  direction and the sketch; beside it what version one does and does not do; and, in a
+  disclosure, acceptance, unverified assumptions and implementation tasks. No boundary
+  is hidden behind a summary.
+- **How it works and what stays yours are one section.** Three steps of the actual
+  behaviour, then three principles. The product's own goals — editing on the map,
+  asking for changes inside a running prototype — are stated as goals, because the
+  public film does not have those interactions.
+- **The boundary is stated once, in full, at the end.** A short "concept film, fixed
+  example" stays beside the player and the unverified items keep their own marks, but
+  the paragraph is not repeated per section.
+
+### The decision, and the pointer that presses it
+
+The button had drifted away from the card that asks the question: it hung at the
+bottom edge of the sheet, separated from the proposal by a band of nothing, and the
+simulated pointer was aimed at a coordinate written down separately from it — so the
+arrow's point landed several pixels above the control it was pressing, and pressing it
+moved the control further away.
+
+- The control is now the last thing inside the decision card, in ordinary flow, after
+  what is being asked, the proposal, what it says, what it gives up this round and who
+  it came from. It finishes inside the sheet with room to spare in every language.
+- The pointer no longer carries a coordinate. The timeline says which control it is
+  going to and how far along it is; the stage resolves both from the box it has
+  actually laid out and carries that through the sheet's own transform. The arrow's
+  point (4, 2 of its 24-unit sprite) is the one hotspot: the sprite is placed by it,
+  the press scales around it, and the ripple is centred on it.
+- Every mark drawn on a sentence — the strike through the first description, the
+  underline on a finding, the circle around an open question — is generated from the
+  box that sentence occupies, so a longer translation moves the words and the ink
+  together. The strike used to cross one of the two lines it was cancelling, and the
+  underline stopped two thirds of the way through the English line.
+- The approach finishes a frame before the beat it is named for, so the frame at
+  "arrive" is already settled on the control rather than still reaching for it.
+
+### The phone reads one block at a time
+
+Shrinking a 760-unit stage and calling the result readable was the previous answer.
+Sizes are now chosen from the pixels a 390px screen actually shows: sentences at 15–16
+px, secondary lines and labels at 12–13. A sheet shrunk to the edge of the desk may be
+smaller, because it is a trace of a contribution rather than something to read.
+
+- The draft gets a taller sheet in the narrow composition rather than smaller type,
+  and comes forward to 1.2 for the decision and the client's view — a close-up, so the
+  question, the trade-off and the control are all at reading size in one shot.
+- From the moment GoodIdea starts combining, the phone shows exactly one block: the
+  fusion card, then the decision, then the client's view. The team's sheets, the status
+  strip and the creator's own line stand aside for all three and come back together at
+  the end. The decision card names all three contributors itself.
+- Four labelled stages do not fit a phone's top bar at reading size, so only the stage
+  the film is in is named; the rest keep their number.
+- CJK headings take back the negative tracking, break by phrase where the browser can
+  segment, and balance — so a two-clause sentence breaks at its own comma instead of
+  through the middle of a word.
+
+### The end of the film
+
+The clock runs in raw seconds and the picture is sampled from quantised ones, and the
+two disagree by less than a frame at the end. Asking "is it finished?" in raw seconds
+left the transport offering "play" at a film that had stopped, and the read-out one
+second short of the length the page states. Both now ask in frames.
+
 ## 2026-09-08: the AI team made visible
 
 The landing page's demo is now a paper stop-motion film of about 70 seconds, in

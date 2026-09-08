@@ -15,7 +15,7 @@ import {
 
 import {
   CHAPTER_STARTS, DURATION, MOBILE_STAGE, POSTER_TIME, STAGE, STATIC_TIME,
-  advanceTime, chapterAt, chapterStill, quantize, sampleScene,
+  advanceTime, atEnd, chapterAt, chapterStill, quantize, sampleScene,
 } from "./paperTimeline";
 import { paperCopy, type PaperLocale } from "./paperCopy";
 import { PaperStage } from "./PaperStage";
@@ -160,7 +160,7 @@ function Film({ locale, debug, loop, forceReduced }: Required<PaperFilmProps>) {
       seek(chapterStill(0));
       return;
     }
-    if (time >= DURATION - 0.01) seek(0);
+    if (atEnd(time)) seek(0);
     setWantsToPlay(true);
   }, [reduced, seek, time]);
 
@@ -170,7 +170,14 @@ function Film({ locale, debug, loop, forceReduced }: Required<PaperFilmProps>) {
   const shown = reduced ? time || chapterStill(0) : started ? time : POSTER_TIME;
   const scene = useMemo(() => sampleScene(shown, compact, looping && started), [shown, compact, looping, started]);
   const stage = compact ? MOBILE_STAGE : STAGE;
-  const atEnd = time >= DURATION - 0.01;
+  /* The clock runs in raw seconds and the picture is sampled from quantised ones, so
+   * "finished" is a question about frames. Asking it in raw seconds is what used to
+   * leave the control offering "play" at a film that had stopped, and the read-out one
+   * second short of the length the page states. */
+  const finished = started && atEnd(time);
+  /* Once it has finished, the read-out says the length the page promised rather than
+   * the last whole second before it. */
+  const elapsed = !started ? 0 : finished ? Math.round(DURATION) : Math.floor(time);
 
   const stepScene = (delta: number) => {
     const next = chapterAt(shown) + delta;
@@ -208,8 +215,8 @@ function Film({ locale, debug, loop, forceReduced }: Required<PaperFilmProps>) {
         ) : (
           <>
             <button type="button" className="gip-play" onClick={() => (playing ? setWantsToPlay(false) : start())}>
-              {playing ? copy.ui.pause : atEnd && started ? copy.ui.replay : copy.ui.play}
-              <i className="gip-icon" aria-hidden="true">{playing ? "❙❙" : "▶"}</i>
+              {playing ? copy.ui.pause : finished ? copy.ui.replay : copy.ui.play}
+              <i className="gip-icon" aria-hidden="true">{playing ? "❙❙" : finished ? "↺" : "▶"}</i>
             </button>
             <button type="button" onClick={replay}>
               {copy.ui.replay}<i className="gip-icon" aria-hidden="true">↺</i>
@@ -229,7 +236,7 @@ function Film({ locale, debug, loop, forceReduced }: Required<PaperFilmProps>) {
               }}
             />
             <span className="gip-time">
-              {String(Math.floor(started ? time : 0)).padStart(2, "0")} / {Math.round(DURATION)}
+              {String(elapsed).padStart(2, "0")} / {Math.round(DURATION)}
             </span>
             {debug && (
               <label className="gip-time" style={{ display: "flex", gap: 6, alignItems: "center" }}>

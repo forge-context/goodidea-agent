@@ -8,24 +8,30 @@ It is for people who can already get AI to write the code, but have not settled 
 the first version should be.
 
 How it works:
-- Start from something that happened, not from a feature list.
-- Ask one question at a time — the one that would change the direction.
-- Get to a prototype early, so a new request changes the screen instead of the plan.
-- Show a change before it moves a conclusion, and let the person accept or refuse it.
-- Never treat a vague yes as a product decision.
-- Make every line of version one traceable to something the person said.
-- Say plainly what has not been verified, and keep real-world side effects outside.
+- Specialist agents propose from different angles: research reads what the client
+  keeps asking, UX sketches where the edges are, engineering prices the build.
+- Each contribution is signed, and says whether it is an assumption, an exploration
+  or a suggestion.
+- GoodIdea combines them into what they agree on, plus the one choice that needs a
+  person to make it. Disagreement is put on the table, not smoothed away.
+- Nothing reaches the product draft until the person confirms it; after they do, the
+  old description is struck out and the version moves, so the change is visible.
+- Every line on the draft says which contribution it came from.
+- What has not been verified is marked as such, and real-world side effects stay out.
 
-Scope of this website: a 70-second paper stop-motion concept film follows one fixed
-example. A freelance designer's quoting problem becomes an idea; three specialist
-agents — research (Mira), UX (Luca) and engineering (Kai) — each hand in one signed
-contribution, and each of the later two answers the one before it; GoodIdea states
-where they agree and what is still a trade-off, and turns that into a single decision;
-the product draft changes only after the creator confirms it. The canonical handoff
-package can be downloaded from the output section. Earlier walkthroughs are retained
-at /lab/?view=story and /lab/?view=legacy. Nothing on the site calls a live model or a
-backend, no software is generated, and no package is really sent to a coding agent;
-the live workspace is not open yet. The agents, their names and their contributions
-are a demonstration of how the product works, not records of real research.
+Scope of this website: the page opens on how GoodIdea works and what comes out
+of it, then a 70-second paper stop-motion concept film follows one fixed case. A
+freelance designer's quoting problem becomes an idea; three specialist agents —
+research (Mira), UX (Luca) and engineering (Kai) — each hand in one signed
+contribution, and each of the later two answers the one before it; GoodIdea
+states where they agree and what is still a trade-off, and turns that into a
+single decision; the product draft changes only after the creator confirms it.
+The output section writes that same case out in full and the canonical handoff
+package can be downloaded there. Earlier walkthroughs are retained at
+/lab/?view=story, /lab/?view=legacy and /lab/?view=hero. Nothing on the site
+calls a live model or a backend, no software is generated, and no package is
+really sent to a coding agent; the live workspace is not open yet. The agents,
+their names and their contributions are a demonstration of how the product
+works, not records of real research.
 
 Public repository (demo and shared interface): https://github.com/forge-context/goodidea-agent

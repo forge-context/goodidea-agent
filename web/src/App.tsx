@@ -1,11 +1,19 @@
-import { IdeaMapHero } from "./IdeaMap";
-import { siteCopy, withSeconds, type Locale } from "./siteCopy";
+import { OutcomePreview } from "./OutcomePreview";
+import { siteCopy, withSeconds, type Locale, type SiteCopy } from "./siteCopy";
 import { buildPaperBrief, paperHandoffMarkdown } from "./studio/paper/paperBrief";
 import { PaperFilm } from "./studio/paper/PaperFilm";
 import { PAPER_SECONDS } from "./studio/paper/paperTimeline";
 
 const REPO = "https://github.com/forge-context/goodidea-agent";
 
+/**
+ * The page, in the order it has to be read.
+ *
+ * Position, then the demo, then what the demo leaves behind, then who decides, then a
+ * short close. The film is the argument, so nothing stands between the hero and it —
+ * what a visitor needs before pressing play is a look at the outcome, not seven cards
+ * of it, and that is what the hero carries beside the headline.
+ */
 function App() {
   const documentLocale = document.documentElement.dataset.locale;
   const locale: Locale =
@@ -13,6 +21,7 @@ function App() {
   const t = siteCopy[locale];
   const brief = buildPaperBrief(locale);
   const seconds = PAPER_SECONDS;
+  const groups = groupBrief(brief.blocks, t);
 
   return (
     <>
@@ -25,8 +34,8 @@ function App() {
           <span>GoodIdea</span>
         </a>
         <nav aria-label={t.primaryNavigationLabel}>
-          <a href="#brief">{t.nav.brief}</a>
           <a href="#demo">{t.nav.demo}</a>
+          <a href="#brief">{t.nav.brief}</a>
           <a href="#how">{t.nav.how}</a>
           <a href={REPO}>{t.nav.github}</a>
         </nav>
@@ -38,108 +47,103 @@ function App() {
       </header>
 
       <main id="main">
-        <IdeaMapHero
-          locale={locale}
-          copy={t}
-          actions={
+        <section className="hero section-shell" id="top">
+          <div className="hero-copy">
+            <p className="eyebrow">{t.heroEyebrow}</p>
+            <h1>{t.heroTitle}</h1>
+            <p className="hero-intro">{t.heroIntro}</p>
+            <p className="hero-audience">{t.heroAudience}</p>
             <div className="hero-actions">
-              <div>
-                <a className="button button-primary" href="#demo">{withSeconds(t.heroPrimary, seconds)}<ArrowDownIcon /></a>
-                <small>{t.heroPrimaryNote}</small>
-              </div>
-              <div>
-                <a className="button button-quiet" href="#brief">{t.heroSecondary}<ArrowDownIcon /></a>
-                <small>{t.heroSecondaryNote}</small>
-              </div>
+              <a className="button button-primary" href="#demo">{t.heroPrimary}<ArrowDownIcon /></a>
+              <span className="hero-length">{withSeconds(t.heroPrimaryNote, seconds)}</span>
+              <a className="button button-quiet" href="#brief">{t.heroSecondary}<ArrowDownIcon /></a>
             </div>
-          }
-        />
-
-        {/* Before the demo, because a visitor who never clicks anything still has to
-            be able to say what they would walk away holding. */}
-        <section className="brief-section" id="brief">
-          <div className="section-shell">
-            <div className="section-heading">
-              <div>
-                <p className="eyebrow">{t.briefEyebrow}</p>
-                <h2>{t.briefTitle}</h2>
-              </div>
-              <p>{t.briefIntro}</p>
-            </div>
-
-            <div className="brief-input">
-              <p className="brief-input-label">{t.briefInputLabel}</p>
-              <p className="brief-input-text">{brief.input}</p>
-              <p className="brief-scenario">{t.briefScenarioNote}</p>
-            </div>
-
-            <div className="brief-grid">
-              {brief.blocks.map((block) => (
-                <article key={block.label} className="brief-block" data-tone={block.tone ?? "plain"}>
-                  <h3>{block.label}</h3>
-                  <ul>
-                    {block.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                  {block.note && <p className="brief-note">{block.note}</p>}
-                </article>
-              ))}
-            </div>
-            <p className="brief-footer">{t.briefFooter}</p>
-            <p className="brief-download">
-              <button type="button" className="button button-quiet" onClick={() => downloadHandoff(locale)}>
-                {t.briefDownload}<ArrowDownIcon />
-              </button>
-            </p>
           </div>
+          <OutcomePreview locale={locale} copy={t} />
         </section>
 
         <section className="demo-section" id="demo">
           <div className="section-shell">
             <div className="section-heading">
-              <div>
-                <p className="eyebrow">{t.demoEyebrow}</p>
-                <h2>{t.demoTitle}</h2>
-              </div>
-              <p>{withSeconds(t.demoIntro, seconds)}</p>
+              <p className="eyebrow">{t.demoEyebrow}</p>
+              <h2>{t.demoTitle}</h2>
+              <p className="section-lead">{t.demoIntro}</p>
             </div>
-
             <div className="demo-window">
               <PaperFilm locale={locale} />
             </div>
           </div>
         </section>
 
-        <section className="how-section section-shell" id="how">
-          <div className="section-heading compact">
-            <div><p className="eyebrow">{t.howEyebrow}</p><h2>{t.howTitle}</h2></div>
-          </div>
-          <div className="how-grid">
-            {t.howItems.map((item) => (
-              <article key={item.number}><span>{item.number}</span><h3>{item.title}</h3><p>{item.text}</p></article>
-            ))}
+        {/* The same case, standing still and complete. The hero shows the shape of it;
+            this is where the boundaries are actually readable. */}
+        <section className="brief-section" id="brief">
+          <div className="section-shell">
+            <div className="section-heading">
+              <p className="eyebrow">{t.briefEyebrow}</p>
+              <h2>{t.briefTitle}</h2>
+              <p className="section-lead">{t.briefIntro}</p>
+            </div>
+
+            <div className="brief-layout">
+              <article className="brief-sheet">
+                <p className="brief-input-label">{t.briefInputLabel}</p>
+                <p className="brief-input-text">{brief.input}</p>
+                <div className="brief-sheet-body">
+                  {groups.direction.map((block) => (
+                    <BriefBlock key={block.label} block={block} />
+                  ))}
+                </div>
+                <p className="brief-scenario">{t.briefScenarioNote}</p>
+              </article>
+
+              <div className="brief-side">
+                {groups.scope.map((block) => (
+                  <article key={block.label} className="brief-block" data-tone={block.tone ?? "plain"}>
+                    <h3>{block.label}</h3>
+                    <ul>{block.items.map((item) => <li key={item}>{item}</li>)}</ul>
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            {/* The boundaries a first version needs are above, in full. What is below
+                is detail — never a boundary hidden behind a summary. */}
+            <details className="brief-details">
+              <summary>{t.briefDetails}</summary>
+              <div className="brief-details-grid">
+                {groups.detail.map((block) => (
+                  <BriefBlock key={block.label} block={block} />
+                ))}
+              </div>
+            </details>
+
+            <div className="brief-foot">
+              <p>{t.briefFooter}</p>
+              <button type="button" className="button button-quiet" onClick={() => downloadHandoff(locale)}>
+                {t.briefDownload}<ArrowDownIcon />
+              </button>
+            </div>
           </div>
         </section>
 
-        <section className="trust-section section-shell" id="trust">
-          <div className="section-heading compact">
-            <div>
-              <p className="eyebrow">{t.trustEyebrow}</p>
-              <h2>{t.trustTitle}</h2>
-              <p className="trust-intro">{t.trustIntro}</p>
-            </div>
+        <section className="work-section section-shell" id="how">
+          <div className="section-heading">
+            <p className="eyebrow">{t.workEyebrow}</p>
+            <h2>{t.workTitle}</h2>
+            <p className="section-lead">{t.workIntro}</p>
           </div>
-          <dl className="trust-list">
-            {t.trustItems.map((item) => (
-              <div key={item.term}>
-                <dt>{item.term}</dt>
-                <dd>{item.text}</dd>
-              </div>
+          <ol className="work-steps">
+            {t.workSteps.map((item) => (
+              <li key={item.number}><span>{item.number}</span><h3>{item.title}</h3><p>{item.text}</p></li>
+            ))}
+          </ol>
+          <dl className="work-principles">
+            {t.workPrinciples.map((item) => (
+              <div key={item.term}><dt>{item.term}</dt><dd>{item.text}</dd></div>
             ))}
           </dl>
-          <p className="trust-scope">{t.trustScope}</p>
-          <a className="button button-quiet" href={t.trustLinkHref}>{t.trustLink}<ArrowUpRightIcon /></a>
+          <p className="work-vision">{t.workVision}</p>
         </section>
 
         <section className="closing-section" id="start">
@@ -148,10 +152,12 @@ function App() {
             <h2>{t.closingTitle}</h2>
             <p>{withSeconds(t.closingText, seconds)}</p>
             <div className="closing-actions">
-              <a className="button button-primary" href="#demo">{withSeconds(t.closingPrimary, seconds)}<ArrowUpIcon /></a>
+              <a className="button button-primary" href="#demo">{t.closingPrimary}<ArrowUpIcon /></a>
               <a className="button button-quiet" href="#brief">{t.closingSecondary}<ArrowUpIcon /></a>
             </div>
+            {/* Said in full, once, where the page ends. */}
             <p className="closing-scope">{t.trustScope}</p>
+            <a className="closing-source" href={t.trustLinkHref}>{t.trustLink}<ArrowUpRightIcon /></a>
           </div>
         </section>
       </main>
@@ -163,6 +169,31 @@ function App() {
       </footer>
     </>
   );
+}
+
+type Block = ReturnType<typeof buildPaperBrief>["blocks"][number];
+
+function BriefBlock({ block }: { block: Block }) {
+  return (
+    <article className="brief-block" data-tone={block.tone ?? "plain"}>
+      <h3>{block.label}</h3>
+      <ul>{block.items.map((item) => <li key={item}>{item}</li>)}</ul>
+      {block.note && <p className="brief-note">{block.note}</p>}
+    </article>
+  );
+}
+
+/* Seven equally weighted cards is a list, not a result. The same seven blocks are read
+ * as one draft and two groups: what the product is, what version one is bounded by,
+ * and — opened only if wanted — the detail behind both. */
+function groupBrief(blocks: Block[], t: SiteCopy) {
+  const by = (label: string) => blocks.filter((block) => block.label === label);
+  const L = t.briefLabels;
+  return {
+    direction: [...by(L.direction), ...by(L.prototype)],
+    scope: [...by(L.scope), ...by(L.nonGoals)],
+    detail: [...by(L.done), ...by(L.open), ...by(L.handoff)],
+  };
 }
 
 /* The same content the section above shows, handed over as the file a coding agent

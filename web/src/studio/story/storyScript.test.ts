@@ -101,15 +101,21 @@ describe("the story", () => {
       // The page never carries a hand-written length: it is filled in from the run.
       const advertised = demoSeconds(locale);
       expect(Math.abs(advertised - duration)).toBeLessThanOrEqual(2.5);
+      /* The landing page states a length in exactly one place per action — the quiet
+         label beside the primary action, and the closing line — and the retired
+         walkthrough states its own. None of them may hard-code a number. */
       for (const line of [
-        siteCopy[locale].heroPrimary,
-        siteCopy[locale].closingPrimary,
+        siteCopy[locale].heroPrimaryNote,
         siteCopy[locale].closingText,
-        siteCopy[locale].demoIntro,
         siteCopy[locale].demo.startText,
         siteCopy[locale].demo.lengthNote,
       ]) {
         expect(line).toContain("{seconds}");
+      }
+      // And an action's own label never carries one, so trimming the film cannot
+      // leave a button promising a number it no longer takes.
+      for (const label of [siteCopy[locale].heroPrimary, siteCopy[locale].closingPrimary]) {
+        expect(label).not.toContain("{seconds}");
       }
       expect(withSeconds(siteCopy[locale].demo.lengthNote, advertised)).toContain(
         String(advertised),

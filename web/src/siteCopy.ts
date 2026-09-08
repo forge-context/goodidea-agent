@@ -1,22 +1,26 @@
-/* Every word the landing page says outside the walkthrough, in the three languages
- * it ships.
+/* Every word the landing page says outside the film, in the three languages it ships.
  *
- * The page is ordered so that scrolling alone answers four questions: what this is,
- * when it is for me, what I end up holding, and how to try it now. Each locale is
- * written in its own language rather than translated line for line, but the four
- * answers have to survive in all three.
+ * The page is ordered so that scrolling alone answers four questions, in this order:
+ * what this is and what it leaves you with, how one idea actually gets there, what
+ * the finished thing contains, and who decides. Each locale is written in its own
+ * language rather than translated line for line, but those four answers have to
+ * survive in all three.
  *
- * The site tells one story — a freelancer sorting a client's change requests — and
- * every section here refers to that same one. The words the walkthrough itself says
- * live in `studio/story/storyCopy.ts`; the output preview is assembled from them in
- * `studio/story/handoffPackage.ts`, so the page and the demo cannot drift apart.
+ * One case runs through the whole page — a freelance designer turning a quote's scope
+ * into something a client can read and confirm — and every section refers to that same
+ * one. The words the film itself says live in `studio/paper/paperCopy.ts`; the outcome
+ * preview and the download are assembled from them in `studio/paper/paperBrief.ts`, so
+ * the page, the demo and the file cannot drift apart.
+ *
+ * Some keys below are read only by the retired walkthroughs kept in `lab/`. They are
+ * marked, and the landing page does not show them.
  */
 
 export type Locale = "en" | "ja" | "zh-CN";
 
-/* How long the walkthrough actually runs is derived from the script, never typed
- * into the copy: any line that mentions the length carries `{seconds}` and is filled
- * in at render, so trimming a turn cannot leave the page promising the old number. */
+/* How long the film actually runs is derived from the script, never typed into the
+ * copy: any line that mentions the length carries `{seconds}` and is filled in at
+ * render, so trimming a turn cannot leave the page promising the old number. */
 export function withSeconds(text: string, seconds: number): string {
   return text.replace("{seconds}", String(seconds));
 }
@@ -25,19 +29,35 @@ export type SiteCopy = {
   skip: string;
   primaryNavigationLabel: string;
   languageLabel: string;
-  nav: { brief: string; demo: string; how: string; github: string };
+  nav: { demo: string; brief: string; how: string; github: string };
 
   heroEyebrow: string;
   heroTitle: string;
   heroIntro: string;
-  /** The old brand line, kept as a quieter second voice. */
-  heroBrandLine: string;
+  /** Who this is for. One line, between the intro and the actions. */
+  heroAudience: string;
   heroPrimary: string;
+  /** The quiet label beside the primary action; carries the derived length. */
   heroPrimaryNote: string;
   heroSecondary: string;
-  heroSecondaryNote: string;
-  mapReplay: string;
-  mapReplayed: string;
+
+  /* Beside the hero: how GoodIdea works and what comes out of it. Deliberately not
+     the case — the case belongs to the demo and to the outcome section below, and in
+     the hero it made the page look like the website of a quoting tool. */
+  previewLabel: string;
+  previewContribLabel: string;
+  /** What each discipline hands in, said generically: the case is the demo's job. */
+  previewContributions: [string, string, string];
+  previewDecision: string;
+  previewDecisionDone: string;
+  previewDraftLabel: string;
+  previewFormingLabel: string;
+  previewDeliverables: string[];
+  previewReplay: string;
+
+  demoEyebrow: string;
+  demoTitle: string;
+  demoIntro: string;
 
   briefEyebrow: string;
   briefTitle: string;
@@ -54,48 +74,20 @@ export type SiteCopy = {
     open: string;
     handoff: string;
   };
+  /** The three groups the outcome is read in, before any detail is opened. */
+  briefGroups: { direction: string; scope: string; handoff: string };
+  briefDetails: string;
   briefFooter: string;
 
-  demoEyebrow: string;
-  demoTitle: string;
-  demoIntro: string;
-  demo: {
-    startTitle: string;
-    startText: string;
-    watch: string;
-    tryIt: string;
-    play: string;
-    pause: string;
-    resume: string;
-    replay: string;
-    prevStep: string;
-    /** Reduced motion has no autoplay to replay, so the end offers the steps again. */
-    restartSteps: string;
-    nextStep: string;
-    stageLabel: string;
-    lengthNote: string;
-    playing: string;
-    paused: string;
-    finished: string;
-    stepOf: string;
-    finishedTitle: string;
-    finishedText: string;
-    finishedBrief: string;
-    /** Only the retired walkthrough kept in `lab/legacy` still shows these. */
-    modeLabel: string;
-    modeWatch: string;
-    modeTry: string;
-    finishedTry: string;
-  };
+  workEyebrow: string;
+  workTitle: string;
+  workIntro: string;
+  workSteps: { number: string; title: string; text: string }[];
+  workPrinciples: { term: string; text: string }[];
+  /** Where the product is going, said as a goal rather than as something on screen. */
+  workVision: string;
 
-  howEyebrow: string;
-  howTitle: string;
-  howItems: { number: string; title: string; text: string }[];
-
-  trustEyebrow: string;
-  trustTitle: string;
-  trustIntro: string;
-  trustItems: { term: string; text: string }[];
+  /** The one full statement of what is and is not open. Said once, in the closing. */
   trustScope: string;
   trustLink: string;
   trustLinkHref: string;
@@ -107,6 +99,34 @@ export type SiteCopy = {
   closingSecondary: string;
 
   footer: string;
+
+  /* ---- read only by the retired walkthroughs in `lab/` ------------------- */
+  demo: {
+    startTitle: string;
+    startText: string;
+    watch: string;
+    tryIt: string;
+    play: string;
+    pause: string;
+    resume: string;
+    replay: string;
+    prevStep: string;
+    restartSteps: string;
+    nextStep: string;
+    stageLabel: string;
+    lengthNote: string;
+    playing: string;
+    paused: string;
+    finished: string;
+    stepOf: string;
+    finishedTitle: string;
+    finishedText: string;
+    finishedBrief: string;
+    modeLabel: string;
+    modeWatch: string;
+    modeTry: string;
+    finishedTry: string;
+  };
 };
 
 const REPO = "https://github.com/forge-context/goodidea-agent";
@@ -116,44 +136,94 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     skip: "跳到正文",
     primaryNavigationLabel: "主导航",
     languageLabel: "语言",
-    nav: { brief: "产出示例", demo: "Demo", how: "工作方式", github: "GitHub" },
+    nav: { demo: "Demo", brief: "成果", how: "协作机制", github: "GitHub" },
 
     heroEyebrow: "给准备用 AI 写代码的人",
-    heroTitle: "把一个想法，变成看得见的原型和可以交接的第一版。",
+    heroTitle: "和 AI 团队一起，把想法推敲成可以开工的产品。",
     heroIntro:
-      "你已经能让 AI 写代码，缺的是第一版到底该做什么。GoodIdea 陪你把想法问清楚：为谁解决什么、原型长什么样、这一版做什么和不做什么、怎么算做对了。",
-    heroBrandLine: "想法不是直线，但下一步可以很清楚。",
-    heroPrimary: "看一个想法的 {seconds} 秒",
-    heroPrimaryNote: "无需注册 · 固定示例，不调用真实模型",
-    heroSecondary: "先看最后得到什么",
-    heroSecondaryNote: "产品方向、概念原型、第一版定义与交接材料",
-    mapReplay: "重看这段路线",
-    mapReplayed: "路线重新开始。",
+      "研究、UX 和工程 Agent 各自提出建议，GoodIdea 整理出关键选择。你做决定，产品方向、草图与第一版范围逐渐清楚。",
+    heroAudience: "适合已经能让 AI 写代码，却还没想清第一版该做什么的人。",
+    heroPrimary: "看一个想法如何成形",
+    heroPrimaryNote: "{seconds} 秒 · 无需注册",
+    heroSecondary: "看最后留下什么",
 
-    briefEyebrow: "不用播放也能读完的产出",
-    briefTitle: "一句想法，最后留下这几样东西。",
+    previewLabel: "Agent 提案 · GoodIdea 综合 · 你来决定",
+    previewContribLabel: "三位专业 Agent 的贡献",
+    previewContributions: ["待验证假设", "概念草图", "实现代价"],
+    previewDecision: "1 项待你决定",
+    previewDecisionDone: "你已采用 · 写入产品稿",
+    previewDraftLabel: "产品稿",
+    previewFormingLabel: "逐渐清楚的，是这几样",
+    previewDeliverables: ["产品方向", "概念草图", "第一版范围", "开发交接材料"],
+    previewReplay: "再看一次",
+
+    demoEyebrow: "主 Demo",
+    demoTitle: "三份贡献，一项由你决定。",
+    demoIntro:
+      "一位自由职业设计师的报价困扰，变成一句想法。研究、UX 与工程三位 Agent 各交出一份署名贡献，GoodIdea 写出共同方向和一处取舍。你确认之后，产品稿才改写。",
+
+    briefEyebrow: "成果",
+    briefTitle: "同一个案例，最终留下什么。",
     briefIntro:
-      "下面是这个固定示例走完之后留下的：产品方向、一个概念原型、第一版的定义，以及交给 coding agent 的材料。它不是已经生成的软件，也不代表这个市场已经被验证。",
+      "上面这段动画走完，留下的就是下面这些：一份产品稿、第一版的范围，以及交给 coding agent 的材料。",
     briefInputLabel: "最初的一句话",
-    briefDownload: "下载这份交接包（Markdown）",
+    briefDownload: "下载交接包（Markdown）",
     briefScenarioNote:
-      "示例场景：一位自由职业设计师，想把每次都要重新解释一遍的报价范围，变成一份客户能读、能确认的单子。页面不连接后端，原型是概念预览，交接与实现任务是示例内容。",
+      "案例：一位自由职业设计师，想把每次都要重新解释的报价范围，变成一份客户能读、能确认的单子。",
     briefLabels: {
       direction: "产品方向",
-      prototype: "概念原型",
+      prototype: "概念草图",
       scope: "第一版做什么",
       nonGoals: "第一版不做",
       done: "怎么算做对了",
       open: "还需要验证",
       handoff: "交接后的实现任务",
     },
-    briefFooter:
-      "下面的动画讲述这份方案如何成形：三位 Agent 各自提出，GoodIdea 综合，你来决定。这里保留完整内容，也可以下载交接包细看。",
+    briefGroups: { direction: "产品方向与草图", scope: "第一版范围", handoff: "开发交接" },
+    briefDetails: "展开：验收条件、待验证假设与实现任务",
+    briefFooter: "页面上的内容和下载的交接包同源，改一处就一起改。",
 
-    demoEyebrow: "AI 团队和你，一起把想法推敲清楚",
-    demoTitle: "三份贡献，一项待你决定。",
-    demoIntro:
-      "{seconds} 秒：一位设计师的报价困扰变成一个想法；研究、UX 与工程三位 Agent 各交出一份署名贡献；GoodIdea 把共同方向和分歧整理成一项待决定。你确认之后，产品稿才改写。",
+    workEyebrow: "协作机制",
+    workTitle: "AI 团队提出，GoodIdea 综合，你来决定。",
+    workIntro: "三步之后是三条原则。它们决定了：当它想错的时候，你还能不能把结论拉回来。",
+    workSteps: [
+      {
+        number: "01",
+        title: "专业 Agent 从不同角度提出",
+        text: "研究看客户反复问的是什么，UX 把边界画成草图，工程算实现代价。每份贡献都署名，也都说清是假设、探索还是建议。",
+      },
+      {
+        number: "02",
+        title: "GoodIdea 对齐方向与待取舍项",
+        text: "三份贡献收在一起，写出它们共同指向的方向，以及一处需要有人拍板的取舍——不替你把分歧抹平。",
+      },
+      {
+        number: "03",
+        title: "你确认之后，才写入产品稿",
+        text: "提案停在那里等你。确认之后旧描述被划掉、新方向写上、版本号变化，你看得出这次决定改了什么。",
+      },
+    ],
+    workPrinciples: [
+      { term: "贡献有来源", text: "产品稿上的每一条，都写着它来自哪位 Agent 的哪份贡献。" },
+      { term: "提案与已采用分开", text: "没被确认的提案有自己的边框，不会悄悄变成产品内容。" },
+      { term: "未验证的会标出来", text: "研究提出的是待验证假设，草图是尚未采用的探索，都单独标记。" },
+    ],
+    workVision:
+      "在地图里直接修改、在原型里点着提新要求，是 GoodIdea 的产品目标，当前公开的动画还没有这些交互。",
+
+    trustScope:
+      "现在公开的是这一个固定案例和它的界面实现。真实工作台还没有开放：页面不连接后端，不会真的生成软件，也不会真的把材料发给任何 coding agent。",
+    trustLink: "查看 Demo 源码",
+    trustLinkHref: REPO,
+
+    closingEyebrow: "下一步",
+    closingTitle: "从一句话开始，看看第一版该长什么样。",
+    closingText: "{seconds} 秒看完整个过程，或者直接读这一页留下的成果。",
+    closingPrimary: "看一个想法如何成形",
+    closingSecondary: "查看 / 下载成果",
+
+    footer: "公开 Demo 与共用界面实现 · English / 日本語 / 简体中文",
+
     demo: {
       startTitle: "先看一遍，还是直接试原型？",
       startText:
@@ -181,105 +251,100 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       modeTry: "自己体验",
       finishedTry: "自己走一遍",
     },
-
-    howEyebrow: "工作方式",
-    howTitle: "一次只推进一个会影响方向的问题。",
-    howItems: [
-      {
-        number: "01",
-        title: "从一次真实经历问起",
-        text: "不从功能开始，先问最近哪一段最花时间。你说过的条件会留在地图上，不用重复说第二遍。",
-      },
-      {
-        number: "02",
-        title: "尽早看到能点的原型",
-        text: "把讨论变成一个可以操作的概念原型。你在里面提新要求，画面跟着变，不用等到写完代码才知道对不对。",
-      },
-      {
-        number: "03",
-        title: "定下边界，做成能交接的一份",
-        text: "写清这一版做什么、不做什么、满足什么条件算完成，连同原型一起交给 coding agent。",
-      },
-    ],
-
-    trustEyebrow: "你保留的控制",
-    trustTitle: "它替你整理，但不替你决定。",
-    trustIntro: "下面几条决定了：当它想错的时候，你还能不能把结论拉回来。",
-    trustItems: [
-      {
-        term: "每一步都追得回去",
-        text: "第一版里的每一条，都写着它是从你哪一句话来的。不同意，就能顺着那句话改回去。",
-      },
-      {
-        term: "改动先给你看",
-        text: "每次要动结论，它先摆出改了什么、加了什么、还有什么不确定，再问你要不要。",
-      },
-      {
-        term: "模糊的「好」不算决定",
-        text: "你答得含糊时，它会把具体选项再摆一次，而不是替你选一个继续往下走。",
-      },
-      {
-        term: "没做到的事会写明",
-        text: "原型是概念预览，交接材料是示例内容。哪些还没验证，会单独列出来，不混进结论里。",
-      },
-    ],
-    trustScope:
-      "现在公开的是这套固定示例和它的界面实现。真实工作台还没有开放：页面不连接后端，不会真的生成软件，也不会真的把材料发给任何 coding agent。",
-    trustLink: "查看 Demo 源码",
-    trustLinkHref: REPO,
-
-    closingEyebrow: "下一步",
-    closingTitle: "从一句话开始，看看第一版该长什么样。",
-    closingText:
-      "先看 {seconds} 秒的动画，看 AI 团队怎么提出、GoodIdea 怎么综合、决定权怎么留在你手里。想细看留下什么，回到上面的产出示例。",
-    closingPrimary: "看一个想法的 {seconds} 秒",
-    closingSecondary: "回到产出示例",
-
-    footer: "公开 Demo 与共用界面实现 · English / 日本語 / 简体中文",
   },
 
   en: {
     skip: "Skip to content",
     primaryNavigationLabel: "Primary navigation",
     languageLabel: "Language",
-    nav: { brief: "Example output", demo: "Demo", how: "How it works", github: "GitHub" },
+    nav: { demo: "Demo", brief: "Output", how: "How it works", github: "GitHub" },
 
     heroEyebrow: "For people about to build with AI",
-    heroTitle: "Turn one idea into a prototype you can see and a first version you can hand over.",
+    heroTitle: "Work an idea out with an AI team, until it is something you can start building.",
     heroIntro:
-      "You can already get AI to write the code. What is missing is version one: who it is for, what the thing actually looks like, what it does and does not do, and how you will know it came out right. GoodIdea works that out with you.",
-    heroBrandLine: "An idea is not a straight line. The next step can still be clear.",
-    heroPrimary: "An idea, in {seconds} seconds",
-    heroPrimaryNote: "No sign-up · fixed example, no live model",
-    heroSecondary: "See what you end up with",
-    heroSecondaryNote: "Direction, concept prototype, version-one definition, handoff",
-    mapReplay: "Play the route again",
-    mapReplayed: "The route starts over.",
+      "Research, UX and engineering agents each propose. GoodIdea states where they agree and what is still a choice. You decide — and the direction, the sketch and the scope of version one get clearer.",
+    heroAudience: "For people who can already get AI to write the code, and still have to decide what version one is.",
+    heroPrimary: "Watch an idea take shape",
+    heroPrimaryNote: "{seconds} seconds · no sign-up",
+    heroSecondary: "See what is left at the end",
 
-    briefEyebrow: "Output you can read without pressing play",
-    briefTitle: "One sentence in. These come out.",
+    previewLabel: "Agents propose · GoodIdea combines · you decide",
+    previewContribLabel: "Three specialist agents",
+    previewContributions: ["Assumption to test", "Concept sketch", "Build cost"],
+    previewDecision: "1 decision, and it is yours",
+    previewDecisionDone: "Adopted · written into the draft",
+    previewDraftLabel: "Product draft",
+    previewFormingLabel: "What gets clearer",
+    previewDeliverables: ["Direction", "Concept sketch", "Version-one scope", "Handoff package"],
+    previewReplay: "Show it again",
+
+    demoEyebrow: "The demo",
+    demoTitle: "Three contributions. One decision, and it is yours.",
+    demoIntro:
+      "A freelance designer's quoting problem becomes one sentence. Research, UX and engineering agents each hand in a signed contribution, and GoodIdea states where they agree and what is still a trade-off. The product draft changes only after you confirm it.",
+
+    briefEyebrow: "Output",
+    briefTitle: "The same case. This is what is left.",
     briefIntro:
-      "This is what the fixed example ends with: a product direction, a concept prototype, a definition of version one, and the package a coding agent would be handed. It is not generated software, and it is not evidence that the market has been validated.",
+      "When the film above finishes, this is what remains: a product draft, the scope of version one, and the package a coding agent would be handed.",
     briefInputLabel: "The first sentence",
     briefDownload: "Download the handoff package (Markdown)",
     briefScenarioNote:
-      "The example: a freelance designer who wants the scope they re-explain on every quote to become one sheet a client can read and confirm. Nothing here talks to a backend; the prototype is a concept preview and the handoff tasks are sample content.",
+      "The case: a freelance designer who wants the scope they re-explain on every quote to become one sheet a client can read and confirm.",
     briefLabels: {
       direction: "Direction",
-      prototype: "Concept prototype",
+      prototype: "Concept sketch",
       scope: "Version one does",
       nonGoals: "Version one does not",
       done: "Done means",
       open: "Still unverified",
       handoff: "Work after the handoff",
     },
-    briefFooter:
-      "The film below shows this plan taking shape: three agents propose, GoodIdea combines, you decide. Read the full details here, or download the handoff package.",
+    briefGroups: { direction: "Direction and sketch", scope: "Version-one scope", handoff: "Handoff to development" },
+    briefDetails: "Open: acceptance, unverified assumptions and implementation tasks",
+    briefFooter: "The page and the downloaded package are built from the same source, so they cannot disagree.",
 
-    demoEyebrow: "You and an AI team, working one idea out",
-    demoTitle: "Three contributions. One decision, and it is yours.",
-    demoIntro:
-      "{seconds} seconds: a designer's quoting problem becomes an idea, research, UX and engineering agents each hand in a signed contribution, and GoodIdea states where they agree and what is still a trade-off. The product draft changes only after you confirm it.",
+    workEyebrow: "How it works",
+    workTitle: "The agents propose. GoodIdea combines. You decide.",
+    workIntro: "Three steps, then three principles — and the principles all answer one question: when it gets something wrong, can you pull the conclusion back?",
+    workSteps: [
+      {
+        number: "01",
+        title: "Specialists propose, from different angles",
+        text: "Research reads what the client keeps asking. UX sketches where the edges are. Engineering prices the build. Each contribution is signed, and says whether it is an assumption, an exploration or a suggestion.",
+      },
+      {
+        number: "02",
+        title: "GoodIdea states the direction and the trade-off",
+        text: "The three contributions come together into what they agree on, plus the one choice that needs a person to make it. Disagreement is put on the table, not smoothed away.",
+      },
+      {
+        number: "03",
+        title: "Nothing reaches the draft until you confirm it",
+        text: "The proposal waits. After you confirm, the old description is struck out, the new direction is written in and the version moves — so you can see what your decision changed.",
+      },
+    ],
+    workPrinciples: [
+      { term: "Contributions are attributed", text: "Every line on the draft says which agent's contribution it came from." },
+      { term: "Proposed and adopted stay apart", text: "An unconfirmed proposal keeps its own dashed edge; it never quietly becomes product content." },
+      { term: "What is unverified is marked", text: "Research proposes an assumption to test; a sketch is an exploration, not an adopted design. Both say so." },
+    ],
+    workVision:
+      "Editing on the map itself, and asking for changes inside a running prototype, are where GoodIdea is going. The public film does not have those interactions yet.",
+
+    trustScope:
+      "What is public today is this one fixed case and the interface it runs on. The live workspace is not open yet: nothing on this page talks to a backend, nothing is really generated, and no package is really sent to a coding agent.",
+    trustLink: "View the demo source",
+    trustLinkHref: REPO,
+
+    closingEyebrow: "Next",
+    closingTitle: "Start from one sentence, and see what version one looks like.",
+    closingText: "Watch the whole thing in {seconds} seconds, or just read what it leaves behind.",
+    closingPrimary: "Watch an idea take shape",
+    closingSecondary: "Read or download the output",
+
+    footer: "Public demo and shared interface · English / 日本語 / 简体中文",
+
     demo: {
       startTitle: "Watch it through, or go straight to the prototype?",
       startText:
@@ -307,105 +372,100 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       modeTry: "Try it",
       finishedTry: "Take it yourself",
     },
-
-    howEyebrow: "How it works",
-    howTitle: "One question at a time — the one that changes the direction.",
-    howItems: [
-      {
-        number: "01",
-        title: "Start from something that happened",
-        text: "Not from features. What took the most time on the last real project? What you say about your own limits stays on the map, so you never say it twice.",
-      },
-      {
-        number: "02",
-        title: "Get to a prototype you can click",
-        text: "The conversation turns into a concept prototype early. Ask for something inside it and the screen changes, instead of finding out after the code is written.",
-      },
-      {
-        number: "03",
-        title: "Fix the edges and hand it over",
-        text: "Write down what this version does, what it will not do, and what has to be true to call it finished — then hand that, with the prototype, to the coding agent.",
-      },
-    ],
-
-    trustEyebrow: "What stays yours",
-    trustTitle: "It organises the idea. It does not decide it.",
-    trustIntro: "Each line below answers the same question: when it gets something wrong, can you still pull the conclusion back?",
-    trustItems: [
-      {
-        term: "Every line traces back",
-        text: "Each item in version one says which sentence of yours it came from. Disagree, and you can follow it back to that sentence and change it.",
-      },
-      {
-        term: "Changes are shown first",
-        text: "Before a conclusion moves, you see what changed, what was added, and what is still open — and then you are asked.",
-      },
-      {
-        term: "A vague yes is not a choice",
-        text: "When your answer is loose, it puts the concrete options back in front of you instead of quietly picking one.",
-      },
-      {
-        term: "What it cannot do is said plainly",
-        text: "The prototype is a concept preview and the handoff is sample content. What has not been verified is listed on its own, not folded into the conclusion.",
-      },
-    ],
-    trustScope:
-      "What is public today is this fixed example and the interface it runs on. The live workspace is not open yet: nothing on this page talks to a backend, nothing is really generated, and no package is really sent to a coding agent.",
-    trustLink: "View the demo source",
-    trustLinkHref: REPO,
-
-    closingEyebrow: "Next",
-    closingTitle: "Start from one sentence and see what version one looks like.",
-    closingText:
-      "Watch the {seconds}-second film: what the agents propose, how GoodIdea combines it, and where the decision stays. For the full result, return to the example output above.",
-    closingPrimary: "An idea, in {seconds} seconds",
-    closingSecondary: "Back to the example output",
-
-    footer: "Public demo and shared interface · English / 日本語 / 简体中文",
   },
 
   ja: {
     skip: "本文へ移動",
     primaryNavigationLabel: "メインナビゲーション",
     languageLabel: "言語",
-    nav: { brief: "成果物の例", demo: "Demo", how: "進め方", github: "GitHub" },
+    nav: { demo: "Demo", brief: "成果物", how: "進め方", github: "GitHub" },
 
     heroEyebrow: "AI と一緒に作り始める人へ",
-    heroTitle: "アイデアを、目に見える試作と、引き渡せる初版に。",
+    heroTitle: "AI チームと一緒に、アイデアを着手できる製品まで詰める。",
     heroIntro:
-      "コードは AI に書かせられる。決まっていないのは初版です。誰のどの困りごとを解くのか、実物はどんな形か、何をやって何をやらないのか、どうなったら正しくできたと言えるのか。GoodIdea はそこを一緒に詰めます。",
-    heroBrandLine: "アイデアは直線ではない。それでも次の一歩は決められる。",
-    heroPrimary: "あるアイデアの {seconds} 秒を見る",
-    heroPrimaryNote: "登録不要 · 固定の例で、実モデルは呼びません",
-    heroSecondary: "先に成果物を見る",
-    heroSecondaryNote: "方向・コンセプト試作・初版の定義・引き渡し一式",
-    mapReplay: "ルートをもう一度",
-    mapReplayed: "ルートを最初から再生します。",
+      "調査・UX・実装の Agent がそれぞれ提案し、GoodIdea が大事な選択をまとめます。決めるのはあなた。方向・スケッチ・初版の範囲が、だんだんはっきりします。",
+    heroAudience: "コードは AI に書かせられる。でも初版の中身がまだ決まっていない——そんな人に。",
+    heroPrimary: "アイデアが形になる過程を見る",
+    heroPrimaryNote: "{seconds} 秒 · 登録不要",
+    heroSecondary: "最後に何が残るかを見る",
 
-    briefEyebrow: "再生しなくても読める成果物",
-    briefTitle: "一文のアイデアから、これだけが残ります。",
+    previewLabel: "Agent が提案 · GoodIdea がまとめ · あなたが決める",
+    previewContribLabel: "3 名の専門 Agent の提案",
+    previewContributions: ["検証前の仮説", "コンセプト案", "実装コスト"],
+    previewDecision: "あなたの決定 1 件",
+    previewDecisionDone: "採用 · ドラフトに反映",
+    previewDraftLabel: "製品ドラフト",
+    previewFormingLabel: "はっきりしてくるもの",
+    previewDeliverables: ["製品の方向", "コンセプトスケッチ", "初版の範囲", "引き渡し一式"],
+    previewReplay: "もう一度",
+
+    demoEyebrow: "デモ",
+    demoTitle: "提案は 3 件。決めるのは、1 件のあなたの判断。",
+    demoIntro:
+      "フリーランスのデザイナーの見積もりの困りごとが、一文のアイデアになる。調査・UX・実装の 3 名の Agent が署名つきの提案を出し、GoodIdea が共通する方向と判断が要る点をまとめる。製品ドラフトが変わるのは、あなたが確認したあとです。",
+
+    briefEyebrow: "成果物",
+    briefTitle: "同じ事例から、最後に残るもの。",
     briefIntro:
-      "固定の例を最後まで進めると残るもの：製品の方向、コンセプト試作、初版の定義、そして coding agent に渡す一式です。生成済みのソフトウェアではなく、市場が検証済みだという意味でもありません。",
+      "上の映像を最後まで見ると残るのが、これです。製品ドラフト、初版の範囲、そして coding agent に渡す一式。",
     briefInputLabel: "最初の一文",
     briefDownload: "引き渡し資料をダウンロード（Markdown）",
     briefScenarioNote:
-      "例：フリーランスのデザイナーが、見積もりのたびに説明し直している範囲を、お客さまが読んで確認できる一枚にしたい。このページはバックエンドにつながらず、試作はコンセプトの見取り図、引き渡しの作業も例です。",
+      "事例：フリーランスのデザイナーが、見積もりのたびに説明し直している範囲を、お客さまが読んで確認できる一枚にしたい。",
     briefLabels: {
       direction: "製品の方向",
-      prototype: "コンセプト試作",
+      prototype: "コンセプトスケッチ",
       scope: "初版でやること",
       nonGoals: "初版でやらないこと",
       done: "できたと言える条件",
       open: "まだ検証していない",
       handoff: "引き渡し後の作業",
     },
-    briefFooter:
-      "下の映像は、この案が形になるまでの物語です。3 名の Agent が提案し、GoodIdea がまとめ、決めるのはあなた。詳しい内容はここで読め、引き渡し資料もダウンロードできます。",
+    briefGroups: { direction: "方向とスケッチ", scope: "初版の範囲", handoff: "開発への引き渡し" },
+    briefDetails: "開く：完了条件・未検証の仮説・実装の作業",
+    briefFooter: "ページの内容とダウンロードする資料は同じ元から作られるので、食い違いません。",
 
-    demoEyebrow: "AI チームとあなたで、アイデアを詰める",
-    demoTitle: "提案は 3 件。決めるのは、1 件のあなたの判断。",
-    demoIntro:
-      "{seconds} 秒。デザイナーの見積もりの困りごとがアイデアになり、調査・UX・実装の 3 名の Agent が署名つきの提案を出し、GoodIdea が共通点と判断が要る点をまとめます。製品ドラフトが変わるのは、あなたが確認したあとです。",
+    workEyebrow: "進め方",
+    workTitle: "Agent が提案し、GoodIdea がまとめ、あなたが決める。",
+    workIntro: "3 つの手順のあとに 3 つの原則。原則はすべて「間違えたとき、結論を引き戻せるか」への答えです。",
+    workSteps: [
+      {
+        number: "01",
+        title: "専門の Agent が、別の角度から出す",
+        text: "調査はお客さまが繰り返し聞くことを読み、UX は境界をスケッチし、実装はコストを見ます。提案には署名があり、仮説か・探索か・提案かも書かれます。",
+      },
+      {
+        number: "02",
+        title: "GoodIdea が方向と判断どころをまとめる",
+        text: "3 件をまとめて、共通する方向と、人が決めるべき 1 つの取捨を書き出します。食い違いは、消さずに並べます。",
+      },
+      {
+        number: "03",
+        title: "確認するまで、ドラフトは変わらない",
+        text: "提案はそこで待ちます。確認のあと、古い説明に線が引かれ、新しい方向が書かれ、版が上がる。何が変わったかが見えます。",
+      },
+    ],
+    workPrinciples: [
+      { term: "提案には出どころがある", text: "ドラフトの各行に、どの Agent のどの提案から来たかが書かれています。" },
+      { term: "提案と採用は分けて見せる", text: "確認前の提案は破線の枠のまま。黙って製品の内容に変わることはありません。" },
+      { term: "未検証には印をつける", text: "調査が出すのは検証前の仮説、スケッチは未採用の探索。どちらもそう書いてあります。" },
+    ],
+    workVision:
+      "地図の上で直接直す、試作の中で新しい要望を言う——それは GoodIdea が目指す形です。いま公開している映像には、その操作はまだありません。",
+
+    trustScope:
+      "現在公開しているのは、この固定の事例とその画面実装です。実際のワークスペースはまだ公開しておらず、このページはバックエンドに接続せず、実際に何かを生成することも、coding agent に一式を送ることもありません。",
+    trustLink: "Demo のソースを見る",
+    trustLinkHref: REPO,
+
+    closingEyebrow: "次にできること",
+    closingTitle: "一文から始めて、初版がどうなるか見てみる。",
+    closingText: "{seconds} 秒で全体を見るか、残ったものだけ読むか。",
+    closingPrimary: "アイデアが形になる過程を見る",
+    closingSecondary: "成果物を読む / ダウンロード",
+
+    footer: "公開 Demo と共通 UI の実装 · English / 日本語 / 简体中文",
+
     demo: {
       startTitle: "通しで見ますか、試作から触りますか。",
       startText:
@@ -433,60 +493,5 @@ export const siteCopy: Record<Locale, SiteCopy> = {
       modeTry: "自分で",
       finishedTry: "自分で進める",
     },
-
-    howEyebrow: "進め方",
-    howTitle: "方向を変える問いだけを、一度に一つずつ。",
-    howItems: [
-      {
-        number: "01",
-        title: "実際にあった一件から聞く",
-        text: "機能からは始めません。直近の案件でどこが一番時間を食ったか。制約として話したことは地図に残るので、二度言う必要はありません。",
-      },
-      {
-        number: "02",
-        title: "早い段階で触れる試作にする",
-        text: "会話をコンセプト試作に変えます。その中で要望を言えば画面が変わる。コードを書き終えてから確かめる必要はありません。",
-      },
-      {
-        number: "03",
-        title: "境目を決めて、渡せる形にする",
-        text: "この版でやること、やらないこと、何を満たせば完了かを書き出し、試作ごと coding agent に渡します。",
-      },
-    ],
-
-    trustEyebrow: "あなたが握り続けるもの",
-    trustTitle: "整理はする。決めはしない。",
-    trustIntro: "以下はすべて「間違えたとき、結論を引き戻せるか」への答えです。",
-    trustItems: [
-      {
-        term: "どの一行もたどれる",
-        text: "初版の各項目には、あなたのどの発言から来たかが書いてあります。違うと思えば、その発言まで戻って直せます。",
-      },
-      {
-        term: "変更は先に見せる",
-        text: "結論を動かす前に、何が変わり、何が加わり、何がまだ不確かかを出してから聞きます。",
-      },
-      {
-        term: "曖昧な「はい」は選択ではない",
-        text: "答えがぼやけているときは、具体的な選択肢をもう一度出します。勝手に一つ選んで先へは進みません。",
-      },
-      {
-        term: "できていないことは書く",
-        text: "試作はコンセプトの見取り図、引き渡しは例の内容です。未検証のものは結論に混ぜず、別に並べます。",
-      },
-    ],
-    trustScope:
-      "現在公開しているのは、この固定の例とその画面実装です。実際のワークスペースはまだ公開しておらず、このページはバックエンドに接続せず、実際に何かを生成することも、coding agent に一式を送ることもありません。",
-    trustLink: "Demo のソースを見る",
-    trustLinkHref: REPO,
-
-    closingEyebrow: "次にできること",
-    closingTitle: "一文から始めて、初版がどうなるか見てみる。",
-    closingText:
-      "{seconds} 秒の映像で、Agent が何を出し、GoodIdea がどうまとめ、決定がどこに残るのかを見てください。残るものを詳しく知りたいときは、上の成果物の例へ。",
-    closingPrimary: "あるアイデアの {seconds} 秒を見る",
-    closingSecondary: "成果物の例に戻る",
-
-    footer: "公開 Demo と共通 UI の実装 · English / 日本語 / 简体中文",
   },
 };

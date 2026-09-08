@@ -25,8 +25,8 @@ export type AgentCopy = {
   initial: string;
   title: string;
   tag: string;
-  /** Line one of the rail: what it is doing right now. */
-  work: [string, string, string];
+  /** What it is doing right now, before it has handed anything in. */
+  work: [string, string];
   /** Line two of the rail: what it has handed in. Grows at most once. */
   notes: string[];
 };
@@ -47,13 +47,15 @@ export type PaperCopyShape = {
   creator: { label: string; thoughts: string[] };
   workspace: {
     project: string; breadcrumb: string; stages: [string, string, string, string];
-    statuses: string[]; evidence: string; decisions: [string, string, string];
+    statuses: string[]; evidence: string;
   };
   product: {
     stageLabel: string; canvasLabel: string; title: string; original: [string, string];
+    /** What the sentence under it is: the direction the draft currently states. */
+    currentLabel: string;
     versionNote: [string, string];
     proposalKicker: string; proposalKickerDone: string; proposal: string;
-    proposalDetail: [string, string]; deferred: string;
+    proposalDetail: string; deferred: string;
     button: string; buttonDone: string; revised: [string, string]; revisedMark: string;
   };
   sketch: {
@@ -135,16 +137,16 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
       stages: ["想法", "团队推敲", "你的决定", "产品稿"],
       statuses: ["想法已接收", "团队推敲中", "1 项待你决定", "正在写入产品稿", "产品稿已更新", "体验产品预览"],
       evidence: "来自 Mira、Luca、Kai 的三份贡献",
-      decisions: ["尚无已采用决定", "待你决定 · 1", "已采用 1 项决定"],
     },
     product: {
       stageLabel: "最初的想法", canvasLabel: "产品稿", title: "设计师报价工具",
       original: ["能不能做个工具，", "帮我更快创建报价？"],
+      currentLabel: "当前方向",
       versionNote: ["推敲中", "已更新"],
-      proposalKicker: "待决定 01 · 融合提案", proposalKickerDone: "你已确认 · 写入产品稿",
-      proposal: "先做只读的范围确认？",
-      proposalDetail: ["交付、修改次数、包含与追加项，", "连同价格，一起写清楚。"],
-      deferred: "范围调整与自动计价，暂不纳入。",
+      proposalKicker: "待你决定 · 01", proposalKickerDone: "你已采用 · 写入产品稿",
+      proposal: "先做范围确认？",
+      proposalDetail: "让客户在开工前，看清交付内容、修改次数和价格。",
+      deferred: "本轮暂不做：范围调整与自动计价，留待后续。",
       button: "采用这个方向", buttonDone: "你已确认",
       revised: ["先看清范围与价格，", "开工前，只读确认。"],
       revisedMark: "只把你确认的内容，写进第一版。",
@@ -174,19 +176,19 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
       research: {
         role: "研究 Agent", name: "Mira", tagRole: "研究", initial: "M",
         title: "用户研究", tag: "待验证假设",
-        work: ["正在读客户反复问的话", "正在写下范围假设", "本轮已交出"],
+        work: ["正在读客户反复问的话", "正在写下范围假设"],
         notes: ["已提出范围假设"],
       },
       experience: {
         role: "UX Agent", name: "Luca", tagRole: "UX", initial: "L",
         title: "UX · 画出来", tag: "探索草图 · 尚未采用",
-        work: ["正在把边界画成草图", "正在标出可调整的地方", "本轮已交出"],
+        work: ["正在把边界画成草图", "正在标出可调整的地方"],
         notes: ["承接研究，整理确认流程"],
       },
       engineering: {
         role: "工程 Agent", name: "Kai", tagRole: "工程", initial: "K",
         title: "工程 · 想一想", tag: "建议 · 待你确认",
-        work: ["正在看实现代价", "正在核对计价依赖", "本轮已交出"],
+        work: ["正在看实现代价", "正在核对计价依赖"],
         notes: ["已标出计价依赖", "已贡献建议：先做只读确认"],
       },
     },
@@ -205,7 +207,7 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
         "1 份贡献 · 继续推敲",
         "2 份贡献 · 继续推敲",
         "3 份贡献 · 正在综合",
-        "3 份贡献 → 1 项待你决定",
+        "3 份贡献 → 1 项提案",
         "1 项已采用 · 写入 v0.2",
       ],
     },
@@ -213,8 +215,8 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
       kicker: "GoodIdea · 综合",
       chips: ["Mira · 范围假设", "Luca · 确认流程草图", "Kai · 计价依赖"],
       sharedLabel: "共同方向", shared: "让客户先看清范围与价格。",
-      tradeLabel: "待取舍", trade: "Kai 在 Luca 的草图上圈出「范围可以调整吗？」：要调整范围，就得同步计价。",
-      resultLabel: "整理成", result: "1 项待你决定：先做只读确认，其余留待后续。",
+      tradeLabel: "一处关键取舍", trade: "可调范围需要同步计价，第一版先做确认。",
+      resultLabel: "整理成", result: "1 项提案：先做范围确认，其余留待后续。",
     },
   },
 
@@ -270,16 +272,16 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
       stages: ["Idea", "Team works", "Your call", "Draft"],
       statuses: ["Idea received", "Team is working", "1 decision for you", "Writing into the draft", "Draft updated", "Product preview"],
       evidence: "Three contributions: Mira, Luca, Kai",
-      decisions: ["No decisions adopted yet", "For you to decide · 1", "1 decision adopted"],
     },
     product: {
       stageLabel: "The first idea", canvasLabel: "Product draft", title: "Designer quoting tool",
       original: ["Could I have a tool that", "makes quoting faster?"],
+      currentLabel: "Current direction",
       versionNote: ["in progress", "updated"],
-      proposalKicker: "Decision 01 · combined proposal", proposalKickerDone: "You confirmed · written into the draft",
-      proposal: "Start with read-only scope confirmation?",
-      proposalDetail: ["Deliverables, revisions, what's in and what's extra,", "with the price, all written out."],
-      deferred: "Adjustable scope and automatic pricing stay out for now.",
+      proposalKicker: "Your call · 01", proposalKickerDone: "You adopted this · in the draft",
+      proposal: "Start with a scope confirmation?",
+      proposalDetail: "Before work starts, the client sees the deliverables, the revisions and the price.",
+      deferred: "Not this round: adjustable scope and automatic pricing.",
       button: "Adopt this direction", buttonDone: "You confirmed",
       revised: ["See the scope and the price first.", "Confirm before work starts."],
       revisedMark: "Only what you confirmed goes into version one.",
@@ -309,19 +311,19 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
       research: {
         role: "Research agent", name: "Mira", tagRole: "Research", initial: "M",
         title: "User research", tag: "Assumption to test",
-        work: ["Reading what the client keeps asking", "Writing down a scope assumption", "Handed in for this round"],
+        work: ["Reading what the client keeps asking", "Writing down a scope assumption"],
         notes: ["Proposed a scope assumption"],
       },
       experience: {
         role: "UX agent", name: "Luca", tagRole: "UX", initial: "L",
         title: "UX · sketch it", tag: "Exploration · not adopted",
-        work: ["Sketching where the edges are", "Marking what could be adjustable", "Handed in for this round"],
+        work: ["Sketching where the edges are", "Marking what could be adjustable"],
         notes: ["Built on the research: a confirm flow"],
       },
       engineering: {
         role: "Engineering agent", name: "Kai", tagRole: "Engineering", initial: "K",
         title: "Engineering check", tag: "Suggestion · needs your call",
-        work: ["Checking what it costs to build", "Tracing the pricing dependency", "Handed in for this round"],
+        work: ["Checking what it costs to build", "Tracing the pricing dependency"],
         notes: ["Flagged the pricing dependency", "Suggests a read-only first version"],
       },
     },
@@ -340,7 +342,7 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
         "1 contribution · still working",
         "2 contributions · still working",
         "3 contributions · being combined",
-        "3 contributions → 1 decision for you",
+        "3 contributions → 1 proposal",
         "1 adopted · written into v0.2",
       ],
     },
@@ -348,8 +350,8 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
       kicker: "GoodIdea · combining",
       chips: ["Mira · scope assumption", "Luca · confirm-flow sketch", "Kai · pricing dependency"],
       sharedLabel: "Where they agree", shared: "Let the client see the scope and the price first.",
-      tradeLabel: "Still a trade-off", trade: "Kai circled Luca's open question: adjustable scope means pricing rules follow.",
-      resultLabel: "Comes out as", result: "1 decision for you: read-only confirmation first, the rest later.",
+      tradeLabel: "One trade-off", trade: "Adjustable scope needs pricing to follow. Version one confirms only.",
+      resultLabel: "Comes out as", result: "One proposal: confirm the scope first, the rest later.",
     },
   },
 
@@ -405,16 +407,16 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
       stages: ["アイデア", "チーム検討", "あなたの決定", "ドラフト"],
       statuses: ["アイデアを受け取りました", "チームが検討中", "あなたの決定 1 件", "ドラフトに反映中", "ドラフト更新済み", "製品プレビュー"],
       evidence: "Mira・Luca・Kai の 3 件の提案から",
-      decisions: ["採用した決定はまだありません", "あなたの決定 · 1 件", "決定を 1 件採用"],
     },
     product: {
       stageLabel: "最初のアイデア", canvasLabel: "製品ドラフト", title: "デザイナー向け見積ツール",
       original: ["見積もりをもっと早く作れる", "道具が作れないかな？"],
+      currentLabel: "いまの方向",
       versionNote: ["検討中", "更新済み"],
-      proposalKicker: "決定 01 · 統合された提案", proposalKickerDone: "確認済み · ドラフトに反映",
-      proposal: "まず「読むだけの範囲確認」から？",
-      proposalDetail: ["納品物・修正回数・含むものと追加分を、", "価格まで含めて書き出す。"],
-      deferred: "範囲の調整と自動見積もりは、今回は入れない。",
+      proposalKicker: "あなたの決定 · 01", proposalKickerDone: "採用しました · ドラフトに反映",
+      proposal: "まず範囲の確認から？",
+      proposalDetail: "着手の前にお客さまが、納品物・修正回数・価格を確かめられる。",
+      deferred: "今回はやらない：範囲の調整と自動見積もり。",
       button: "この方向で進める", buttonDone: "確認しました",
       revised: ["まず範囲と価格を見てもらう。", "着手前に、読んで確認。"],
       revisedMark: "確認したことだけを、初版に書きます。",
@@ -444,19 +446,19 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
       research: {
         role: "リサーチ Agent", name: "Mira", tagRole: "調査", initial: "M",
         title: "ユーザー調査", tag: "検証前の仮説",
-        work: ["お客さまの問いを読んでいる", "範囲の仮説を書いている", "今回の分は提出済み"],
+        work: ["お客さまの問いを読んでいる", "範囲の仮説を書いている"],
         notes: ["範囲の仮説を提出"],
       },
       experience: {
         role: "UX Agent", name: "Luca", tagRole: "UX", initial: "L",
         title: "UX · 描いてみる", tag: "探索スケッチ · 未採用",
-        work: ["境界をスケッチしている", "調整できる箇所に印をつけている", "今回の分は提出済み"],
+        work: ["境界をスケッチしている", "調整できる箇所に印をつけている"],
         notes: ["調査を受けて確認の流れを整理"],
       },
       engineering: {
         role: "実装 Agent", name: "Kai", tagRole: "実装", initial: "K",
         title: "実装 · 考えてみる", tag: "提案 · あなたの確認待ち",
-        work: ["実装のコストを見ている", "価格の依存関係を確認している", "今回の分は提出済み"],
+        work: ["実装のコストを見ている", "価格の依存関係を確認している"],
         notes: ["価格の依存関係を指摘", "提案：まず読むだけの確認から"],
       },
     },
@@ -475,7 +477,7 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
         "貢献 1 件 · 検討中",
         "貢献 2 件 · 検討中",
         "貢献 3 件 · 統合中",
-        "貢献 3 件 → あなたの決定 1 件",
+        "貢献 3 件 → 提案 1 件",
         "1 件採用 · v0.2 に反映",
       ],
     },
@@ -483,8 +485,8 @@ export const paperCopy: Record<PaperLocale, PaperCopyShape> = {
       kicker: "GoodIdea · 統合",
       chips: ["Mira · 範囲の仮説", "Luca · 確認フローの草案", "Kai · 価格の依存"],
       sharedLabel: "共通する方向", shared: "まずお客さまに、範囲と価格を見せる。",
-      tradeLabel: "判断が要る点", trade: "Kai が Luca の「範囲は調整できる？」を丸で囲んだ：調整できるなら価格の規則も揃える。",
-      resultLabel: "まとまり", result: "あなたの決定 1 件：まず読むだけの確認、残りは後で。",
+      tradeLabel: "判断が要る点", trade: "範囲を可変にすると価格も揃える必要がある。初版は確認だけ。",
+      resultLabel: "まとまり", result: "提案 1 件：まず範囲の確認、残りは後で。",
     },
   },
 };

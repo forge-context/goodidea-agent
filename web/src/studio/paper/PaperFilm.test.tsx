@@ -4,7 +4,7 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 
 import { PaperFilm } from "./PaperFilm";
 import { paperCopy } from "./paperCopy";
-import { CHAPTER_STARTS, DURATION, chapterAt, chapterStill, quantize } from "./paperTimeline";
+import { CHAPTER_STARTS, DURATION, LAST_FRAME, chapterAt, chapterStill, quantize } from "./paperTimeline";
 
 const copy = paperCopy["zh-CN"];
 let requests: Map<number, FrameRequestCallback>;
@@ -143,6 +143,28 @@ describe("the landing page's film", () => {
     expect(screen.getByText(copy.brand.lines[1])).toBeTruthy();
   });
 
+  it("says it has finished, and the main control replays from the start", () => {
+    render(<PaperFilm locale="zh-CN" />);
+    play();
+    tick(); run(DURATION + 1);
+    expect(requests.size).toBe(0);
+    expect(Number(slider().value)).toBe(LAST_FRAME);
+
+    /* The read-out states the length the page promises, not the last whole second
+     * before it: the clock is raw and the picture is quantised, and the two disagree
+     * by less than a frame at the end. */
+    const readout = document.querySelector(".gip-time") as HTMLElement;
+    expect(readout.textContent).toBe(`${Math.round(DURATION)} / ${Math.round(DURATION)}`);
+
+    // And the main control offers to replay rather than to play a film that has ended.
+    const main = document.querySelector(".gip-play") as HTMLButtonElement;
+    expect(main.textContent).toContain(copy.ui.replay);
+    fireEvent.click(main);
+    expect(Number(slider().value)).toBe(0);
+    tick(); run(2);
+    expect(Number(slider().value)).toBeCloseTo(2, 1);
+  });
+
   it("leaves the page's own keyboard alone", () => {
     const listeners: string[] = [];
     const add = window.addEventListener.bind(window);
@@ -195,16 +217,20 @@ describe("the landing page's film", () => {
       const t = paperCopy[locale];
       expect(screen.getByText(t.opening.thought)).toBeTruthy();
       fireEvent.click(screen.getByRole("button", { name: new RegExp(t.ui.poster) }));
-      // jsdom reports a zero-width container, so this is the phone composition: the
-      // fusion card carries the contributions while it is open, and the team strip
-      // comes back with GoodIdea's own count once it has closed.
+      /* jsdom reports a zero-width container, so this is the phone composition, which
+         shows one block at a time: GoodIdea's card carries the three signed
+         contributions while it is open... */
       seek(41);
       expect(screen.getByText(t.fusion.shared)).toBeTruthy();
       expect(screen.getByText(t.fusion.result)).toBeTruthy();
       expect(screen.getByText(t.fusion.chips[0])).toBeTruthy();
+      // ...and once it has closed the decision has the screen to itself, naming where
+      // it came from on the card rather than repeating it in a strip above.
       seek(45);
-      expect(screen.getByText(t.rail.summary[4])).toBeTruthy();
-      expect(screen.getByText(t.agents.engineering.notes[1])).toBeTruthy();
+      expect(screen.queryByText(t.rail.summary[4])).toBeNull();
+      expect(screen.getByText(t.product.proposal)).toBeTruthy();
+      expect(screen.getByText(t.product.button)).toBeTruthy();
+      expect(screen.getByText(t.workspace.evidence)).toBeTruthy();
     }
   });
 });

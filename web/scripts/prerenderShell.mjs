@@ -59,8 +59,8 @@ export function renderShell(t, { locale, homePath, seconds, withSeconds }) {
       <header class="site-header">
         <a class="brand" href="${localePath[locale]}">${BRAND_MARK}<span>GoodIdea</span></a>
         <nav aria-label="${escape(t.primaryNavigationLabel)}">
-          <a href="#brief">${escape(t.nav.brief)}</a>
           <a href="#demo">${escape(t.nav.demo)}</a>
+          <a href="#brief">${escape(t.nav.brief)}</a>
           <a href="#how">${escape(t.nav.how)}</a>
           <a href="${REPO}">${escape(t.nav.github)}</a>
         </nav>
@@ -71,74 +71,64 @@ export function renderShell(t, { locale, homePath, seconds, withSeconds }) {
         </div>
       </header>
       <main id="main">
-        <section class="map-hero section-shell" id="top">
-          <div class="map-copy">
+        <section class="hero section-shell" id="top">
+          <div class="hero-copy">
             <p class="eyebrow">${escape(t.heroEyebrow)}</p>
             <h1>${escape(t.heroTitle)}</h1>
             <p class="hero-intro">${escape(t.heroIntro)}</p>
+            <p class="hero-audience">${escape(t.heroAudience)}</p>
             <div class="hero-actions">
-              <div>
-                <a class="button button-primary" href="#demo">${seconded(t.heroPrimary)}${ARROW_DOWN}</a>
-                <small>${escape(t.heroPrimaryNote)}</small>
-              </div>
-              <div>
-                <a class="button button-quiet" href="#brief">${escape(t.heroSecondary)}${ARROW_DOWN}</a>
-                <small>${escape(t.heroSecondaryNote)}</small>
-              </div>
+              <a class="button button-primary" href="#demo">${escape(t.heroPrimary)}${ARROW_DOWN}</a>
+              <span class="hero-length">${seconded(t.heroPrimaryNote)}</span>
+              <a class="button button-quiet" href="#brief">${escape(t.heroSecondary)}${ARROW_DOWN}</a>
             </div>
           </div>
-          <div class="map-stage" aria-hidden="true"></div>
-        </section>
-        <section class="brief-section" id="brief">
-          <div class="section-shell">
-            <div class="section-heading">
-              <div>
-                <p class="eyebrow">${escape(t.briefEyebrow)}</p>
-                <h2>${escape(t.briefTitle)}</h2>
-              </div>
-              <p>${escape(t.briefIntro)}</p>
-            </div>
-          </div>
+          <aside class="outcome" aria-label="${escape(t.previewLabel)}">
+            <p class="outcome-kicker">${escape(t.previewLabel)}</p>
+            <ul class="outcome-deliverables">
+              ${t.previewDeliverables.map((item) => `<li>${escape(item)}</li>`).join("\n              ")}
+            </ul>
+          </aside>
         </section>
         <section class="demo-section" id="demo">
           <div class="section-shell">
             <div class="section-heading">
-              <div>
-                <p class="eyebrow">${escape(t.demoEyebrow)}</p>
-                <h2>${escape(t.demoTitle)}</h2>
-              </div>
-              <p>${seconded(t.demoIntro)}</p>
+              <p class="eyebrow">${escape(t.demoEyebrow)}</p>
+              <h2>${escape(t.demoTitle)}</h2>
+              <p class="section-lead">${seconded(t.demoIntro)}</p>
             </div>
           </div>
         </section>
-        <section class="how-section section-shell" id="how">
-          <div class="section-heading compact">
-            <div><p class="eyebrow">${escape(t.howEyebrow)}</p><h2>${escape(t.howTitle)}</h2></div>
+        <section class="brief-section" id="brief">
+          <div class="section-shell">
+            <div class="section-heading">
+              <p class="eyebrow">${escape(t.briefEyebrow)}</p>
+              <h2>${escape(t.briefTitle)}</h2>
+              <p class="section-lead">${escape(t.briefIntro)}</p>
+            </div>
+            <p class="brief-scenario">${escape(t.briefScenarioNote)}</p>
           </div>
-          <div class="how-grid">
-            ${t.howItems
+        </section>
+        <section class="work-section section-shell" id="how">
+          <div class="section-heading">
+            <p class="eyebrow">${escape(t.workEyebrow)}</p>
+            <h2>${escape(t.workTitle)}</h2>
+            <p class="section-lead">${escape(t.workIntro)}</p>
+          </div>
+          <ol class="work-steps">
+            ${t.workSteps
               .map(
                 (item) =>
-                  `<article><span>${escape(item.number)}</span><h3>${escape(item.title)}</h3><p>${escape(item.text)}</p></article>`,
+                  `<li><span>${escape(item.number)}</span><h3>${escape(item.title)}</h3><p>${escape(item.text)}</p></li>`,
               )
               .join("\n            ")}
-          </div>
-        </section>
-        <section class="trust-section section-shell" id="trust">
-          <div class="section-heading compact">
-            <div>
-              <p class="eyebrow">${escape(t.trustEyebrow)}</p>
-              <h2>${escape(t.trustTitle)}</h2>
-              <p class="trust-intro">${escape(t.trustIntro)}</p>
-            </div>
-          </div>
-          <dl class="trust-list">
-            ${t.trustItems
+          </ol>
+          <dl class="work-principles">
+            ${t.workPrinciples
               .map((item) => `<div><dt>${escape(item.term)}</dt><dd>${escape(item.text)}</dd></div>`)
               .join("\n            ")}
           </dl>
-          <p class="trust-scope">${escape(t.trustScope)}</p>
-          <a class="button button-quiet" href="${escape(t.trustLinkHref)}">${escape(t.trustLink)}${ARROW_UP_RIGHT}</a>
+          <p class="work-vision">${escape(t.workVision)}</p>
         </section>
         <section class="closing-section" id="start">
           <div class="section-shell closing-panel">
@@ -146,10 +136,11 @@ export function renderShell(t, { locale, homePath, seconds, withSeconds }) {
             <h2>${escape(t.closingTitle)}</h2>
             <p>${seconded(t.closingText)}</p>
             <div class="closing-actions">
-              <a class="button button-primary" href="#demo">${seconded(t.closingPrimary)}${ARROW_UP}</a>
+              <a class="button button-primary" href="#demo">${escape(t.closingPrimary)}${ARROW_UP}</a>
               <a class="button button-quiet" href="#brief">${escape(t.closingSecondary)}${ARROW_UP}</a>
             </div>
             <p class="closing-scope">${escape(t.trustScope)}</p>
+            <a class="closing-source" href="${escape(t.trustLinkHref)}">${escape(t.trustLink)}${ARROW_UP_RIGHT}</a>
           </div>
         </section>
       </main>

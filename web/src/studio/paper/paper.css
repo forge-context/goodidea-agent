@@ -34,6 +34,15 @@
 
 .gip-film * { box-sizing: border-box; }
 
+/* The site's mark, wherever the film shows it: the workspace bar, GoodIdea's own
+   card, and the closing frame. One shape, one colour, three sizes. */
+.gip-mark { display: inline-flex; flex: none; color: var(--gip-sage-deep); }
+.gip-mark svg { width: 100%; height: 100%; overflow: visible; }
+.gip-mark-loop, .gip-mark-turn { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+.gip-mark-loop { stroke-width: 4.8; }
+.gip-mark-turn { stroke-width: 4.3; }
+.gip-mark-spark { fill: var(--gip-research); }
+
 /* ------------------------------------------------------------------ viewport */
 
 .gip-viewport {
@@ -74,6 +83,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
+  /* A sheet that is taller than its texture crops the paper rather than stretching
+     it: torn edges are a photograph, and a stretched tear reads as a mistake. */
+  object-fit: cover;
   user-select: none;
   pointer-events: none;
   /* The shadow follows the torn outline and transforms with the sheet. */
@@ -285,6 +297,9 @@
 .gip-tag span { color: #8b8375; }
 
 
+/* Narrower than the sheet's column: at full width the exploration drawing is tall
+   enough to push the open question it leads to off the bottom edge of the paper. */
+.gip-ux-sketch { width: 320px; }
 .gip-sketch { display: block; width: 100%; overflow: visible; font: 26px var(--gip-hand); fill: #4b5247; }
 .gip-sketch-small { font-size: 22px; }
 .gip-sketch-caption { font-size: 22px; fill: var(--gip-sage-deep); }
@@ -314,16 +329,7 @@
   background: #fffefa;
 }
 .gip-ws-brand { display: flex; align-items: center; gap: 10px; font-size: 28px; letter-spacing: -.035em; color: #42583e; }
-.gip-ws-symbol {
-  display: grid;
-  place-items: center;
-  width: 31px;
-  height: 34px;
-  border-radius: 10px 10px 10px 3px;
-  background: #657b59;
-  color: #f6f7ef;
-  font: italic 30px Georgia, serif;
-}
+.gip-ws-symbol { width: 34px; height: 34px; }
 .gip-ws-project { display: flex; align-items: center; gap: 14px; font-size: 18px; color: #4d5948; }
 .gip-ws-project > span { color: #909887; }
 .gip-ws-status { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 17px; color: #65775b; white-space: nowrap; }
@@ -338,7 +344,6 @@
   height: 49px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 0 28px;
   border-top: 1px solid #dfe3d7;
   background: #f9faf4;
@@ -348,7 +353,6 @@
 .gip-ws-stages b { font-size: 12px; font-weight: 500; }
 .gip-ws-stages .is-current { color: #425d37; font-weight: 600; }
 .gip-ws-stages .is-past { color: #72856a; }
-.gip-ws-decisions { font-size: 15px; color: #818b78; }
 
 /* ------------------------------------------------------------ agent rail */
 
@@ -444,7 +448,7 @@
   letter-spacing: .06em;
   color: #5c6f52;
 }
-.gip-fusion-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gip-sage-deep); }
+.gip-fusion-badge { width: 19px; height: 19px; }
 .gip-fusion-chips { margin: 0 0 13px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; }
 .gip-fusion-chips li {
   display: flex;
@@ -481,12 +485,18 @@
 
 /* --------------------------------------------------------- product draft */
 
+.gip-current-label {
+  font: 650 15px/1 var(--gip-body);
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: #8d9581;
+}
 .gip-chip-stage { border: 1px solid rgba(125, 143, 116, .3); background: rgba(125, 143, 116, .14); color: var(--gip-sage-deep); }
 .gip-product-title { font: 600 30px/1.2 var(--gip-body); letter-spacing: .015em; }
 .gip-original { font: 25px/1.45 var(--gip-hand); color: #4a443d; }
 .gip-revised { font: 600 25px/1.4 var(--gip-body); color: var(--gip-ink); }
 .gip-proposal {
-  padding: 9px 12px 10px;
+  padding: 11px 14px 14px;
   border: 1px dashed #98a08b;
   border-left: 2px solid #829375;
   background: rgba(245, 240, 228, .23);
@@ -502,11 +512,17 @@
   font: 13px/1.4 var(--gip-body);
   color: #7e8974;
 }
-.gip-button-row { display: flex; }
+/* The control belongs to the card that asks the question: it sits at the end of the
+   card's own content, with room above it and the card's padding below it, so the
+   press is inside the draft rather than hanging off the sheet's bottom edge. */
+.gip-proposal-actions { display: flex; margin-top: 16px; }
 .gip-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  /* A label is one line: a control that grows a line taller in one language moves
+     its own centre, and the pointer is aimed at that centre. */
+  white-space: nowrap;
   padding: 10px 18px;
   border: 1.5px solid var(--gip-sage-deep);
   border-radius: 3px;
@@ -519,7 +535,7 @@
 .gip-btn.is-done { border-color: var(--gip-sage-deep); background: var(--gip-sage-deep); color: #f7f4ea; }
 .gip-btn.is-done::before { content: "✓"; font-size: 15px; }
 .gip-revised-mark { font: 20px var(--gip-hand); color: var(--gip-sage-deep); }
-.gip-accepted { width: 352px; }
+.gip-accepted { width: 336px; }
 
 /* The sheet becomes an editable product canvas once it is inside the project space. */
 .gip-product-surface {
@@ -534,7 +550,7 @@
 .gip-version { float: right; display: flex; align-items: center; gap: 8px; padding-top: 5px; font: 15px var(--gip-body); color: #829176; }
 .gip-version > span { font-size: 12px; }
 .gip-canvas .gip-proposal {
-  padding: 11px 14px;
+  padding: 13px 16px 16px;
   border: 1px solid #bdccb1;
   border-left: 3px solid #7e996b;
   border-radius: 7px;
@@ -601,7 +617,16 @@
 
 .gip-caption { position: absolute; font: 600 30px/1.5 var(--gip-body); letter-spacing: .02em; color: #4c463d; white-space: nowrap; }
 .gip-brand { position: absolute; white-space: nowrap; }
-.gip-brand-mark { margin-bottom: 14px; font: 600 46px/1.15 var(--gip-body); letter-spacing: -.01em; color: var(--gip-sage-deep); }
+.gip-brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+  font: 600 46px/1.15 var(--gip-body);
+  letter-spacing: -.03em;
+  color: var(--gip-sage-deep);
+}
+.gip-brand-symbol { width: 50px; height: 50px; }
 .gip-brand-line { font: 28px/1.5 var(--gip-body); letter-spacing: .02em; color: #3a352e; }
 
 /* ----------------------------------------------------------------- cursor */
@@ -614,90 +639,125 @@
   pointer-events: none;
   filter: drop-shadow(0 2px 3px rgba(43, 39, 36, .25));
 }
-.gip-cursor.is-pressed { transform-origin: 4px 3px; }
+/* The sprite is placed by its point, so the press scales around that same point and
+   the ripple is centred on it. Anything else moves the tip off the control while it
+   is being pressed, which is exactly what a viewer reads as a missed click. */
+.gip-cursor svg { display: block; transform-origin: 4.33px 2.17px; }
 .gip-cursor.is-pressed svg { transform: scale(.88); }
 .gip-cursor-ping {
   position: absolute;
-  top: -8px;
-  left: -8px;
-  width: 26px;
-  height: 26px;
+  top: -8.83px;
+  left: -6.67px;
+  width: 22px;
+  height: 22px;
   border: 2px solid rgba(93, 111, 85, .75);
   border-radius: 50%;
   opacity: 0;
 }
 .gip-cursor.is-pressed .gip-cursor-ping { opacity: 1; }
 
-/* ------------------------------------------------- narrow-screen composition */
+/* ------------------------------------------------- narrow-screen composition
+
+   Sizes here are stage units of a 760-unit-wide stage. What a phone actually shows is
+   `units × (viewport / 760)`, and during the decision and the client's view the draft
+   is additionally held at 1.2 — so on a 390px screen a unit is 0.51px on the desk and
+   0.62px on the draft. Every size below was chosen from the number that comes out of
+   that, not from how it looks at authoring size: sentences land at 15–16px, secondary
+   lines and labels at 12–13px, and nothing a reader needs is left below that. */
 
 .gip-stage.is-compact .gip-workspace { left: 14px; right: 14px; top: 20px; bottom: 16px; border-radius: 13px; }
 .gip-stage.is-compact .gip-ws-bar { height: 76px; gap: 18px; padding: 0 22px; }
 .gip-stage.is-compact .gip-ws-brand { font-size: 30px; }
+.gip-stage.is-compact .gip-ws-symbol { width: 36px; height: 36px; }
 .gip-stage.is-compact .gip-ws-project { display: none; }
-.gip-stage.is-compact .gip-ws-status { font-size: 23px; }
-.gip-stage.is-compact .gip-ws-foot { height: 36px; padding: 0 20px; }
-.gip-stage.is-compact .gip-ws-stages { gap: 20px; font-size: 20px; }
-.gip-stage.is-compact .gip-ws-decisions { display: none; }
-.gip-stage.is-compact .gip-creator { left: 120px; top: 230px; width: 608px; }
-.gip-stage.is-compact .gip-creator-label { font-size: 20px; }
-.gip-stage.is-compact .gip-creator p { margin-top: 6px; font-size: 25px; line-height: 1.4; }
+.gip-stage.is-compact .gip-ws-status { font-size: 27px; }
+.gip-stage.is-compact .gip-ws-foot { height: 40px; padding: 0 20px; }
+/* Four labelled stages do not fit a phone's top bar at reading size, and shrinking
+   them below it is not a fix. Only the stage the film is in is named; the rest keep
+   their number, which is what makes the strip a position rather than a list. */
+.gip-stage.is-compact .gip-ws-stages { gap: 20px; font-size: 26px; }
+.gip-stage.is-compact .gip-ws-stages > span:not(.is-current) { font-size: 0; }
+.gip-stage.is-compact .gip-ws-stages > span:not(.is-current) b { font-size: 26px; }
+.gip-stage.is-compact .gip-ws-stages b { font-size: 26px; }
+.gip-stage.is-compact .gip-creator { left: 190px; top: 1088px; width: 540px; }
+.gip-stage.is-compact .gip-creator-label { font-size: 26px; }
+.gip-stage.is-compact .gip-creator p { margin-top: 6px; font-size: 30px; line-height: 1.4; }
 .gip-stage.is-compact .gip-notebook { left: -150px; bottom: 355px; opacity: .3; }
 .gip-stage.is-compact .gip-tape { top: 20px; right: -64px; }
-.gip-stage.is-compact .gip-chip { font-size: 20px; letter-spacing: 0; }
+.gip-stage.is-compact .gip-chip { font-size: 25px; letter-spacing: 0; }
 .gip-stage.is-compact .gip-corner-title { font-size: 30px; }
-.gip-stage.is-compact .gip-corner-note { font-size: 18px; }
+.gip-stage.is-compact .gip-corner-note { font-size: 27px; }
 .gip-stage.is-compact .gip-note { font-size: 29px; }
 .gip-stage.is-compact .gip-thought { width: 610px; font-size: 32px; line-height: 1.5; }
 .gip-stage.is-compact .gip-quote-title { font-size: 40px; }
 .gip-stage.is-compact .gip-quote-price { font-size: 33px; }
-.gip-stage.is-compact .gip-chip-quote { font-size: 19px; }
-.gip-stage.is-compact .gip-original { font-size: 28px; }
-.gip-stage.is-compact .gip-revised { font-size: 29px; }
-.gip-stage.is-compact .gip-product-title { font-size: 33px; }
-.gip-stage.is-compact .gip-proposal-kicker { font-size: 22px; letter-spacing: 0; }
-.gip-stage.is-compact .gip-proposal-text { font-size: 28px; }
-.gip-stage.is-compact .gip-proposal-detail { font-size: 23px; }
-.gip-stage.is-compact .gip-proposal-deferred { font-size: 21px; }
-.gip-stage.is-compact .gip-proposal-evidence { font-size: 16px; }
-.gip-stage.is-compact .gip-btn { font-size: 24px; }
-.gip-stage.is-compact .gip-revised-mark { font-size: 22px; }
-.gip-stage.is-compact .gip-version { font-size: 21px; }
-.gip-stage.is-compact .gip-version > span { font-size: 17px; }
-.gip-stage.is-compact .gip-canvas .gip-chip-stage { font-size: 23px; }
-.gip-stage.is-compact .gip-canvas .gip-proposal-kicker { font-size: 20px; }
-.gip-stage.is-compact .gip-canvas .gip-proposal-text { font-size: 25px; }
-.gip-stage.is-compact .gip-canvas .gip-proposal-detail { font-size: 21px; }
-.gip-stage.is-compact .gip-canvas .gip-proposal-deferred { font-size: 19px; }
-.gip-stage.is-compact .gip-ask { font-size: 23px; }
-.gip-stage.is-compact .gip-chip-outlook { font-size: 19px; letter-spacing: 0; }
-.gip-stage.is-compact .gip-preview-row { font-size: 24px; }
-.gip-stage.is-compact .gip-preview-k { flex-basis: 96px; font-size: 22px; }
-.gip-stage.is-compact .gip-preview-row.is-total { font-size: 26px; }
-.gip-stage.is-compact .gip-btn.is-client { font-size: 22px; }
-.gip-stage.is-compact .gip-preview-confirm { font-size: 21px; }
+.gip-stage.is-compact .gip-chip-quote { font-size: 26px; }
+
+/* The draft, read at 1.2 in the decision and client acts. */
+.gip-stage.is-compact .gip-original { font-size: 30px; }
+.gip-stage.is-compact .gip-revised { font-size: 28px; }
+.gip-stage.is-compact .gip-product-title { font-size: 32px; }
+.gip-stage.is-compact .gip-current-label { font-size: 26px; }
+.gip-stage.is-compact .gip-proposal-kicker { font-size: 25px; letter-spacing: 0; }
+.gip-stage.is-compact .gip-proposal-text { font-size: 30px; }
+.gip-stage.is-compact .gip-proposal-detail { font-size: 26px; }
+.gip-stage.is-compact .gip-proposal-deferred { font-size: 24px; }
+.gip-stage.is-compact .gip-proposal-evidence { font-size: 22px; }
+.gip-stage.is-compact .gip-proposal-actions { margin-top: 18px; }
+.gip-stage.is-compact .gip-btn { font-size: 27px; padding: 12px 22px; }
+.gip-stage.is-compact .gip-revised-mark { font-size: 26px; }
+.gip-stage.is-compact .gip-version { font-size: 26px; }
+.gip-stage.is-compact .gip-version > span { font-size: 26px; }
+.gip-stage.is-compact .gip-canvas .gip-chip-stage { font-size: 26px; }
+.gip-stage.is-compact .gip-canvas .gip-proposal-kicker { font-size: 26px; }
+.gip-stage.is-compact .gip-canvas .gip-proposal-text { font-size: 29px; }
+.gip-stage.is-compact .gip-canvas .gip-proposal-detail { font-size: 26px; }
+.gip-stage.is-compact .gip-canvas .gip-proposal-deferred { font-size: 24px; }
+.gip-stage.is-compact .gip-ask { font-size: 24px; }
+.gip-stage.is-compact .gip-chip-outlook { font-size: 25px; letter-spacing: 0; }
+.gip-stage.is-compact .gip-preview-row { font-size: 26px; }
+.gip-stage.is-compact .gip-preview-k { flex-basis: 108px; font-size: 24px; }
+.gip-stage.is-compact .gip-preview-row.is-total { font-size: 28px; }
+.gip-stage.is-compact .gip-btn.is-client { font-size: 24px; padding: 9px 18px; }
+.gip-stage.is-compact .gip-preview-confirm { font-size: 22px; }
 .gip-stage.is-compact .gip-caption { font-size: 32px; }
 .gip-stage.is-compact .gip-brand-mark { font-size: 50px; }
+.gip-stage.is-compact .gip-brand-symbol { width: 54px; height: 54px; }
 .gip-stage.is-compact .gip-brand-line { font-size: 30px; }
-.gip-stage.is-compact .gip-work-title { font-size: 35px; }
-.gip-stage.is-compact .gip-byline { font-size: 21px; }
-.gip-stage.is-compact .gip-work-tag { font-size: 25px; }
-.gip-stage.is-compact .gip-work-note { font-size: 34px; }
-.gip-stage.is-compact .gip-quote-ref { font-size: 25px; }
-.gip-stage.is-compact .gip-ux-option { font-size: 28px; }
-.gip-stage.is-compact .gip-eng-footnote { font-size: 28px; }
-.gip-stage.is-compact .gip-tag { padding: 4px 10px 4px 5px; font-size: 18px; }
-.gip-stage.is-compact .gip-tag .gip-agent-mark { width: 21px; height: 21px; font-size: 12px; }
-/* The phone card carries the same six things, set tighter: it has to sit between the
-   creator's line and the product draft without pushing either one off the screen. */
-.gip-stage.is-compact .gip-fusion { padding: 15px 18px 16px; border-radius: 14px; }
-.gip-stage.is-compact .gip-fusion-kicker { margin-bottom: 9px; font-size: 19px; }
-.gip-stage.is-compact .gip-fusion-chips { margin-bottom: 10px; flex-direction: row; flex-wrap: wrap; gap: 5px; }
-.gip-stage.is-compact .gip-fusion-chips li { padding: 3px 9px 3px 4px; font-size: 18px; }
-.gip-stage.is-compact .gip-fusion-chips .gip-agent-mark { width: 21px; height: 21px; font-size: 12px; }
-.gip-stage.is-compact .gip-fusion-read { margin-bottom: 8px; }
-.gip-stage.is-compact .gip-fusion-read b, .gip-stage.is-compact .gip-fusion-result b { font-size: 16px; }
-.gip-stage.is-compact .gip-fusion-read p, .gip-stage.is-compact .gip-fusion-result p { margin-top: 3px; font-size: 21px; line-height: 1.35; }
-.gip-stage.is-compact .gip-fusion-result { margin-top: 9px; padding-top: 9px; }
+
+/* A sheet in the middle of the desk, at 0.84. */
+.gip-stage.is-compact .gip-work-title { font-size: 27px; }
+.gip-stage.is-compact .gip-byline { font-size: 24px; }
+.gip-stage.is-compact .gip-byline .gip-agent-mark,
+.gip-stage.is-compact .gip-quote-ref .gip-agent-mark { width: 28px; height: 28px; font-size: 23px; }
+.gip-stage.is-compact .gip-work-tag { font-size: 23px; }
+.gip-stage.is-compact .gip-work-note { font-size: 29px; }
+.gip-stage.is-compact .gip-quote-ref { font-size: 26px; }
+.gip-stage.is-compact .gip-ux-option { font-size: 25px; }
+.gip-stage.is-compact .gip-eng-footnote { font-size: 25px; }
+.gip-stage.is-compact .gip-ux-sketch { width: 330px; }
+.gip-stage.is-compact .gip-sketch { font-size: 26px; }
+.gip-stage.is-compact .gip-sketch-small { font-size: 22px; }
+.gip-stage.is-compact .gip-sketch-caption { font-size: 22px; }
+.gip-stage.is-compact .gip-tag { padding: 4px 12px 4px 6px; font-size: 27px; }
+.gip-stage.is-compact .gip-tag .gip-agent-mark { width: 31px; height: 31px; font-size: 26px; }
+.gip-stage.is-compact .gip-strip { padding: 11px 20px 12px; }
+.gip-stage.is-compact .gip-strip-agent { font-size: 28px; }
+.gip-stage.is-compact .gip-strip-agent .gip-agent-mark { width: 32px; height: 32px; font-size: 26px; }
+.gip-stage.is-compact .gip-strip-summary { font-size: 28px; }
+
+/* GoodIdea's own card owns the upper half while it is open, so it is set at reading
+   size rather than squeezed between two other things. */
+.gip-stage.is-compact .gip-fusion { padding: 20px 22px 22px; border-radius: 16px; }
+.gip-stage.is-compact .gip-fusion-kicker { margin-bottom: 13px; font-size: 28px; }
+.gip-stage.is-compact .gip-fusion-badge { width: 27px; height: 27px; }
+.gip-stage.is-compact .gip-fusion-chips { margin-bottom: 14px; flex-direction: row; flex-wrap: wrap; gap: 7px; }
+.gip-stage.is-compact .gip-fusion-chips li { padding: 4px 12px 4px 5px; font-size: 27px; }
+.gip-stage.is-compact .gip-fusion-chips .gip-agent-mark { width: 31px; height: 31px; font-size: 26px; }
+.gip-stage.is-compact .gip-fusion-read { margin-bottom: 12px; }
+.gip-stage.is-compact .gip-fusion-read b, .gip-stage.is-compact .gip-fusion-result b { font-size: 27px; }
+.gip-stage.is-compact .gip-fusion-read p, .gip-stage.is-compact .gip-fusion-result p { margin-top: 5px; font-size: 31px; line-height: 1.4; }
+.gip-stage.is-compact .gip-fusion-result { margin-top: 12px; padding-top: 12px; }
 
 /* --------------------------------------------- language-specific type sizes
 
@@ -717,6 +777,7 @@
 .gip-film[data-locale="en"] .gip-stage.is-compact .gip-canvas .gip-proposal-detail { font-size: 20px; }
 .gip-film[data-locale="en"] .gip-stage.is-compact .gip-canvas .gip-proposal-deferred { font-size: 18px; }
 .gip-film[data-locale="en"] .gip-sketch { font-size: 24px; }
+.gip-film[data-locale="en"] .gip-revised-mark { font-size: 17px; }
 .gip-film[data-locale="en"] .gip-sketch-small { font-size: 20px; }
 .gip-film[data-locale="en"] .gip-agent-id b { font-size: 14px; }
 .gip-film[data-locale="ja"] .gip-work-note { font-size: 27px; }
@@ -754,11 +815,14 @@
   color: var(--ink, #241936);
   cursor: pointer;
 }
-.gip-controls button:hover { border-color: var(--primary, #7a3f9f); color: var(--primary, #7a3f9f); }
-.gip-controls .gip-play { border-color: var(--dark, #20152f); background: var(--dark, #20152f); color: #fff; }
-.gip-controls .gip-play:hover { background: #000; color: #fff; }
+.gip-controls button:hover { border-color: var(--gip-sage-deep); color: var(--gip-sage-deep); }
+/* The visitor's own controls are the site's buttons, not a second set in a second
+   palette: one green for the primary action, the page's own line and surface for the
+   rest. The buttons the film draws inside the story stay inside the story. */
+.gip-controls .gip-play { border-color: var(--gip-sage-deep); background: var(--gip-sage-deep); color: #fbf9f3; }
+.gip-controls .gip-play:hover { border-color: #46583f; background: #46583f; color: #fbf9f3; }
 .gip-controls .gip-icon { flex: none; font-size: 12px; }
-.gip-scrub { flex: 1; min-width: 60px; accent-color: var(--primary, #7a3f9f); cursor: pointer; }
+.gip-scrub { flex: 1; min-width: 60px; accent-color: var(--gip-sage-deep); cursor: pointer; }
 .gip-time { flex: none; font: var(--fs-tag, 12px)/1 var(--mono, monospace); font-variant-numeric: tabular-nums; color: var(--muted, #625a70); }
 .gip-below {
   display: flex;
@@ -782,7 +846,7 @@
   cursor: pointer;
 }
 .gip-chapter-link b { font-weight: 700; }
-.gip-chapter-link:hover b { color: var(--primary, #7a3f9f); text-decoration: underline; }
+.gip-chapter-link:hover b { color: var(--gip-sage-deep); text-decoration: underline; }
 
 /* The poster: a readable frame with a play control over it, never a blank rectangle. */
 .gip-poster {
@@ -812,3 +876,38 @@
   .gip-below { padding: 12px 14px 0; }
   .gip-transcript { padding: 8px 14px 0; }
 }
+
+/* ------------------------------------- narrow screens keep their reading size
+
+   The steps above exist because an English or Japanese line of the same meaning is
+   longer than a Chinese one on a desk-width sheet. On a phone that reasoning inverts:
+   the film is already small, and a step down there is the difference between a line a
+   reader can read and one they cannot. These rules restore the phone's floor in every
+   language; where a longer language then needs the room, it is the box that gives, not
+   the type. */
+
+.gip-film[data-locale="en"] .gip-stage.is-compact,
+.gip-film[data-locale="ja"] .gip-stage.is-compact {
+  --gip-note: 25px;
+}
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-work-note,
+.gip-film[data-locale="ja"] .gip-stage.is-compact .gip-work-note { font-size: var(--gip-note); }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-work-title,
+.gip-film[data-locale="ja"] .gip-stage.is-compact .gip-work-title { font-size: 25px; }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-quote-ref,
+.gip-film[data-locale="ja"] .gip-stage.is-compact .gip-quote-ref { font-size: 24px; }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-product-title,
+.gip-film[data-locale="ja"] .gip-stage.is-compact .gip-product-title { font-size: 30px; }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-fusion-read p,
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-fusion-result p,
+.gip-film[data-locale="ja"] .gip-stage.is-compact .gip-fusion-read p,
+.gip-film[data-locale="ja"] .gip-stage.is-compact .gip-fusion-result p { font-size: 28px; line-height: 1.4; }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-fusion-chips li,
+.gip-film[data-locale="ja"] .gip-stage.is-compact .gip-fusion-chips li { font-size: 26px; }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-sketch,
+.gip-film[data-locale="ja"] .gip-stage.is-compact .gip-sketch { font-size: 23px; }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-sketch-small,
+.gip-film[data-locale="ja"] .gip-stage.is-compact .gip-sketch-small { font-size: 20px; }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-canvas .gip-proposal-text { font-size: 28px; }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-canvas .gip-proposal-detail { font-size: 25px; }
+.gip-film[data-locale="en"] .gip-stage.is-compact .gip-canvas .gip-proposal-deferred { font-size: 24px; }

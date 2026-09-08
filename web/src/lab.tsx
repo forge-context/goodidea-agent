@@ -81,7 +81,6 @@ function Lab() {
               </div>
             </div>
           }
-          copy={siteCopy[locale]}
           key={`${locale}-${run}`}
           locale={locale}
         />

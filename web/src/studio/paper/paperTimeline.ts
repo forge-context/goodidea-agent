@@ -24,13 +24,27 @@ const FRAME = 1 / STEP_FPS;
 export const LAYOUT = {
   product: {
     w: 570, h: 760, pad: { left: 116, right: 72 },
+    /* A phone reads the draft at reading size, which makes the decision card and the
+     * client preview roughly half as tall again as they are on a desk — so the narrow
+     * composition gets a taller sheet rather than smaller type. Inside the project
+     * space the sheet is a product canvas and its torn texture has already faded out,
+     * so the extra height costs nothing but the few seconds before the handoff, where
+     * the image is cropped rather than stretched. */
+    hCompact: 1000,
+    /* The draft's readable area inside the product canvas. The decision card and its
+     * action row have to finish above this, which is what keeps the button on the
+     * sheet instead of hanging off its edge. */
+    safeBottom: 706, safeBottomCompact: 930,
     rows: {
-      stageLabel: 105, title: 145, original1: 211, original2: 247,
-      revised1: 302, revised2: 340, proposalCard: 336, button: 664, buttonCompact: 668,
-      sketch: 417, revisedMark: 656,
-      /* During the client preview the confirmed lines lift, which opens the room the
-       * questions and the preview card need. */
-      liftTo1: 196, liftTo2: 232, asks: 272, preview: 388,
+      stageLabel: 105, title: 145, currentLabel: 196, original: 226,
+      revised: 322, proposalCard: 322,
+      sketch: 424, revisedMark: 650,
+      /* During the client preview the confirmed direction lifts, which opens the room
+       * the questions and the preview card need. A phone sets the same words half
+       * again as large and wraps them further, so it gets its own two rows rather
+       * than the desk's with everything squeezed into them. */
+      liftTo: 200, asks: 280, preview: 386,
+      asksCompact: 336, previewCompact: 462,
     },
   },
   work: {
@@ -40,7 +54,7 @@ export const LAYOUT = {
       /* Research states two lines; UX draws; engineering reasons in four short lines
        * and signs off with a note. Every sheet keeps the same title/byline/tag head. */
       researchLine: 236, researchGap: 44,
-      uxQuestion: 196, uxSketch: 266, uxOption: 570, uxOptionCompact: 548,
+      uxQuestion: 196, uxSketch: 248, uxOption: 522, uxOptionCompact: 504,
       engLine: 214, engGap: 44, engQuote: 300, engSuggest: 372, engFootnote: 486,
     },
   },
@@ -180,6 +194,16 @@ export const CHAPTER_STARTS = [
 
 export const quantize = (t: number) => Math.floor(t * STEP_FPS + 1e-6) / STEP_FPS;
 
+/** The last frame the film can be on.
+ *
+ * The clock runs in raw seconds and the picture is sampled from quantised ones, and
+ * `DURATION` is almost never a whole frame — so "finished" has to be asked in frames.
+ * Comparing the quantised time against the raw duration is how the transport used to
+ * end one frame short: playback stopped, but the control still offered to play and the
+ * read-out still showed a second less than the length the page states. */
+export const LAST_FRAME = quantize(DURATION);
+export const atEnd = (t: number) => quantize(t) >= LAST_FRAME - 1e-6;
+
 export function chapterAt(seconds: number): number {
   const t = Math.max(0, Math.min(seconds, DURATION));
   return CHAPTER_STARTS.filter((start) => t >= start).length - 1;
@@ -220,7 +244,7 @@ const GEO = {
     brand: { x: 290, y: 318 },
     /* The fusion panel sits between the parked sheets and the product draft, which is
      * the path the contributions actually travel. */
-    fusion: { x: 258, y: 418, w: 448, h: 372 },
+    fusion: { x: 258, y: 406, w: 448, h: 372 },
   },
   compact: {
     corner: { x: 44, y: 46 },
@@ -228,7 +252,7 @@ const GEO = {
     thought: { x: 82, y: 1210 },
     caption: { x: 80, y: 340 },
     brand: { x: 62, y: 172 },
-    fusion: { x: 130, y: 130, w: 600, h: 400 },
+    fusion: { x: 40, y: 214, w: 680, h: 470 },
   },
 } as const;
 export type StageGeo = {
@@ -237,9 +261,13 @@ export type StageGeo = {
 };
 export const geo = (compact: boolean) => (compact ? GEO.compact : GEO.wide) as StageGeo;
 
-const CLIENT_CURSOR = {
-  wide: { from: { x: 1010, y: 816 }, to: { x: 668, y: 694 } },
-  compact: { from: { x: 596, y: 1284 }, to: { x: 270, y: 1188 } },
+/** How far away, and in which direction, the pointer starts its approach. It is an
+ *  offset from whatever the button turns out to be, never a coordinate of its own:
+ *  that is what stops the two from drifting apart when a language, a type size or a
+ *  composition changes the button's place on the sheet. */
+export const CURSOR_APPROACH = {
+  wide: { adopt: { x: 168, y: 92 }, client: { x: 262, y: 132 } },
+  compact: { adopt: { x: 112, y: 74 }, client: { x: 168, y: 96 } },
 } as const;
 
 function productKeys(compact: boolean): PoseKey[] {
@@ -247,21 +275,28 @@ function productKeys(compact: boolean): PoseKey[] {
   const O = CUES.outlook;
   return compact
     ? [
-      { t: 0, x: 340, y: 948, rot: 2.4, scale: 0.84, opacity: 0 },
+      { t: 0, x: 340, y: 1010, rot: 2.4, scale: 0.84, opacity: 0 },
       { t: o, opacity: 1 },
-      { t: o + 0.5, x: 394, y: 884, rot: -0.9, scale: 0.888 },
-      { t: o + 0.67, x: 390, y: 880, rot: 0.5, scale: 0.88 },
-      { t: o + 0.83, x: 388, y: 880, rot: 0 },
+      { t: o + 0.5, x: 394, y: 946, rot: -0.9, scale: 0.888 },
+      { t: o + 0.67, x: 390, y: 942, rot: 0.5, scale: 0.88 },
+      { t: o + 0.83, x: 388, y: 942, rot: 0 },
       { t: CUES.handoff.from },
       /* On a phone the draft drops out of the way while the team works, so a sheet in
        * the middle of the desk can be read whole, and comes back up for the decision. */
-      { t: CUES.handoff.to, x: 380, y: 1140, rot: 0, scale: 1 },
-      { t: CUES.fuse.open - 0.7 },
-      { t: CUES.fuse.open + 0.3, y: 965 },
+      /* While the team works, the draft waits below the fold: the sheet in the middle
+       * is read at close range and there is no room for a second one behind it. */
+      { t: CUES.handoff.to, x: 380, y: 1880, rot: 0, scale: 1 },
+      /* The fusion card closes and the draft comes forward. On a phone the decision is
+       * a close-up rather than the same desk seen from further away: the question, what
+       * it gives up and the control that adopts it are all at reading size in one shot,
+       * and the shot holds through the client's view so nothing has to move under a
+       * reader mid-sentence. */
+      { t: CUES.decide.cursorIn - 1.2 },
+      { t: CUES.decide.cursorIn - 0.3, x: 380, y: 716, scale: 1.2 },
       { t: O.spread.from },
-      { t: O.spread.to, y: 906 },
+      { t: O.spread.to, y: 700 },
       { t: O.restore.from },
-      { t: O.restore.to, x: 380, y: 880, rot: -0.8, scale: 0.78 },
+      { t: O.restore.to, x: 380, y: 830, rot: -0.8, scale: 0.6 },
     ]
     : [
       { t: 0, x: 700, y: 518, rot: 2.4, scale: 0.9, opacity: 0 },
@@ -326,8 +361,11 @@ const WORK_TIMES = {
 
 function workKeys(role: Role, compact: boolean): PoseKey[] {
   const { enter, park, rot } = WORK_TIMES[role];
-  const focus = compact ? { x: 380, y: 520 } : { x: 472, y: 440 };
-  const focusScale = compact ? 0.84 : 1;
+  /* The sheet being worked on is read close up on a phone, the same way the draft is
+   * during the decision: at the desk's own scale a line of it lands around 12px on a
+   * 390px screen, and the three working turns are where most of the film's words are. */
+  const focus = compact ? { x: 380, y: 664 } : { x: 472, y: 440 };
+  const focusScale = compact ? 1.15 : 1;
   const O = CUES.outlook;
   return [
     { t: 0, x: focus.x - 95, y: focus.y + 60, rot: rot - 7, scale: focusScale * 0.98, opacity: 0 },
@@ -345,23 +383,96 @@ function workKeys(role: Role, compact: boolean): PoseKey[] {
  *  a stroke drawn at t looks the same on every pass. */
 export const INK = {
   quoteRule: ["M 64 232 C 138 228, 248 235, 372 230"],
-  underline: ["M 128 321 C 158 318, 181 324, 209 320", "M 209 320 L 248 321"],
-  strike: ["M 111 265 C 154 261, 186 268, 221 264", "M 221 264 L 279 265"],
-  engineering: ["M 65 461 C 130 457, 205 464, 302 459"],
-  /** Engineering's answer, drawn around UX's open question on the UX sheet. */
-  scopeCircle: ["M 66 610 C 40 594, 78 566, 190 562 C 320 557, 424 570, 420 588 C 416 608, 300 618, 190 614 C 120 611, 72 612, 62 602"],
   /* Three short arrows from the parked sheets down into the fusion panel. */
   /* Routed around the identity markers under each parked sheet rather than through
    * them, so the marks stay readable while the contributions travel. */
   links: [
-    ["M 298 320 C 252 348, 258 388, 288 420", "M 288 420 L 277 409 M 288 420 L 297 408"],
-    ["M 502 322 C 556 352, 522 390, 472 420", "M 472 420 L 470 406 M 472 420 L 485 412"],
-    ["M 658 322 C 702 354, 662 392, 620 420", "M 620 420 L 619 406 M 620 420 L 633 412"],
+    ["M 298 312 C 252 340, 258 378, 288 408", "M 288 408 L 277 397 M 288 408 L 297 396"],
+    ["M 502 314 C 556 344, 522 380, 472 408", "M 472 408 L 470 394 M 472 408 L 485 400"],
+    ["M 658 314 C 702 346, 662 382, 620 408", "M 620 408 L 619 394 M 620 408 L 633 400"],
   ],
-  /* And one from the panel to the proposal on the product draft. */
-  fusionArrow: ["M 712 556 C 764 552, 792 528, 828 512", "M 828 512 L 814 511 M 828 512 L 817 521"],
-  mobileFusionArrow: ["M 372 552 C 352 676, 316 820, 300 906", "M 300 906 L 296 890 M 300 906 L 311 894"],
 } as const;
+
+/* --------------------------------------------------------------- marks on text
+ *
+ * A strike, an underline and a circle are all answers to a particular line, so none
+ * of them may be a fixed path: an English line is nearly twice a Chinese one, and a
+ * path drawn for one language falls into the gap between lines in another. Each mark
+ * below is generated from the box the line actually occupies on its sheet, measured
+ * in that sheet's own coordinates, so the ink and the words it marks move together
+ * whatever the language, the composition or the type size. */
+
+export type TextBox = { x: number; y: number; w: number; h: number };
+
+/** A line drawn through the middle of a line of text, wavering the way a hand does. */
+export function strikeStroke({ x, y, w, h }: TextBox): string[] {
+  const my = y + h / 2;
+  const x0 = x - 5;
+  const x1 = x + w + 5;
+  const d = x1 - x0;
+  return [`M ${r(x0)} ${r(my + 1.4)} C ${r(x0 + d * 0.3)} ${r(my - 2.6)}, ${r(x0 + d * 0.64)} ${r(my + 2.8)}, ${r(x1)} ${r(my - 0.8)}`];
+}
+
+/** A line drawn under a line of text, close enough to belong to it. */
+export function underlineStroke({ x, y, w, h }: TextBox, drop = 3): string[] {
+  const by = y + h - drop;
+  const x0 = x - 3;
+  const x1 = x + w + 4;
+  const d = x1 - x0;
+  return [
+    `M ${r(x0)} ${r(by)} C ${r(x0 + d * 0.32)} ${r(by - 3.2)}, ${r(x0 + d * 0.62)} ${r(by + 3)}, ${r(x1)} ${r(by - 1)}`,
+  ];
+}
+
+/** A loop drawn around a line of text, closing just past where it started. */
+export function circleStroke({ x, y, w, h }: TextBox): string[] {
+  const px = 16;
+  const py = 9;
+  const l = x - px;
+  const rt = x + w + px;
+  const t = y - py;
+  const b = y + h + py;
+  const my = (t + b) / 2;
+  return [
+    `M ${r(l + 4)} ${r(b - 6)} C ${r(l - 6)} ${r(my)}, ${r(l + 10)} ${r(t)}, ${r(x + w * 0.4)} ${r(t - 1)}`
+    + ` C ${r(rt)} ${r(t + 2)}, ${r(rt + 5)} ${r(my)}, ${r(rt - 6)} ${r(b - 3)}`
+    + ` C ${r(x + w * 0.5)} ${r(b + 4)}, ${r(l + 6)} ${r(b + 1)}, ${r(l - 1)} ${r(my + 6)}`,
+  ];
+}
+
+/** One arrow from an edge to an edge, drawn as a body and a two-stroke head so the
+ *  head is only ever added once the body has arrived. */
+export function arrowStrokes(from: Point, to: Point, bow = 0.28): string[] {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  const len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len;
+  const ny = dx / len;
+  const bend = len * bow;
+  const c1 = { x: from.x + dx * 0.35 + nx * bend, y: from.y + dy * 0.35 + ny * bend };
+  const c2 = { x: from.x + dx * 0.7 + nx * bend * 0.5, y: from.y + dy * 0.7 + ny * bend * 0.5 };
+  // The head follows the tangent the body arrives on, not the straight line between
+  // the two points, so a bowed arrow never points somewhere it did not come from.
+  const tx = to.x - c2.x;
+  const ty = to.y - c2.y;
+  const tl = Math.hypot(tx, ty) || 1;
+  const ux = tx / tl;
+  const uy = ty / tl;
+  const head = (angle: number) => {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    return { x: to.x - 13 * (ux * cos - uy * sin), y: to.y - 13 * (ux * sin + uy * cos) };
+  };
+  const a = head(0.45);
+  const b = head(-0.45);
+  return [
+    `M ${r(from.x)} ${r(from.y)} C ${r(c1.x)} ${r(c1.y)}, ${r(c2.x)} ${r(c2.y)}, ${r(to.x)} ${r(to.y)}`,
+    `M ${r(to.x)} ${r(to.y)} L ${r(a.x)} ${r(a.y)} M ${r(to.x)} ${r(to.y)} L ${r(b.x)} ${r(b.y)}`,
+  ];
+}
+
+const r = (v: number) => Math.round(v * 10) / 10;
+export type Point = { x: number; y: number };
 
 /* ------------------------------------------------------------------ sampling */
 
@@ -369,7 +480,9 @@ function designerKeys(compact: boolean): PoseKey[] {
   const home = compact ? { x: -6, y: 320, scale: 0.73 } : { x: 96, y: 235, scale: 1 };
   /* Once the idea is handed over the creator stays beside the project space; the
    * agent rail never takes their place in the frame. */
-  const beside = compact ? { x: 16, y: 224, scale: 0.23 } : { x: 24, y: 486, scale: 0.46 };
+  /* On a phone the sheet in the middle takes the width, so the creator waits below it
+   * rather than under it. */
+  const beside = compact ? { x: 8, y: 1046, scale: 0.29 } : { x: 24, y: 486, scale: 0.46 };
   return [
     { t: 0, ...home, rot: 0, opacity: 0 },
     { t: CUES.designerEnter, opacity: 1 },
@@ -396,22 +509,26 @@ const CREATOR_BEATS = [
 /* What each agent is doing, and what it has handed in. Both are indexes into the
  * copy, so the rail says the same thing in three languages and changes only when the
  * film actually shows the contribution being made. */
+/* Once an agent has handed something in, what it is doing stops being the useful
+ * line: the contribution is. So `work` stops at its last real activity rather than
+ * turning into another "handed in", which is a line that repeats three times and
+ * tells the viewer nothing. */
 type AgentStep = { at: number; work: number; note: number };
 const AGENT_STEPS: Record<Role, AgentStep[]> = {
   research: [
     { at: CUES.researchEnter, work: 0, note: -1 },
     { at: CUES.researchLine1, work: 1, note: -1 },
-    { at: CUES.researchLine2 + 0.5, work: 2, note: 0 },
+    { at: CUES.researchLine2 + 0.5, work: 1, note: 0 },
   ],
   experience: [
     { at: CUES.uxEnter, work: 0, note: -1 },
     { at: CUES.uxSketch[0], work: 1, note: -1 },
-    { at: CUES.uxOption + 0.5, work: 2, note: 0 },
+    { at: CUES.uxOption + 0.5, work: 1, note: 0 },
   ],
   engineering: [
     { at: CUES.engineeringEnter, work: 0, note: -1 },
     { at: CUES.engineeringLines[1] + 0.5, work: 1, note: 0 },
-    { at: CUES.engineeringFootnote + 0.5, work: 2, note: 1 },
+    { at: CUES.engineeringFootnote + 0.5, work: 1, note: 1 },
   ],
 };
 
@@ -454,13 +571,13 @@ export type Scene = {
     asks: AskState[]; caption: [number, number]; brand: [number, number, number];
   };
   ink: { underline: number; strike: number; engineering: number; scopeCircle: number; links: number[]; fusionArrow: number; arrowOpacity: number };
-  cursor: { visible: boolean; x: number; y: number; pressed: boolean };
+  cursor: { visible: boolean; target: "adopt" | "client" | null; p: number; pressed: boolean };
 };
 
+export const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 const ramp = (t: number, from: number, to: number) => clamp01((t - from) / (to - from));
 const appear = (t: number, at: number) => (t < at ? 0 : t < at + FRAME ? 0.55 : t < at + 2 * FRAME ? 0.88 : 1);
-const lerp = (a: number, b: number, p: number) => a + (b - a) * p;
 
 function samplePose(keys: PoseKey[], t: number): Pose {
   let pose: Pose = { x: 0, y: 0, rot: 0, scale: 1, opacity: 1 };
@@ -527,21 +644,22 @@ export function sampleScene(rawTime: number, compact = false, loop = true): Scen
       return { opacity: a(at) * (live ? 1 : 0.58), live, done: t >= end };
     });
 
-  const actCursor = t >= D.cursorIn && t < D.cursorOut;
+  /* The pointer is described by which control it is going to and how far along it is,
+   * never by a pair of stage coordinates. The stage resolves both from the button it
+   * has actually laid out, so the arrow's point, the ripple under it and the control
+   * being pressed can only ever be read off the same box. */
   const endCursor = t >= O.cursorIn && t < O.cursorOut;
-  const cc = compact ? CLIENT_CURSOR.compact : CLIENT_CURSOR.wide;
-  const actP = ramp(t, D.cursorIn, D.cursorArrive);
-  const endP = ramp(t, O.cursorIn, O.cursorArrive);
-  const cursor = endCursor
-    ? {
-      visible: true, x: lerp(cc.from.x, cc.to.x, endP), y: lerp(cc.from.y, cc.to.y, endP),
-      pressed: clientButton === "press",
-    }
-    : {
-      visible: actCursor,
-      x: (compact ? 436 : 1072) - 155 * actP, y: (compact ? 1333 : 800) - 76 * actP,
-      pressed: button === "press",
-    };
+  const actCursor = t >= D.cursorIn && t < D.cursorOut;
+  /* The approach finishes a frame before the beat it is named for, so that the frame
+   * at "arrive" is already settled on the control. Ending it exactly on the cue left
+   * the pointer short of the button whenever the cue was not itself a whole frame —
+   * visible as a hand still reaching at the moment it was supposed to have arrived. */
+  const arrive = (from: number, to: number) => ramp(t, from, to - FRAME);
+  const cursor: Scene["cursor"] = endCursor
+    ? { visible: true, target: "client", p: arrive(O.cursorIn, O.cursorArrive), pressed: clientButton === "press" }
+    : actCursor
+      ? { visible: true, target: "adopt", p: arrive(D.cursorIn, D.cursorArrive), pressed: button === "press" }
+      : { visible: false, target: null, p: 0, pressed: false };
 
   const work = {
     research: samplePose(workKeys("research", compact), t),
@@ -556,19 +674,28 @@ export function sampleScene(rawTime: number, compact = false, loop = true): Scen
   const fusionEnd = compact
     ? { from: D.cursorIn - 1.6, to: D.cursorIn - 1.1 }
     : D.arrowFade;
-  const mobileFusionHide = compact
-    ? clamp01(ramp(t, F.open, F.open + 0.5) - ramp(t, D.cursorIn - 1.1, D.cursorIn - 0.6))
+  /* A phone reads one block at a time.
+   *
+   * From the moment GoodIdea starts combining, the narrow composition shows exactly
+   * one: the fusion card, then the decision in close-up, then what the client sees.
+   * The team's sheets and the status strip stand aside for all three and come back
+   * together at the end — the decision card names all three contributors itself, so
+   * nothing about where the proposal came from is lost while they are away. */
+  const mobileAside = compact
+    ? clamp01(ramp(t, F.open, F.open + 0.5) - ramp(t, O.restore.from, O.restore.from + 0.6))
     : 0;
-  const mobileThoughtHide = compact
-    ? clamp01(ramp(t, F.open - 0.3, F.open + 0.2) - ramp(t, D.cursorIn - 0.9, D.cursorIn - 0.4))
-    : 0;
+  /* The creator steps aside for the same three blocks. On a phone the draft fills the
+   * frame during the decision and the client's view, and there is no room beside it
+   * for a second voice — so rather than sit on top of the words being read, they come
+   * back with the team for the closing frame. */
+  const mobileThoughtHide = compact ? ramp(t, F.open - 0.3, F.open + 0.2) - ramp(t, O.restore.from, O.restore.from + 0.6) : 0;
   const paperH = LAYOUT.work.h;
   const tags = {} as Scene["tags"];
   /* While one sheet is in the middle of the desk it lies over the parked ones, so the
    * markers wait: they belong to the moment every sheet is side by side. */
   const anyLive = t < CUES.engineeringPark.to && t >= CUES.researchEnter;
   for (const role of ROLES) {
-    work[role].opacity *= periphery * (1 - mobileFusionHide);
+    work[role].opacity *= periphery * (1 - mobileAside);
     const pose = work[role];
     tags[role] = {
       x: pose.x,
@@ -609,13 +736,16 @@ export function sampleScene(rawTime: number, compact = false, loop = true): Scen
     product: samplePose(productKeys(compact), t),
     quote: samplePose(quoteKeys(compact), t),
     designer: {
-      pose: samplePose(designerKeys(compact), t),
+      pose: (() => {
+        const pose = samplePose(designerKeys(compact), t);
+        return { ...pose, opacity: pose.opacity * clamp01(1 - mobileAside) };
+      })(),
       gesture: creator?.gesture ?? (t < CUES.designerThink ? "work" : t < CUES.designerIdea ? "think" : "idea"),
       thought: creator ? creator.thought : -1,
       /* On a phone the fusion card takes the space the thought sits in, so the two
        * take turns rather than stacking on top of each other. */
       thoughtOpacity: creator
-        ? a(creator.at) * (1 - ramp(t, O.restore.from, O.restore.to)) * (1 - mobileThoughtHide)
+        ? a(creator.at) * (1 - ramp(t, O.restore.from, O.restore.to)) * clamp01(1 - mobileThoughtHide)
         : 0,
       equipment: 1 - ramp(t, CUES.ideaEnter, CUES.designerIdea),
     },
@@ -648,7 +778,7 @@ export function sampleScene(rawTime: number, compact = false, loop = true): Scen
     rail: {
       // On a phone the fusion card carries all three signed contributions itself, so
       // the status strip steps aside for it rather than repeating them above it.
-      opacity: workspaceOpacity * (1 - ramp(t, O.spread.from, O.spread.to)) * (1 - mobileFusionHide),
+      opacity: workspaceOpacity * (1 - ramp(t, O.spread.from, O.spread.to)) * (1 - mobileAside),
       agents, summary: railSummary,
     },
     fusion: {

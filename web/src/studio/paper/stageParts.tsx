@@ -9,6 +9,23 @@ import type { PaperCopyShape } from "./paperCopy";
 
 export const ASSETS = "/paper-film";
 
+/** The site's own mark, at the size the film needs it.
+ *
+ * The same path the page header and the footer draw, so the workspace inside the film,
+ * the closing card and the page around them are one identity rather than three. It
+ * takes its colour from whatever it is placed in. */
+export function GoodIdeaMark({ className = "" }: { className?: string }) {
+  return (
+    <span className={`gip-mark ${className}`} aria-hidden="true">
+      <svg viewBox="0 0 36 36">
+        <path className="gip-mark-loop" d="M26.4 10.8A10.5 10.5 0 1 0 27.7 24" />
+        <path className="gip-mark-turn" d="M18.8 18.2h8.7v7.5" />
+        <circle className="gip-mark-spark" cx="28.3" cy="7.6" r="2.5" />
+      </svg>
+    </span>
+  );
+}
+
 type InkProps = {
   /** Fixed paths. Only how far the pen has got changes with time. */
   strokes: readonly string[];

@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 
-import type { SiteCopy } from "./siteCopy";
-
 export type MapLocale = "en" | "ja" | "zh-CN";
 
 type Point = { x: number; y: number };
@@ -10,6 +8,15 @@ type MapCopy = {
   nodes: { label: string; question: string }[];
   detours: { label: string; note: string }[];
   result: { label: string; note: string };
+  /* The hero this drawing belonged to. It has left the landing page, so the words it
+   * needs live here rather than in `siteCopy`, where they would read as copy the site
+   * still shows. */
+  eyebrow: string;
+  title: string;
+  intro: string;
+  closing: string;
+  replay: string;
+  replayed: string;
 };
 
 // The map is drawn in this space; labels are positioned as percentages of it, so the
@@ -79,6 +86,12 @@ const COPY: Record<MapLocale, MapCopy> = {
       { label: "Build every feature", note: "Looks more complete" },
     ],
     result: { label: "First-version plan", note: "Prototype, scope, acceptance" },
+    eyebrow: "For people about to build with AI",
+    title: "Turn one idea into a prototype you can see and a first version you can hand over.",
+    intro: "You can already get AI to write the code. What is missing is version one: who it is for, what it looks like, what it does and does not do.",
+    closing: "An idea is not a straight line. The next step can still be clear.",
+    replay: "Play the route again",
+    replayed: "The route starts over.",
   },
   ja: {
     nodes: [
@@ -94,6 +107,12 @@ const COPY: Record<MapLocale, MapCopy> = {
       { label: "機能を全部入れる", note: "完成して見える" },
     ],
     result: { label: "初版の計画", note: "試作・範囲・完了条件" },
+    eyebrow: "AI と一緒に作り始める人へ",
+    title: "アイデアを、目に見える試作と、引き渡せる初版に。",
+    intro: "コードは AI に書かせられる。決まっていないのは初版です。誰のどの困りごとを、どこまで解くのか。",
+    closing: "アイデアは直線ではない。それでも次の一歩は決められる。",
+    replay: "ルートをもう一度",
+    replayed: "ルートを最初から再生します。",
   },
   "zh-CN": {
     nodes: [
@@ -109,6 +128,12 @@ const COPY: Record<MapLocale, MapCopy> = {
       { label: "把功能全部做上", note: "看起来更完整" },
     ],
     result: { label: "第一版方案", note: "原型、范围、验收条件" },
+    eyebrow: "给准备用 AI 写代码的人",
+    title: "把一个想法，变成看得见的原型和可以交接的第一版。",
+    intro: "你已经能让 AI 写代码，缺的是第一版到底该做什么：为谁解决什么，这一版做什么和不做什么。",
+    closing: "想法不是直线，但下一步可以很清楚。",
+    replay: "重看这段路线",
+    replayed: "路线重新开始。",
   },
 };
 
@@ -266,13 +291,18 @@ function StageMark({ index }: { index: number }) {
   );
 }
 
+/**
+ * The landing page's first hero: an idea finding a route past the roads not taken.
+ *
+ * It no longer opens the site — the page now shows the outcome of the case the demo
+ * works out, rather than a second animation of a different metaphor — but it is kept
+ * whole, and runs at `/lab/?view=hero`.
+ */
 export function IdeaMapHero({
   locale,
-  copy: site,
   actions,
 }: {
   locale: MapLocale;
-  copy: SiteCopy;
   actions?: ReactNode;
 }) {
   const copy = COPY[locale];
@@ -335,12 +365,12 @@ export function IdeaMapHero({
   return (
     <section className="map-hero section-shell" id="top" data-stage={stage}>
       <div className="map-copy">
-        <p className="eyebrow">{site.heroEyebrow}</p>
-        <h1>{site.heroTitle}</h1>
-        <p className="hero-intro">{site.heroIntro}</p>
+        <p className="eyebrow">{copy.eyebrow}</p>
+        <h1>{copy.title}</h1>
+        <p className="hero-intro">{copy.intro}</p>
         {actions}
         <p className="map-closing" data-visible={arrived}>
-          {site.heroBrandLine}
+          {copy.closing}
         </p>
       </div>
 
@@ -485,11 +515,11 @@ export function IdeaMapHero({
             for a second look rather than for catching up. */}
         {!reduceMotion && (
           <button type="button" className="map-replay" onClick={replay}>
-            {site.mapReplay}
+            {copy.replay}
           </button>
         )}
         <p className="sr-only" aria-live="polite">
-          {replayed ? site.mapReplayed : ""}
+          {replayed ? copy.replayed : ""}
         </p>
       </div>
     </section>
