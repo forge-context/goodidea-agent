@@ -1,5 +1,6 @@
 @import "../../shared/studio/tokens.css";
 @import "../../shared/studio/studio.css";
+@import "./fonts.css";
 
 /* ---------------------------------------------------------------------------
    The landing page's own reading of the shared tokens.
@@ -8,22 +9,31 @@
    the place to restyle a website. Everything below re-points the same semantic names
    at this page's palette, and nothing outside `web/` is touched.
 
-   The palette is one idea: a clear product interface carrying paper thinking. Warm
-   white ground, graphite text, and a sage green dark enough to be a real primary at
-   text size. Light sage is for selection, proposals and quiet emphasis only. The
-   three professional identities — research ochre, UX blue-grey, engineering brown —
-   stay exactly that: identities, not a colour per section.
+   The palette is one idea: a studio that has made up its mind. The ground is the
+   illustration's own cream, so the drawing has no edge to hide; the text is a deep
+   ink green rather than a grey, and the primary is a green dark and full enough to
+   carry a solid button, a rule and a heading without turning pale. One bright
+   yellow-green exists, and it appears in one place per screen — under the words in
+   the headline that say you can start. Light sage stays what it was: selection,
+   proposals and quiet ground. The three professional identities — research ochre,
+   UX blue-grey, engineering brown — stay identities, not a colour per section.
    --------------------------------------------------------------------------- */
 :root {
-  --ink: #2b2724;
-  --muted: #6a6259;
-  --line: #e2ded1;
-  --line-strong: #ccc6b5;
-  --paper: #fbf8f2;
+  --ink: #202820;
+  --muted: #566052;
+  --line: #ded9cb;
+  --line-strong: #c3bdaa;
+  /* The illustration's own ground, sampled from the file, so the picture and the
+     page are one surface and no rectangle shows at its edges. */
+  --paper: #faf8f2;
   --surface: #fffefb;
-  --primary: #4e6446;
-  --primary-dark: #3b4d35;
-  --primary-soft: #eaefe3;
+  --primary: #31543a;
+  --primary-dark: #24402b;
+  --primary-soft: #e7eddf;
+  /* The one bright mark. Used under the promise in the headline and nowhere else:
+     the moment a second thing on a screen is this colour, neither is emphasis. It is
+     far too light to carry text, so it is never a foreground. */
+  --accent: #d4e86c;
   --coral: #8a4a37;
   --coral-soft: #f8efe9;
   --mint: #47613f;
@@ -49,10 +59,42 @@
   --role-research: #8a7331;
   --role-ux: #4f7784;
   --role-engineering: #7c6452;
+
+  /* ---- the type scale --------------------------------------------------
+     One scale for the whole page. Before this, every section had picked its own
+     sizes, and the result was a page where a heading and a card title differed by
+     two pixels and body text was set at 14px in half the sections. Eight roles, and
+     any rule that wants a size names one of them.
+
+     The two headline roles are fluid, because a headline is measured against the
+     window it fills; everything below reading size is fixed, because a 16px
+     paragraph does not become more readable on a wider monitor. 14px is the floor
+     for anything that is a word, and 13px is reserved for the short uppercase
+     labels, where every glyph is at cap height. */
+  --fs-hero: clamp(34px, 4.2vw, 60px);
+  --fs-h2: clamp(28px, 2.9vw, 38px);
+  --fs-h3: 20px;
+  --fs-hero-lead: clamp(17px, 1.35vw, 19px);
+  --fs-lead: 17px;
+  --fs-body: 16px;
+  --fs-small: 14px;
+  --fs-label: 13px;
+  --fs-tag: 12px;
+
+}
+
+/* A short laptop is a different problem from a narrow one: the hero has to fit the
+   window's height, and at 768px there is not room for a 60px headline, its intro,
+   its actions and the hint below them. The headline steps down; nothing else does. */
+@media (max-height: 820px) and (min-width: 1081px) {
+  :root { --fs-hero: clamp(32px, 3.4vw, 48px); }
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+/* `shared/studio/tokens.css` puts a system stack on `:root` itself for the private
+   product; this page ships its own face, so the root element carries it too and no
+   element can inherit the old one. */
+html { scroll-behavior: smooth; font-family: var(--sans); }
 /* The header is sticky, so a section scrolled to by its id would otherwise arrive
    underneath it. */
 :target, .demo-section, .brief-section, .work-section, .closing-section {
@@ -64,14 +106,19 @@ body {
   overflow-x: hidden;
   background: var(--paper);
   color: var(--ink);
-  font: var(--fs-body)/1.7 var(--sans);
+  font: var(--fw-body) var(--fs-body)/1.7 var(--sans);
   -webkit-font-smoothing: antialiased;
 }
 a { color: inherit; text-decoration: none; }
 button, textarea { color: inherit; font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
-button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-visible {
-  outline: 3px solid rgba(78, 100, 70, .55);
+/* One focus ring for the whole page, in the brand's own green at full strength and
+   offset clear of the control, so it reads on the cream ground and on the dark green
+   button alike. A half-transparent ring was the previous version of this and it
+   disappeared over anything but plain paper. */
+button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-visible,
+input:focus-visible, [tabindex]:focus-visible {
+  outline: 3px solid var(--primary);
   outline-offset: 3px;
 }
 .skip-link {
@@ -129,7 +176,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
 .brand-turn { stroke-width: 4.3; }
 .brand-spark { fill: var(--role-research); }
 .brand-mark.small { width: 27px; height: 27px; }
-.site-header nav { display: flex; align-items: center; gap: 26px; font: 650 var(--fs-small) var(--mono); }
+.site-header nav { display: flex; align-items: center; gap: 26px; font: var(--fw-heading) var(--fs-small) var(--sans); }
 .site-header nav a { color: var(--muted); transition: color .18s ease; }
 .site-header nav a:hover { color: var(--primary); }
 .site-header nav a:last-child {
@@ -161,17 +208,18 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
   font-weight: 700;
   line-height: 1;
 }
-.locale-switch a[lang="en"] { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-.locale-switch a[lang="ja"] { font-family: "Hiragino Sans", "Yu Gothic UI", "Yu Gothic", "Noto Sans JP", sans-serif; }
-.locale-switch a[lang="zh-CN"] { font-family: "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; font-size: 15px; }
+/* The switch used to name a system face per language, which put three different
+   fonts inside one control. The page ships all three scripts itself now, so the
+   button that says 中文 is set in the same face as the page it leads to. */
+.locale-switch a { font-family: var(--sans); }
 .locale-switch a.active { background: var(--primary-soft); color: var(--primary-dark); }
 
 .section-shell { width: var(--shell); margin: 0 auto; }
 .eyebrow {
   margin: 0 0 18px;
   color: var(--primary-dark);
-  font: 800 var(--fs-label) var(--mono);
-  letter-spacing: .08em;
+  font: var(--fw-label) var(--fs-label) var(--sans);
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 
@@ -189,7 +237,7 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
   background: var(--surface);
   color: var(--ink);
   cursor: pointer;
-  font: 650 15px var(--sans);
+  font: var(--fw-heading) var(--fs-body) var(--sans);
   transition: border-color .18s ease, background .18s ease, color .18s ease;
 }
 .button:hover { border-color: var(--primary); background: var(--primary-soft); color: var(--primary-dark); }
@@ -218,8 +266,8 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
 .section-heading { max-width: 780px; margin-bottom: 44px; }
 .section-heading h2 {
   margin: 0;
-  font-size: clamp(30px, 3.2vw, 42px);
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-heading);
   line-height: 1.24;
   letter-spacing: -.03em;
 }
@@ -229,6 +277,9 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
   color: var(--muted);
   font-size: var(--fs-lead);
   line-height: 1.72;
+  /* A two-line paragraph whose second line is one word is worse than two even ones,
+     and it happens in all three languages at this measure. */
+  text-wrap: pretty;
 }
 /* A heading that arrives once, from a little below, when it first comes into view.
    The attribute is only written by script after mount, so the prerendered page and a
@@ -265,33 +316,51 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
 .hero-lead {
   flex: 1;
   display: grid;
-  /* 45 / 55. The headline needs enough of the row to stay the heavier thing at its
-     own size; past that the drawing starts reading as a poster with a caption. */
-  grid-template-columns: minmax(0, 45fr) minmax(360px, 55fr);
+  /* 48 / 52, with more air between them than either half gives up. The headline is
+     the first thing the page has to say, and at 45 / 55 the drawing was reading as
+     the subject with the words alongside it; a few points back, plus a wider gutter,
+     puts the sentence first without shrinking the picture into a thumbnail. */
+  grid-template-columns: minmax(0, 48fr) minmax(340px, 52fr);
   align-items: center;
   align-content: center;
-  gap: 44px;
+  gap: 56px;
   padding-block: 8px 34px;
 }
 .hero-copy { min-width: 0; }
 .hero h1 {
   margin: 0 0 22px;
-  font-size: clamp(29px, 3.7vw, 53px);
-  font-weight: 600;
-  line-height: 1.2;
+  font-size: var(--fs-hero);
+  font-weight: var(--fw-hero);
+  line-height: 1.18;
   letter-spacing: -.032em;
 }
 /* One clause per line, taken from the copy rather than from wherever the column
    happens to run out. A clause wider than the column still wraps inside its own
    line, so no language overflows. */
 .hero h1 span { display: block; }
-/* The English headline is one long sentence rather than three short clauses, so it
-   needs a step down to still read as three lines in the same column. */
-html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
+/* English sets more characters per clause than either CJK script, so it takes one
+   step down to hold the same three lines in the same column. */
+html[lang="en"] .hero h1 { font-size: clamp(32px, 3.4vw, 50px); }
+/* The Japanese third clause is the longest of the three headlines. */
+html[lang="ja"] .hero h1 { font-size: clamp(32px, 3.7vw, 54px); }
+
+/* The words that carry the promise, under the page's one bright rule.
+   It is drawn the way the illustration draws a rule — one stroke, slightly uneven,
+   ending short of square — rather than as a border, and it sits low enough to clear
+   the descenders in every script. Weight is unchanged: the colour is the emphasis. */
+.hero-mark {
+  font-weight: inherit;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'><path d='M2 8.4C36 4.6 84 3.2 132 4.1c24 .5 46 1.9 66 3.6' fill='none' stroke='%23d4e86c' stroke-width='7' stroke-linecap='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: 0 88%;
+  background-size: 100% .22em;
+}
 /* Two clauses, two lines: what the team does, and what stays yours. They are separate
    strings rather than one wrapped paragraph so each language ends its own line. */
-.hero-intro { max-width: 34em; margin: 0; color: var(--muted); font-size: var(--fs-lead); line-height: 1.74; }
-.hero-intro span { display: block; }
+.hero-intro { max-width: 34em; margin: 0; color: var(--muted); font-size: var(--fs-hero-lead); line-height: 1.72; }
+/* Each clause is its own block, so a clause too wide for the column wraps inside its
+   own line and is balanced there rather than leaving one word alone. */
+.hero-intro span { display: block; text-wrap: pretty; }
 .hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 26px; margin-top: 32px; }
 /* The outcome is worth a link, not a second button: one solid action per screen. */
 .hero-aside-link {
@@ -302,12 +371,12 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
   border-bottom: 1px solid var(--line-strong);
   color: var(--muted);
   font-size: var(--fs-small);
-  font-weight: 600;
+  font-weight: var(--fw-heading);
 }
 .hero-aside-link:hover { border-color: var(--primary); color: var(--primary-dark); }
 /* Derived from the timeline, so it is a fact about the film rather than a claim on
    the button; it sits under the actions rather than between them. */
-.hero-length { margin: 16px 0 0; color: var(--muted); font-size: var(--fs-small); }
+.hero-length { margin: 16px 0 0; color: var(--muted); font-size: var(--fs-small); font-weight: var(--fw-label); }
 
 /* ---- the way out of a full screen ---- */
 
@@ -326,9 +395,9 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
      home indicator needs. */
   margin-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   border-radius: var(--radius-control);
-  color: #5f6b57;
+  color: var(--muted);
   font-size: var(--fs-small);
-  font-weight: 600;
+  font-weight: var(--fw-heading);
   letter-spacing: .01em;
 }
 .hero-scroll:hover { color: var(--primary-dark); }
@@ -352,7 +421,7 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
 }
 
 /* ------------------------------------------------- the hero's drawing ----
-   One supplied illustration, and the three phrases written on it.
+   One supplied illustration, and the one phrase written on it.
 
    The picture is not a composite: the two people, the sheets, the note, the plant,
    the wireframes and the green marks are all inside the file, on its own cream
@@ -361,18 +430,15 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
    move as one object and never rotate, because turning a rectangular picture on a
    flat ground is exactly what would show its edges.
 
-   Every overlay is placed as a percentage of the image and turned to the angle of
-   the paper beneath it, measured off the artwork itself: the long rule near the top
-   runs at +7 degrees, the short rule at the foot at -3, and the ring in between sits
-   almost flat.
+   The phrase is placed as a percentage of the image and turned to the angle of the
+   paper beneath it, measured off the artwork itself: the ring sits almost flat. Two
+   further phrases used to sit above the rule near the top and the rule at the foot;
+   they are gone, and the rules are left as the drawing's own marks. Blank paper in
+   an illustration is not a gap waiting to be filled.
    -------------------------------------------------------------------------- */
 
 .hero-scene {
   --hero-p: 0;
-  /* The handwriting role, as the film sets it: no web font ships with this page, and
-     a Chinese-only subset would leave English and Japanese half-rendered. */
-  --hand: "Kaiti SC", STKaiti, KaiTi, "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif;
-
   container-type: inline-size;
   position: relative;
   /* The artwork's own ratio, so the box is the right shape before it loads. */
@@ -395,67 +461,48 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
 /* ---- the three phrases on the paper ---- */
 
 .hero-ink {
-  /* The handwriting scales with the drawing, and the drawing gets as narrow as 544px
-     in the narrowest two-column layout — where a plain `cqw` size lands under the
-     page's own 14px floor for anything that is a word. Every size below is a floor
-     and a proportion, so it keeps its relation to the paper until that would make it
+  /* The phrase scales with the drawing, and the drawing gets as narrow as 520px in
+     the narrowest two-column layout — where a plain `cqw` size lands under the
+     page's own 14px floor for anything that is a word. The size below is a floor and
+     a proportion, so it keeps its relation to the paper until that would make it
      unreadable, and then stops. */
   --ink-floor: 14px;
 
   position: absolute;
   margin: 0;
-  color: #494339;
-  font-family: var(--hand);
-  line-height: 1.42;
+  color: #46503f;
+  /* The page's own face, at the page's own weight. A brush face here was a fourth
+     font doing the job the drawing already does — the paper, the pencil and the
+     green rules are the handwriting. */
+  font-family: var(--sans);
+  font-weight: var(--fw-label);
+  line-height: 1.5;
   text-align: center;
   white-space: pre-line;
   pointer-events: none;
 }
 
-/* Above the long rule, which the artwork draws from (31%, 26%) to (69%, 31%). The
-   phrase sits on that line's midpoint and rises from it. */
-.hero-ink-title {
-  left: 50%;
-  top: 25.5%;
-  width: max-content;
-  max-width: 36%;
-  font-size: max(var(--ink-floor), 3.4cqw);
-  letter-spacing: .05em;
-  color: #3f3a31;
-  transform: translate(-50%, -100%) rotate(7deg);
-}
-
 /* Inside the ring, whose box in the artwork is (57.7%, 43.5%) to (83.9%, 64%) —
    centre (70.8%, 53.8%), radii 13.1% and 10.25%. The block is sized so its corners
    stay inside that curve, which is why the line breaks are in the copy: a ring is
-   only wide across its middle. */
+   only wide across its middle.
+
+   It stays below the weight of the intro beside it — around 16px against 19px at a
+   1440px window — because it is a note on a drawing, not a second lead paragraph. */
 .hero-ink-circled {
   left: 70.8%;
   top: 53.8%;
   width: max-content;
-  max-width: 22%;
-  font-size: max(var(--ink-floor), 2.5cqw);
+  max-width: 21%;
+  font-size: max(var(--ink-floor), 2.4cqw);
   transform: translate(-50%, -50%) rotate(2deg);
 }
 
-/* Above the short rule at the foot of the sheet. */
-.hero-ink-first {
-  left: 65.5%;
-  top: 81.5%;
-  width: max-content;
-  max-width: 30%;
-  font-size: max(var(--ink-floor), 2.6cqw);
-  transform: translate(-50%, -100%) rotate(-3deg);
-}
-
-/* Each language writes a different number of characters into the same ring and onto
-   the same two rules, so each gets its own size. */
-html[lang="en"] .hero-ink-title { font-size: max(var(--ink-floor), 2.9cqw); letter-spacing: .01em; }
-html[lang="ja"] .hero-ink-title { font-size: max(var(--ink-floor), 2.8cqw); letter-spacing: .02em; }
-html[lang="en"] .hero-ink-circled { font-size: max(var(--ink-floor), 2.4cqw); }
-html[lang="ja"] .hero-ink-circled { font-size: max(var(--ink-floor), 2.5cqw); }
-html[lang="en"] .hero-ink-first { font-size: max(var(--ink-floor), 2.15cqw); }
-html[lang="ja"] .hero-ink-first { font-size: max(var(--ink-floor), 2.3cqw); }
+/* Each language writes a different number of characters into the same ring, so each
+   gets its own size. English sets three short lines where Chinese sets two, so it
+   runs smaller to keep its corners inside the same curve. */
+html[lang="en"] .hero-ink-circled { font-size: max(var(--ink-floor), 2.05cqw); line-height: 1.45; }
+html[lang="ja"] .hero-ink-circled { font-size: max(var(--ink-floor), 2.4cqw); }
 
 /* The drawing is a drawing before it is anything else: when a visitor asks for less
    movement it simply stops moving. Nothing is hidden, because nothing was ever
@@ -505,13 +552,13 @@ html[lang="ja"] .hero-ink-first { font-size: max(var(--ink-floor), 2.3cqw); }
   margin: 0;
   color: var(--primary-dark);
   font-size: var(--fs-label);
-  font-weight: 700;
-  letter-spacing: .05em;
+  font-weight: var(--fw-label);
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 .brief-input-text { margin: 10px 0 0; max-width: 30em; font-size: 22px; line-height: 1.5; letter-spacing: -.02em; }
 .brief-sheet-body { display: grid; gap: 22px; margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--line); }
-.brief-scenario { margin: 22px 0 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.7; }
+.brief-scenario { margin: 22px 0 0; color: var(--muted); font-size: var(--fs-body); line-height: 1.7; text-wrap: pretty; }
 .brief-side { display: grid; gap: 14px; }
 .brief-side .brief-block {
   padding: 20px 22px 21px;
@@ -523,17 +570,17 @@ html[lang="ja"] .hero-ink-first { font-size: max(var(--ink-floor), 2.3cqw); }
   margin: 0 0 11px;
   color: var(--primary-dark);
   font-size: var(--fs-label);
-  font-weight: 700;
-  letter-spacing: .05em;
+  font-weight: var(--fw-label);
+  letter-spacing: .1em;
   text-transform: uppercase;
 }
 .brief-block ul { margin: 0; padding: 0; display: grid; gap: 9px; list-style: none; }
 .brief-block li {
   position: relative;
-  padding-left: 17px;
-  color: #4a4740;
-  font-size: var(--fs-small);
-  line-height: 1.65;
+  padding-left: 18px;
+  color: var(--ink);
+  font-size: var(--fs-body);
+  line-height: 1.68;
 }
 .brief-block li::before {
   position: absolute;
@@ -551,20 +598,20 @@ html[lang="ja"] .hero-ink-first { font-size: max(var(--ink-floor), 2.3cqw); }
 .brief-block[data-tone="limit"] li::before { border-radius: 999px; background: none; box-shadow: inset 0 0 0 1.5px var(--coral); }
 .brief-block[data-tone="open"] h3 { color: var(--amber); }
 .brief-block[data-tone="open"] li::before { border-radius: 999px; background: var(--amber); opacity: .6; }
-.brief-note { margin: 11px 0 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.65; }
+.brief-note { margin: 12px 0 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.65; }
 
 .brief-details { margin-top: 18px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); }
 .brief-details summary {
   padding: 15px 20px;
   color: var(--primary-dark);
-  font-size: var(--fs-small);
-  font-weight: 650;
+  font-size: var(--fs-body);
+  font-weight: var(--fw-heading);
   cursor: pointer;
 }
 .brief-details[open] summary { border-bottom: 1px solid var(--line); }
 .brief-details-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding: 22px 20px 24px; }
 .brief-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px 26px; margin-top: 24px; }
-.brief-foot p { margin: 0; max-width: 52ch; color: var(--muted); font-size: var(--fs-small); line-height: 1.7; }
+.brief-foot p { margin: 0; max-width: 52ch; color: var(--muted); font-size: var(--fs-body); line-height: 1.7; }
 .brief-foot .button { cursor: pointer; }
 
 /* -------------------------------------------------- how it works, and who decides */
@@ -586,14 +633,16 @@ html[lang="ja"] .hero-ink-first { font-size: max(var(--ink-floor), 2.3cqw); }
   border-radius: var(--radius-card);
   background: var(--surface);
 }
-.work-steps > li > span { color: var(--muted); font: 700 var(--fs-tag) var(--mono); letter-spacing: .1em; }
-.work-steps h3 { margin: 12px 0 10px; font-size: 19px; font-weight: 650; line-height: 1.4; letter-spacing: -.02em; }
-.work-steps p { margin: 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.72; }
+/* A step number is a number, not a code listing: it is set in the page's own face
+   at the label weight, with tabular figures so 01, 02 and 03 line up. */
+.work-steps > li > span { color: var(--primary); font: var(--fw-label) var(--fs-label) var(--sans); font-variant-numeric: tabular-nums; letter-spacing: .1em; }
+.work-steps h3 { margin: 12px 0 10px; font-size: var(--fs-h3); font-weight: var(--fw-heading); line-height: 1.4; letter-spacing: -.02em; }
+.work-steps p { margin: 0; color: var(--muted); font-size: var(--fs-body); line-height: 1.7; }
 .work-principles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 26px; margin: 30px 0 0; }
 .work-principles > div { padding: 18px 0 0; border-top: 1px solid var(--line); }
-.work-principles dt { color: var(--ink); font-size: var(--fs-small); font-weight: 700; }
-.work-principles dd { margin: 7px 0 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.7; }
-.work-vision { margin: 26px 0 0; max-width: 68ch; color: var(--muted); font-size: var(--fs-small); line-height: 1.72; }
+.work-principles dt { color: var(--ink); font-size: var(--fs-body); font-weight: var(--fw-heading); }
+.work-principles dd { margin: 8px 0 0; color: var(--muted); font-size: var(--fs-body); line-height: 1.7; }
+.work-vision { margin: 26px 0 0; max-width: 68ch; color: var(--muted); font-size: var(--fs-body); line-height: 1.7; text-wrap: pretty; }
 
 /* ---------------------------------------------------------------- closing */
 
@@ -608,15 +657,19 @@ html[lang="ja"] .hero-ink-first { font-size: max(var(--ink-floor), 2.3cqw); }
 .closing-panel h2 {
   max-width: 18em;
   margin: 0 0 14px;
-  font-size: clamp(28px, 3vw, 38px);
-  font-weight: 600;
+  font-size: var(--fs-h2);
+  font-weight: var(--fw-heading);
   line-height: 1.24;
   letter-spacing: -.03em;
 }
-.closing-panel > p { margin: 0; max-width: 46em; color: #4c5545; font-size: var(--fs-lead); line-height: 1.7; }
+/* Named, not selected by element: `\.closing-panel > p` also matched the scope note
+   below the actions and outranked its own rule, which is how a paragraph that asks
+   for 30px of air above it and reading size ended up flush against the buttons at
+   lead size. */
+.closing-lead { margin: 0; max-width: 46em; color: var(--muted); font-size: var(--fs-lead); line-height: 1.7; text-wrap: pretty; }
 .closing-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-.closing-scope { margin: 30px 0 0; max-width: 62ch; color: var(--muted); font-size: var(--fs-small); line-height: 1.72; }
-.closing-source { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; color: var(--primary-dark); font-size: var(--fs-small); font-weight: 650; }
+.closing-scope { margin: 32px 0 0; max-width: 62ch; color: var(--muted); font-size: var(--fs-body); line-height: 1.7; text-wrap: pretty; }
+.closing-source { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; color: var(--primary-dark); font-size: var(--fs-body); font-weight: var(--fw-heading); }
 .closing-source:hover { text-decoration: underline; }
 
 /* ---------------------------------------------------------------------------
@@ -896,7 +949,7 @@ footer {
   border-top: 1px solid var(--line);
   background: var(--surface);
   color: var(--muted);
-  font: var(--fs-small)/1.7 var(--sans);
+  font: var(--fw-body) var(--fs-small)/1.7 var(--sans);
 }
 footer .brand { color: var(--ink); }
 footer .brand-mark { color: var(--primary); }
@@ -909,10 +962,10 @@ footer > a:last-child:hover { border-color: var(--primary); color: var(--primary
   to { opacity: 1; filter: blur(0); transform: translateY(0); }
 }
 
-/* A monospace, letter-spaced, uppercased label is a Latin device. Set in Chinese or
-   Japanese it picks a fallback face that matches nothing else on the page and opens
-   gaps the script does not want, so both CJK settings take those labels back to the
-   page's own sans at its own spacing. */
+/* A letter-spaced, uppercased label is a Latin device: there is no case to change in
+   either CJK script, and the tracking only opens gaps the script does not want. Both
+   settings take those labels back to the page's own spacing. The face is already the
+   same one — every script here is Noto Sans — so only the spacing has to be undone. */
 html[lang="zh-CN"] :is(
   .site-header nav,
   .eyebrow,
@@ -928,7 +981,6 @@ html[lang="zh-CN"] :is(
   .work-principles dt,
   footer
 ) {
-  font-family: var(--sans);
   letter-spacing: 0;
   text-transform: none;
 }
@@ -948,21 +1000,15 @@ html[lang="ja"] :is(
   .work-principles dt,
   footer
 ) {
-  font-family: var(--sans);
   letter-spacing: 0;
   text-transform: none;
 }
 
-html[lang="zh-CN"] .site-header nav,
-html[lang="ja"] .site-header nav,
-html[lang="zh-CN"] .button,
-html[lang="ja"] .button { font-size: 15px; font-weight: 600; }
-/* 13px is only ever allowed for the all-caps monospace labels, where every glyph is
-   at cap height and 13px carries roughly the weight of 16px lowercase. The rule above
-   takes those labels back to ordinary sans for Chinese and Japanese, which removes
-   exactly what made 13px legible — so anything in that list steps up to the page's
-   own floor here. `.brief-block h3` and `.brief-input-label` were reset above but
-   left at 13px, which is how eight CJK labels ended up under the floor. */
+/* 13px is only ever allowed for the all-caps Latin labels, where every glyph is at
+   cap height and 13px carries roughly the weight of 16px lowercase. The rule above
+   takes the case and the tracking off those labels for Chinese and Japanese, which
+   removes exactly what made 13px legible — so anything in that list steps up to the
+   page's own floor here. */
 html[lang="zh-CN"] :is(.eyebrow, .brief-block h3, .brief-input-label, .studio-mode, .rail-title, .canvas-title, .canvas-node-caption, .branch-context > span, .canvas-node-note),
 html[lang="ja"] :is(
   .eyebrow,
@@ -979,6 +1025,9 @@ html[lang="ja"] :is(
 /* Negative tracking is a Latin adjustment. Applied to Chinese or Japanese it closes
    gaps the script needs, so the CJK settings take it back to zero and let the line
    break where the language allows instead. */
+/* Negative tracking is a Latin adjustment; the weights are not, and each heading role
+   now carries its own (the headline at 700, everything under it at 600) in both
+   scripts rather than being flattened to one value here. */
 html[lang="zh-CN"] :is(
   .hero h1,
   .map-copy h1,
@@ -987,7 +1036,6 @@ html[lang="zh-CN"] :is(
   .brief-input-text,
   .closing-panel h2
 ) {
-  font-weight: 600;
   letter-spacing: 0;
 }
 
@@ -1065,8 +1113,10 @@ html[lang="ja"] .map-copy h1 { word-break: normal; }
     text-wrap: balance;
   }
   /* A phone column is narrower than one Chinese clause at full heading size, and a
-     clause split down the middle of a word is worse than a smaller heading. */
-  html[lang="zh-CN"] .hero h1, html[lang="ja"] .hero h1 { font-size: 27px; }
+     clause split down the middle of a word is worse than a smaller heading. 30px is
+     as far down as it goes: below that the headline stops out-weighing the 17px
+     paragraph under it, and a hero that fits by being small is not a hero. */
+  html[lang="zh-CN"] .hero h1, html[lang="ja"] .hero h1 { font-size: 30px; }
   /* At this width a Japanese phrase is wider than the column, and phrase breaking
      turns the heading into six short lines. */
   html[lang="ja"] .hero h1 { word-break: normal; }
@@ -1087,17 +1137,11 @@ html[lang="ja"] .map-copy h1 { word-break: normal; }
   /* Edge to edge: the drawing is scenery, and at this width a 16px margin either
      side is the difference between a readable sheet and a thumbnail. */
   .hero-scene { width: 100vw; max-width: none; margin-inline: -16px; }
-  /* Only the title survives here. The ring and the foot rule are small parts of a
-     small picture at this width, and their phrases would land well under the page's
-     own reading floor; the title is the one that carries the idea. */
-  /* On a phone the whole drawing is 390px wide. Holding its handwriting to the 14px
-     floor would push the title off the paper and under the figure, so here the marks
-     drop to the page's absolute minimum — the size reserved for metadata — and the
-     two phrases that would fall furthest are hidden entirely rather than shrunk. */
-  .hero-ink { --ink-floor: 12px; }
-  .hero-ink-title { font-size: max(var(--ink-floor), 3.8cqw); }
-  html[lang="en"] .hero-ink-title, html[lang="ja"] .hero-ink-title { font-size: max(var(--ink-floor), 3.4cqw); }
-  .hero-ink-circled, .hero-ink-first { display: none; }
+  /* On a phone the whole drawing is 390px wide, which makes the ring about 80px
+     across. Nothing readable fits inside it, and a phrase shrunk to fit would be
+     under any floor worth having — so the drawing goes back to being a drawing. The
+     phrase says what the headline two inches above it already said. */
+  .hero-ink-circled { display: none; }
   .map-closing { margin-top: 18px; }
   .demo-section, .work-section { padding: 60px 0 64px; }
   .brief-section { padding: 60px 0 64px; }

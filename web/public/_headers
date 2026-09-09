@@ -6,3 +6,10 @@
 
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+
+# The subsets are cut from this site's own copy, so a change of copy is a change of
+# file name away from here — but the names are stable, so they are revalidated daily
+# rather than pinned for a year the way the hashed bundle is.
+/fonts/*
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+  Access-Control-Allow-Origin: *

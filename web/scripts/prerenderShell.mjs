@@ -39,6 +39,15 @@ const escape = (value) =>
 
 const REPO = "https://github.com/forge-context/goodidea-agent";
 
+// The same underline React draws under the words that carry the promise. The shell is
+// what a visitor sees before the bundle runs, so the headline has to arrive already
+// marked rather than gaining its accent a moment later. `App.tsx` holds the reasoning.
+const markPromise = (line, mark) => {
+  const at = mark ? line.indexOf(mark) : -1;
+  if (at < 0) return escape(line);
+  return `${escape(line.slice(0, at))}<b class="hero-mark">${escape(mark)}</b>${escape(line.slice(at + mark.length))}`;
+};
+
 const BRAND_MARK = `<span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36"><path class="brand-loop" d="M26.4 10.8A10.5 10.5 0 1 0 27.7 24" /><path class="brand-turn" d="M18.8 18.2h8.7v7.5" /><circle class="brand-spark" cx="28.3" cy="7.6" r="2.5" /></svg></span>`;
 const ARROW_DOWN = `<svg class="action-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5v12.2m0 0-4-4m4 4 4-4" /></svg>`;
 const ARROW_UP = `<svg class="action-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16.5V4.3m0 0-4 4m4-4 4 4" /></svg>`;
@@ -76,7 +85,7 @@ export function renderShell(t, { locale, homePath, seconds, withSeconds }) {
           <div class="hero-lead">
           <div class="hero-copy">
             <p class="eyebrow">${escape(t.heroEyebrow)}</p>
-            <h1>${t.heroTitle.map((line) => `<span>${escape(line)}</span>`).join("")}</h1>
+            <h1>${t.heroTitle.map((line) => `<span>${markPromise(line, t.heroTitleMark)}</span>`).join("")}</h1>
             <p class="hero-intro">${t.heroIntro.map((line) => `<span>${escape(line)}</span>`).join("")}</p>
             <div class="hero-actions">
               <a class="button button-primary" href="#demo">${escape(t.heroPrimary)}${ARROW_DOWN}</a>
@@ -140,7 +149,7 @@ export function renderShell(t, { locale, homePath, seconds, withSeconds }) {
           <div class="section-shell closing-panel">
             <p class="eyebrow">${escape(t.closingEyebrow)}</p>
             <h2>${escape(t.closingTitle)}</h2>
-            <p>${seconded(t.closingText)}</p>
+            <p class="closing-lead">${seconded(t.closingText)}</p>
             <div class="closing-actions">
               <a class="button button-primary" href="#demo">${escape(t.closingPrimary)}${ARROW_UP}</a>
               <a class="button button-quiet" href="#brief">${escape(t.closingSecondary)}${ARROW_UP}</a>

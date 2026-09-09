@@ -6,6 +6,80 @@ This record explains the current LP design decisions. It does not claim that a c
 
 The detailed walkthrough and live workspace share tokens, Studio styles and the map renderer in `shared/studio/`. The public concept film lives separately in `web/src/studio/paper/`, under its own `gip-` class and custom-property prefix, and does not change the shared product interface.
 
+## 2026-09-09 (further): one typeface, one scale, one bright mark
+
+The page had four opinions about type and was reading as four voices. Navigation, the
+eyebrows, the step numbers and the film's clock were monospace; the phrases on the
+illustration and a third of the film were a Chinese brush face falling back through a
+Japanese serif to Georgia; everything else was whatever sans the operating system
+happened to offer, which is not the same shape on a Mac, a Windows machine and an
+Android phone. There is now one family per language and nothing else.
+
+- **Noto Sans, self-hosted, one file per language.** Noto Sans for English, Noto Sans
+  SC for Simplified Chinese, Noto Sans JP for Japanese. Each is a variable font
+  carrying the weight axis, so 400 / 500 / 600 / 700 come out of a single request.
+  `web/src/fonts.css` declares the faces and the roles; `--font-sans` is set per
+  `html[lang]`, and `--sans` and `--mono` — the names `shared/studio/` and the film
+  both read — are pointed at it there, on the same `html[lang]` selectors the shared
+  file uses, which is the only place a `:root` rule would lose to it. `--font-code`
+  exists for genuine code and nothing on the landing page uses it.
+- **The subsets are cut from this site's own copy.** `web/scripts/build-fonts.mjs`
+  bundles `siteCopy.ts`, `paperCopy.ts` and `paperBrief.ts`, walks them per locale and
+  cuts exactly those characters, plus full ASCII and the punctuation the layout can
+  produce without any of it being written down. 37 kB Latin, 128 kB Chinese, 136 kB
+  Japanese. The upstream variable fonts come from `google/fonts` into a gitignored
+  `.fontcache/` and are not committed; the OFL licence for each family is written next
+  to the subset it covers in `web/public/fonts/`.
+- **Only the language being read is downloaded.** A face nothing on the page is set in
+  is never fetched, and each locale's HTML preloads its own file. Verified cold, per
+  page: English pulls the Latin file, Japanese the Japanese one, Chinese the Chinese
+  one — and nothing else. The one shared extra is `noto-sans-cjk-bits.woff2`, 7 kB: the
+  footer of every page lists "English / 日本語 / 简体中文" and the language switch says
+  中文, so the English and Japanese pages need CJK their own faces do not have. The
+  script asks each built subset what it is missing rather than guessing, and cuts that
+  from the simplified face.
+- **One scale, named once.** `--fs-hero` and `--fs-h2` are fluid because a headline is
+  measured against the window it fills; everything at reading size and below is fixed,
+  because a 16px paragraph does not become more readable on a wider monitor. Reading
+  text moved up to 16px wherever it had been set at 14 — the outcome lists, the three
+  steps, the principles, the scope note — and 14px went back to being the floor for
+  labels rather than a size for prose. Weights are roles: 700 headline, 600 headings
+  and controls, 500 labels, 400 body. A short laptop (under 820px tall) steps the
+  headline down; nothing else moves.
+- **One bright mark, once per screen.** The palette keeps the warm ground — now
+  `#faf8f2`, sampled from the illustration itself, so the picture and the page are one
+  surface — and takes the text to a deep ink green, the secondary to a green-grey that
+  reads at 6:1, and the primary to `#31543a`, dark and full enough to carry a solid
+  button. `--accent` (`#d4e86c`) appears in exactly one place: a hand-drawn rule under
+  the words in the headline that say you can start — 可以开工, start building,
+  開発に進める形. A second bright thing on a screen would make neither of them
+  emphasis.
+- **The illustration keeps one phrase.** The three overlaid phrases became one, inside
+  the green ring: 把想法，推敲成形。 The title above the top rule and the note above
+  the bottom one are gone — three phrases on a drawing beside a three-line headline is
+  two arguments at once, and the drawing's blank paper is not a gap to fill. What is
+  left is set in the page's own face, below the weight of the intro beside it, and
+  hidden below 720px where the ring is 80px across.
+- **The demo says what it shows.** "Three contributions, one decision" described the
+  mechanism before the visitor had seen it. It now says 看一个报价工具的想法，如何变得
+  具体 — watch one quoting-tool idea get specific — and the paragraph under it lost the
+  sentence that repeated the case the film opens with. The English hero lost two lines;
+  the Japanese one is built around 開発に進める形 rather than translated clause by
+  clause. Nothing claims a capability that is not there: the closing still states, in
+  full, that this is one fixed case with no backend behind it.
+- **Contrast and focus.** Every text colour on all three pages clears 4.5:1 (3:1 for
+  large text), measured with translucent layers composited rather than read as solid —
+  four labels inside the film were failing and were taken deeper in their own hues. The
+  focus ring is `3px solid var(--primary)` at full strength, offset clear of the
+  control; the half-transparent one it replaces disappeared over anything but plain
+  paper.
+
+Checked at 1366×768, 1440×900, 1920×1080 and 390 / 360 wide, in all three languages:
+no horizontal overflow, the hero still ends exactly where the demo begins on every
+desktop size, and one font family resolves for every text node on each page. The film
+was stepped through at ten marks per locale after the type change — nothing is occluded
+or pushed off its sheet — and play, pause, scrub and replay were exercised again.
+
 ## 2026-09-09 (later): the hero fills the window, and says so at its foot
 
 The header is sticky but still holds its place in normal flow, so the hero has exactly
@@ -220,10 +294,13 @@ the three questions the film opened with. The length is derived from the script
   moment the story is about — the designer, the quote, the three questions — rather
   than an empty desk. Under `prefers-reduced-motion` there is no timeline: ten settled
   stills the visitor steps through, plus a written version of every scene.
-- **No web font is shipped with the film.** The reference demo's handwriting subsets
-  cover only its own Chinese text, which would leave English and Japanese half-rendered
-  in mixed faces. The hand role falls back through the system's brush and serif stacks;
-  the paper texture, the ink and the colour carry the character instead.
+- **No web font was shipped with the film** — until 2026-09-09, when the page began
+  shipping one per language and the film joined it. The hand role is kept as a name so
+  the sheets still say which text is a mark on paper, but it no longer swaps the family
+  to say it: the paper texture, the pencil, the pinned note and the green rules are the
+  handwriting. What the earlier note got right is why it was never solved locally — a
+  Chinese-only subset would have left English and Japanese half-rendered; the answer
+  was three subsets cut from the site's own copy, not one.
 - **Assets.** `web/public/paper-film/` holds the four textures as WebP (456 KB in total,
   down from 7.2 MB of PNG). The character sheet stays near-lossless because its
   transparency is derived at composite time from its own colours — see
@@ -269,8 +346,8 @@ The independent local prototype opens outside the film and pauses playback. Repl
 | Responsive structure | Three columns on desktop; below 1080px the signposts fold into a strip and the conversation keeps the map beside it; on a phone the conversation is the page and the two side panels become real panels | Each size preserves reading order and core action instead of merely shrinking the desktop page. The map is never shrunk below a readable size: it scrolls instead. |
 | Phone reading order | The hero route runs top to bottom in two columns, keeps the line that says what each landmark means, and drops two of the three refused shortcuts | The earlier compact route climbed upward, so scrolling down met the result before the work that earned it, and it saved height by deleting the explanations rather than the decoration. Meaning is the last thing to compress. |
 | Content column | `--shell` holds at 1180px through laptop widths, then grows with the viewport to a 1360px cap; every section shares that one edge | A fixed 1180px left a 1920px monitor as roughly 40% margin. The cap is set by the demo: past 1360px the chat turn has already reached its reading measure, so more width would only stretch the idea field and the primary action. |
-| Typography | Locale-specific system stacks, real 600-weight display headings across all locales, and monospace only where the content is actually technical metadata | The LP has no undeclared webfont dependency. Chinese labels keep CJK metrics, avoid Latin-only uppercase/spacing rules, and use semantic break opportunities instead of splitting words such as “开始”. |
-| Type scale | One scale of five sizes: 16px body, 17px leads, 14px floor for anything that is a word or a sentence, and 12–13px reserved for all-caps monospace metadata | The page previously ran on 8–13px for almost everything, which is below every mainstream baseline. |
+| Typography | One self-hosted family per language — Noto Sans, Noto Sans SC, Noto Sans JP — as variable fonts cut from the site's own copy, with weights used as roles (700 headline, 600 headings and controls, 500 labels, 400 body) | The page reads as one voice on every operating system instead of four, and no monospace or brush face is asked to mean something a weight already means. Only the language being read is downloaded. Chinese and Japanese labels still drop Latin-only uppercase and tracking, and use semantic break opportunities instead of splitting words such as “开始”. |
+| Type scale | One scale, declared once: fluid `--fs-hero` and `--fs-h2`, then fixed 17px leads, 16px body, a 14px floor for anything that is a word or a sentence, and 12–13px reserved for all-caps labels | A headline is measured against its window; a paragraph is not, and does not become more readable on a wider monitor. The page previously ran on 8–13px for almost everything, which is below every mainstream baseline. |
 | Imagery | No generic photography or decorative illustration yet | The interactive product behavior is the strongest current proof. Original brand imagery can be added when real cases exist. |
 
 ## The first view: the idea map

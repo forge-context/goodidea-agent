@@ -40,6 +40,12 @@ export type SiteCopy = {
    *  each part is a block, and a language whose clause is wider than the column (in
    *  practice English) still wraps inside its own part. */
   heroTitle: string[];
+  /** The words inside `heroTitle` that carry the promise — "you can start building",
+   *  and its equivalent in each language. They are marked on the page with the one
+   *  bright accent the palette allows, drawn as the same hand rule the illustration
+   *  uses. It has to be a substring of exactly one of the title's lines: a mark that
+   *  wrapped would draw two rules, and a mark that matched twice would draw none. */
+  heroTitleMark: string;
   /** Two short lines: what the team does, and what stays the visitor's to decide.
    *  Kept as two strings so each language breaks where its own clause ends. */
   heroIntro: [string, string];
@@ -51,22 +57,19 @@ export type SiteCopy = {
    *  page goes, and it is a link to the demo like the button above it. */
   heroScrollCue: string;
 
-  /* The three phrases laid over the drawing beside the headline. The artwork ships
+  /* The one phrase laid over the drawing beside the headline. The artwork ships
      without words on purpose, because the same picture serves three languages and a
-     slab of one of them is not an illustration to the other two. Short and few: the
-     drawing has to read at a glance, not become a second thing to read, and every
-     one of these is also said in plain text elsewhere on the page. */
+     slab of one of them is not an illustration to the other two.
+     One phrase, not three: the headline beside it already carries the promise, and a
+     drawing that has to be read line by line stops being scenery and starts
+     competing with the words it was meant to support. */
   scene: {
     /** The whole picture, said once, for anyone who is not looking at it. */
     alt: string;
-    /** Above the long green rule near the top of the sheet. */
-    title: string;
     /** Inside the ring on the right. A ring is only wide across its middle, so the
-     *  breaks are written into the copy: three short lines fit, a paragraph does
-     *  not. */
+     *  breaks are written into the copy: two or three short lines fit, a paragraph
+     *  does not. */
     circled: string;
-    /** Above the short green rule at the foot of the sheet. */
-    first: string;
   };
 
   demoEyebrow: string;
@@ -154,9 +157,10 @@ export const siteCopy: Record<Locale, SiteCopy> = {
 
     heroEyebrow: "给准备用 AI 写代码的人",
     heroTitle: ["和 AI 团队一起，", "把想法推敲成", "可以开工的产品。"],
+    heroTitleMark: "可以开工",
     heroIntro: [
-      "研究、设计与工程，一起帮你理清方向。",
-      "你来做决定，把想法变成可开发的方案。",
+      "研究、设计与工程给出专业判断和方向。",
+      "由你拍板，交出能直接开工的第一版。",
     ],
     heroPrimary: "看一个想法如何成形",
     heroPrimaryNote: "{seconds} 秒 · 无需注册",
@@ -165,15 +169,13 @@ export const siteCopy: Record<Locale, SiteCopy> = {
 
     scene: {
       alt: "一张摊开的手绘产品草稿：纸上有界面线框、被划掉的一版和更简单的下一版、圈出的一句话和几道绿线；一位女性拿着铅笔靠在纸的上边思考，一个人站在纸前看着它。",
-      title: "一个值得做的想法",
-      circled: "让好想法\n更容易变成\n真实的产品。",
-      first: "第一版，先做到这里",
+      circled: "把想法，\n推敲成形。",
     },
 
     demoEyebrow: "主 Demo",
-    demoTitle: "三份贡献，一项由你决定。",
+    demoTitle: "看一个报价工具的想法，如何变得具体。",
     demoIntro:
-      "一位自由职业设计师的报价困扰，变成一句想法。研究、UX 与工程三位 Agent 各交出一份署名贡献，GoodIdea 写出共同方向和一处取舍。你确认之后，产品稿才改写。",
+      "研究、UX 与工程三位 Agent 各交出一份署名贡献，GoodIdea 写出共同方向和一处需要拍板的取舍。你确认之后，产品稿才改写。",
 
     briefEyebrow: "成果",
     briefTitle: "同一个案例，最终留下什么。",
@@ -273,13 +275,14 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     nav: { demo: "Demo", brief: "Output", how: "How it works", github: "GitHub" },
 
     heroEyebrow: "For people about to build with AI",
-    /* English has spaces to break at, so it stays one sentence and wraps where the
-       column ends; the forced clauses exist for the two scripts that would otherwise
-       break inside a word. */
-    heroTitle: ["Work an idea out with an AI team, until it is something you can start building."],
+    /* Three clauses, like the other two languages, rather than one long sentence
+       left to wrap wherever the column runs out. A clause wider than the column
+       still wraps inside its own line, so nothing overflows. */
+    heroTitle: ["Work your idea out", "with an AI team, until", "you can start building."],
+    heroTitleMark: "start building",
     heroIntro: [
-      "Research, design and engineering, working out the direction with you.",
-      "You decide, and the idea becomes something a coding agent can build.",
+      "Research, design and engineering settle the direction.",
+      "You make the call, and the result is ready to build.",
     ],
     heroPrimary: "Watch an idea take shape",
     heroPrimaryNote: "{seconds} seconds · no sign-up",
@@ -288,15 +291,13 @@ export const siteCopy: Record<Locale, SiteCopy> = {
 
     scene: {
       alt: "A large hand-drawn product draft spread out on a desk: an interface sketch, one version crossed out beside a simpler one, a circled note and a few green rules; a woman leans on the top edge with a pencil, and someone stands in front of the paper looking at it.",
-      title: "An idea worth building",
-      circled: "Make good ideas\neasier to build.",
-      first: "Version one stops here",
+      circled: "Work the idea\ninto a shape\nyou can build.",
     },
 
     demoEyebrow: "The demo",
-    demoTitle: "Three contributions. One decision, and it is yours.",
+    demoTitle: "Watch one quoting-tool idea get specific.",
     demoIntro:
-      "A freelance designer's quoting problem becomes one sentence. Research, UX and engineering agents each hand in a signed contribution, and GoodIdea states where they agree and what is still a trade-off. The product draft changes only after you confirm it.",
+      "Research, UX and engineering agents each hand in a signed contribution, and GoodIdea states where they agree and the one trade-off that still needs a person. The product draft changes only after you confirm it.",
 
     briefEyebrow: "Output",
     briefTitle: "The same case. This is what is left.",
@@ -396,10 +397,11 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     nav: { demo: "Demo", brief: "成果物", how: "進め方", github: "GitHub" },
 
     heroEyebrow: "AI と一緒に作り始める人へ",
-    heroTitle: ["AI チームと一緒に、", "アイデアを着手できる", "製品まで詰める。"],
+    heroTitle: ["AI チームと一緒に、", "アイデアを", "開発に進める形へ。"],
+    heroTitleMark: "開発に進める形",
     heroIntro: [
-      "調査・デザイン・エンジニアリングが、方向を一緒に整理する。",
-      "決めるのはあなた。アイデアを、開発できる案にする。",
+      "調査・デザイン・エンジニアリングが、方向をはっきりさせる。",
+      "決めるのはあなた。残るのは、開発に進める初版です。",
     ],
     heroPrimary: "アイデアが形になる過程を見る",
     heroPrimaryNote: "{seconds} 秒 · 登録不要",
@@ -408,15 +410,13 @@ export const siteCopy: Record<Locale, SiteCopy> = {
 
     scene: {
       alt: "机に広げた大きな手描きの製品ドラフト。画面のラフ、線を引いて外した案とより簡単な次の案、丸で囲んだ一文と数本の緑の線が描かれ、鉛筆を持った女性が紙の上端にもたれ、もう一人が紙の前に立って眺めている。",
-      title: "つくる価値のあるアイデア",
-      circled: "良いアイデアを\n形にしやすく。",
-      first: "初版は、ここまで",
+      circled: "アイデアを、\n進める形に。",
     },
 
     demoEyebrow: "デモ",
-    demoTitle: "提案は 3 件。決めるのは、1 件のあなたの判断。",
+    demoTitle: "見積もりツールのアイデアが、具体になるまで。",
     demoIntro:
-      "フリーランスのデザイナーの見積もりの困りごとが、一文のアイデアになる。調査・UX・実装の 3 名の Agent が署名つきの提案を出し、GoodIdea が共通する方向と判断が要る点をまとめる。製品ドラフトが変わるのは、あなたが確認したあとです。",
+      "調査・UX・実装の 3 名の Agent が署名つきの提案を出し、GoodIdea が共通する方向と、人が決めるべき 1 つの取捨をまとめる。製品ドラフトが変わるのは、あなたが確認したあとです。",
 
     briefEyebrow: "成果物",
     briefTitle: "同じ事例から、最後に残るもの。",

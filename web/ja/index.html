@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fffaf7" />
+    <!-- The page is set in one face and this is it, so it is fetched with the
+         first response rather than after the stylesheet is parsed. Only this
+         language's file is named here; the other two are never requested. -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/noto-sans-jp.woff2" crossorigin />
+    <meta name="theme-color" content="#faf8f2" />
     <meta name="description" content="AI と作り始める人へ。調査・UX・実装の Agent がそれぞれ提案し、GoodIdea が大事な選択をまとめ、決めるのはあなた。公開サイトは固定の例です。" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="GoodIdea — AI チームと一緒に、アイデアを着手できる製品まで" />

@@ -1,0 +1,102 @@
+/* The one type system, in the three scripts the site ships.
+ *
+ * Every page is set in Noto Sans: the Latin cut for English, Noto Sans SC for
+ * Simplified Chinese, Noto Sans JP for Japanese. That is the whole list. Before this
+ * the page mixed a system sans, a Chinese brush face, a Japanese serif and a
+ * monospace across four different roles, which read as four opinions rather than one
+ * voice — and none of them said the same thing on a Mac, a Windows machine and a
+ * phone.
+ *
+ * Each file is a variable font carrying the weight axis, so 400/500/600/700 all come
+ * out of a single request per language. The files are cut from this site's own copy
+ * by `scripts/build-fonts.mjs`, which also writes the OFL licence for each family
+ * next to it in `public/fonts/`.
+ *
+ * Only the language being read is downloaded. `--font-sans` is set per `html[lang]`
+ * below, and a face nothing on the page is set in is never fetched, so a Chinese
+ * visitor never pays for the Japanese file. Each locale's HTML preloads its own.
+ */
+
+@font-face {
+  font-family: "Noto Sans";
+  src: url("/fonts/noto-sans-latin.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans SC";
+  src: url("/fonts/noto-sans-sc.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Noto Sans JP";
+  src: url("/fonts/noto-sans-jp.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Every page prints the other two languages' names in the footer, and the language
+   switch says 中文 on all three. Seven kilobytes of exactly those characters, so an
+   English or Japanese page does not drop into a system CJK face for six glyphs — the
+   one place the old page's mixed setting was unavoidable rather than chosen. */
+@font-face {
+  font-family: "Noto Sans CJK Bits";
+  src: url("/fonts/noto-sans-cjk-bits.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------------------------------------------------------------------------
+   The type roles.
+
+   Two families and eight sizes, and every rule on the page names one of them. A
+   `font-family` written anywhere else is a bug: it is how the page ended up with a
+   brush face on the illustration, a serif in the demo and a monospace on the
+   navigation, each added locally to solve one thing.
+   --------------------------------------------------------------------------- */
+:root {
+  --font-sans: "Noto Sans", system-ui, sans-serif;
+  /* Reserved for code, and nothing else. Step numbers, timestamps and navigation are
+     words, not code, and they are set in the page's own face like every other word.
+     Nothing on the landing page renders code today; this is here so that when
+     something does, it has a role to use rather than a family to invent. */
+  --font-code: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  --fw-hero: 700;
+  --fw-heading: 600;
+  --fw-label: 500;
+  --fw-body: 400;
+}
+
+/* The Latin face has no CJK, and the Japanese face was never cut with simplified
+   forms, so both name the bits file behind them. The Chinese face carries Latin,
+   Japanese kana and its own script, so it needs nothing after it. */
+html[lang="en"] {
+  --font-sans: "Noto Sans", "Noto Sans CJK Bits", system-ui, sans-serif;
+}
+html[lang="ja"] {
+  --font-sans: "Noto Sans JP", "Noto Sans CJK Bits", "Hiragino Sans", "Yu Gothic UI", system-ui, sans-serif;
+}
+html[lang="zh-CN"] {
+  --font-sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+/* `shared/studio/tokens.css` names the same two roles, and it points them at a system
+   face per language for the private product, which pins no fonts of its own. This
+   page ships its own, so it takes both names back — including on the `html[lang]`
+   selectors, which is where the shared file sets them and therefore the only place a
+   `:root` rule here would lose to it. `--mono` is deliberately not monospace: nothing
+   on this page is code, and every place that reached for a monospace was reaching for
+   a label. */
+:root,
+html[lang] {
+  --sans: var(--font-sans);
+  --mono: var(--font-sans);
+}

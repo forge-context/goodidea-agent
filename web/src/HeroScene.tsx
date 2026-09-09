@@ -1,4 +1,4 @@
-/* The hero's right half: one drawing, and the three lines written on it.
+/* The hero's right half: one drawing, and the one line written on it.
  *
  * The film below already shows the mechanism — an agent proposes, the visitor adopts,
  * the draft changes. The hero used to show a small version of the same thing, which
@@ -13,11 +13,12 @@
  * against another — it has no layers to move.
  *
  * What the file deliberately leaves out is words, because the same picture serves
- * three languages. Three short phrases are laid over it as ordinary DOM text, each
- * positioned as a percentage of the image and turned to the angle of the paper under
- * it: the title above the long green rule, the promise inside the ring, and where
- * version one stops above the short rule. They are decoration — every one of them is
- * also said in plain text elsewhere on the page.
+ * three languages. One short phrase is laid over it as ordinary DOM text, inside the
+ * green ring, turned to the angle of the paper under it. There used to be three, over
+ * the two rules as well, and three phrases on a drawing beside a three-line headline
+ * is two arguments at once — the ring is the one the artwork already points at. The
+ * drawing's own rules and blank paper stay as they were drawn; the empty space is
+ * not something to fill.
  */
 
 import { useEffect, useRef, type RefObject } from "react";
@@ -122,14 +123,8 @@ export function HeroScene({ copy: t }: { copy: SiteCopy }) {
           decoding="async"
         />
 
-        {/* Above the long green rule near the top of the sheet, which runs at +7°. */}
-        <p className="hero-ink hero-ink-title" aria-hidden="true">{scene.title}</p>
-
         {/* Inside the ring. The paper is close to flat here, so this barely turns. */}
         <p className="hero-ink hero-ink-circled" aria-hidden="true">{scene.circled}</p>
-
-        {/* Above the short rule at the foot of the sheet, which runs at -3°. */}
-        <p className="hero-ink hero-ink-first" aria-hidden="true">{scene.first}</p>
       </div>
     </div>
   );

@@ -21,11 +21,15 @@
   --gip-experience: #4f7784;
   --gip-engineering: #7c6452;
 
-  /* No web font is shipped with the film: the site is trilingual and the demo's
-     Chinese-only subsets would leave English and Japanese half-rendered. The hand
-     role falls back through the system's brush and serif faces instead. */
-  --gip-hand: "Kaiti SC", STKaiti, KaiTi, "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif;
-  --gip-body: var(--sans, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  /* One face, the page's own. The film used to set part of itself in a brush or
+     serif fallback to mean "handwritten", which chose a different font on every
+     operating system and put a fourth voice inside a page that has one. What is
+     handwritten here is drawn — the paper, the pencil, the pinned note, the green
+     rules — so the words on it can be read in the same face as the words around it.
+     The role is kept as a name so the sheets still say which text is a mark on
+     paper; it just no longer swaps the family to say it. */
+  --gip-body: var(--sans, system-ui, sans-serif);
+  --gip-hand: var(--gip-body);
 
   position: relative;
   color: var(--gip-ink);
@@ -171,7 +175,9 @@
   border-radius: 2px;
   font-size: 14px;
   letter-spacing: .06em;
-  color: #8d8577;
+  /* A caption is small and set in caps: it has to clear 4.5:1 on the film's warm
+     ground, which the old grey did not. Same hue, taken down until it reads. */
+  color: #6d6558;
 }
 .gip-note {
   position: absolute;
@@ -209,7 +215,7 @@
 }
 
 .gip-chip { display: inline-block; padding: 3px 9px; border-radius: 2px; font-size: 13px; letter-spacing: .08em; }
-.gip-chip-quote { border: 1px solid rgba(199, 178, 110, .42); background: rgba(236, 224, 173, .24); color: #7d7462; font-size: 15px; }
+.gip-chip-quote { border: 1px solid rgba(199, 178, 110, .42); background: rgba(236, 224, 173, .24); color: #635b4b; font-size: 15px; }
 .gip-quote-title { font: 600 36px/1.2 var(--gip-body); letter-spacing: .02em; color: #34302a; }
 .gip-quote-price { font: 30px var(--gip-hand); color: #494237; }
 .gip-ink-quote { stroke: rgba(163, 147, 112, .4); }
@@ -491,7 +497,9 @@
   text-transform: uppercase;
   color: #8d9581;
 }
-.gip-chip-stage { border: 1px solid rgba(125, 143, 116, .3); background: rgba(125, 143, 116, .14); color: var(--gip-sage-deep); }
+/* The chapter chip is the film's own label for where it is, and at 1.6:1 against its
+   own tint it was a shape rather than a word. */
+.gip-chip-stage { border: 1px solid rgba(125, 143, 116, .38); background: rgba(125, 143, 116, .14); color: #3f5138; }
 .gip-product-title { font: 600 30px/1.2 var(--gip-body); letter-spacing: .015em; }
 .gip-original { font: 25px/1.45 var(--gip-hand); color: #4a443d; }
 .gip-revised { font: 600 25px/1.4 var(--gip-body); color: var(--gip-ink); }
@@ -510,7 +518,7 @@
   padding-top: 7px;
   border-top: 1px solid #dce5d3;
   font: 13px/1.4 var(--gip-body);
-  color: #7e8974;
+  color: #5c6853;
 }
 /* The control belongs to the card that asks the question: it sits at the end of the
    card's own content, with room above it and the card's padding below it, so the
@@ -546,7 +554,7 @@
   background: #fffefa;
   box-shadow: 0 8px 22px rgba(52, 68, 41, .05);
 }
-.gip-canvas .gip-chip-stage { padding-left: 0; padding-right: 0; border: 0; background: none; font-size: 18px; letter-spacing: .03em; color: #64775a; }
+.gip-canvas .gip-chip-stage { padding-left: 0; padding-right: 0; border: 0; background: none; font-size: 18px; letter-spacing: .03em; color: #4a5a42; }
 .gip-version { float: right; display: flex; align-items: center; gap: 8px; padding-top: 5px; font: 15px var(--gip-body); color: #829176; }
 .gip-version > span { font-size: 12px; }
 .gip-canvas .gip-proposal {
@@ -823,7 +831,9 @@
 .gip-controls .gip-play:hover { border-color: #46583f; background: #46583f; color: #fbf9f3; }
 .gip-controls .gip-icon { flex: none; font-size: 12px; }
 .gip-scrub { flex: 1; min-width: 60px; accent-color: var(--gip-sage-deep); cursor: pointer; }
-.gip-time { flex: none; font: var(--fs-tag, 12px)/1 var(--mono, monospace); font-variant-numeric: tabular-nums; color: var(--muted, #625a70); }
+/* A running time is a number, not code: the page's own face, with tabular figures
+   so the digits do not shuffle while it plays. */
+.gip-time { flex: none; font: var(--fs-label, 13px)/1 var(--sans, system-ui); font-variant-numeric: tabular-nums; color: var(--muted, #625a70); }
 .gip-below {
   display: flex;
   flex-wrap: wrap;

@@ -6,6 +6,21 @@
 
 詳細なウォークスルーと実際のワークスペースは `shared/studio/` の Token、Studio スタイル、マップ描画を共用します。主 Demo の映像表現は `web/src/studio/paper/` に分離し、クラス名とカスタムプロパティは `gip-` 接頭辞で統一、共通の製品 UI は変更しません。
 
+## 2026-09-09（さらに続き）：書体を一つ、Scale を一つ、明るい印を一箇所
+
+Page は書体について 4 つの意見を持っていて、4 つの声として読めていた。Navigation、Eyebrow、手順番号、Demo の時計は Monospace。イラスト上の文字と Demo の 3 分の 1 は中国語の楷書体で、日本語の明朝、Georgia へと落ちていく。残りは OS 任せの Sans——Mac と Windows と Android で同じ形ではない。いまは言語ごとに 1 書体、それだけ。
+
+- **Noto Sans を自前で配信、言語ごとに 1 ファイル。** 英語は Noto Sans、簡体字中国語は Noto Sans SC、日本語は Noto Sans JP。いずれも Weight 軸を持つ Variable Font なので、400 / 500 / 600 / 700 が 1 リクエストで揃う。`web/src/fonts.css` が書体と Text Role を宣言し、`--font-sans` を `html[lang]` ごとに置く。`shared/studio/` と Demo が読む `--sans` と `--mono` も同じ `html[lang]` Selector で指し直す——共有ファイルがそこで定義しているので、`:root` に書くと負ける。本物の Code 用に `--font-code` を残したが、Landing Page で使う場所は今のところない。
+- **Subset は Site 自身の Copy から切る。** `web/scripts/build-fonts.mjs` が `siteCopy.ts`・`paperCopy.ts`・`paperBrief.ts` を束ね、Locale ごとに走査して、実際に表示される文字だけを切り出す。加えて ASCII 全体と、Copy には書かれていないが Layout が出しうる約物。英語 37 kB、中国語 128 kB、日本語 136 kB。上流の Variable Font は `google/fonts` から gitignore された `.fontcache/` に取得し、Commit しない。各 Family の OFL Licence は、それが覆う Subset の隣、`web/public/fonts/` に置く。
+- **読んでいる言語のものだけを落とす。** Page のどこにも使われていない書体は取得されず、各 Locale の HTML は自分のファイルだけを Preload する。Page ごとに Cold で確認済み——英語は Latin、日本語は日本語、中国語は中国語、それ以外はない。唯一の共有分が 7 kB の `noto-sans-cjk-bits.woff2`。どの Page の Footer にも「English / 日本語 / 简体中文」が並び、言語切替には 中文 がある。英語 Page と日本語 Page は、自分の書体が持たない字を必要とする。Script は推測せず、生成済みの Subset に何が欠けているかを尋ね、簡体字の書体からそれだけを切る。
+- **Scale は一つ、宣言も一度。** `--fs-hero` と `--fs-h2` は Fluid。見出しは、それが埋める窓で測るものだから。読む Size 以下は固定。16px の段落は、Monitor が広くなっても読みやすくならない。14px に置かれていた本文は 16px に戻した——成果の List、3 つの手順、3 つの原則、範囲の注記。14px は散文の Size ではなく、Label の下限に戻る。Weight は Role として使う。見出し 700、Section 見出しと操作 600、Label 500、本文 400。高さ 820px 未満の画面では見出しだけを一段下げる。
+- **明るい印は 1 画面に 1 つ。** 暖かい地色は残し、イラストから直接採った `#faf8f2` に。絵と Page が一つの面になる。本文は深い墨緑、副次の文字は 6:1 で読める緑がかった灰、Primary は `#31543a`——Solid な Button を支えられる濃さと厚み。`--accent`（`#d4e86c`）が出るのは 1 箇所だけ。見出しの中で「着手できる」と言っている語の下の手描きの線——可以开工 / start building / 開発に進める形。同じ画面に明るいものが 2 つあれば、どちらも強調ではなくなる。
+- **イラストの上は 1 文だけ。** 3 つの重ね文字を、緑の楕円の中の 1 つにした：アイデアを、進める形に。上の線の上にあった見出しと、下の線の上にあった注記は外した。隣が 3 行の見出しなのに絵の上でも 3 文を語れば、同時に 2 つの主張をすることになる。絵の余白は、埋めるべき隙間ではない。残した 1 文は Page 自身の書体で、隣の導入文より軽い。720px 未満では楕円が 80px 幅になるので隠す。
+- **Demo は、何を見せるかを先に言う。** 「提案は 3 件、決めるのは 1 件」は、見る前に仕組みを説明していた。いまは「見積もりツールのアイデアが、具体になるまで。」で、その下の段落からは映像の冒頭と重なる 1 文を落とした。英語の Hero は 2 行短くなり、日本語は逐語訳ではなく「開発に進める形」を軸に書き直した。存在しない機能は主張しない。末尾は変わらず、これが 1 つの固定事例で、背後に Backend がないことを完全な形で述べている。
+- **Contrast と Focus。** 3 言語すべての文字色が 4.5:1（大きい文字は 3:1）を満たす。半透明の層は Solid として読まず、実際に合成してから測った——Demo の中の 4 つの Label が落ちていたので、同じ色相のまま深くした。Focus Ring は `3px solid var(--primary)` の実色で、Control の外に離す。置き換えた半透明の緑は、素の紙以外のどこでも消えていた。
+
+1366×768、1440×900、1920×1080、幅 390 / 360 で、3 言語すべてを確認した。横方向の溢れなし。Desktop のどの Size でも Hero は Demo の始まる位置でちょうど終わる。どの Page でも、すべての Text Node が解決する Font Family は 1 つ。書体を変えたあと Locale ごとに 10 点の時刻で Demo を送って確認し（遮りも紙からの溢れもない）、再生・一時停止・Scrub・再生し直しを改めて確かめた。
+
 ## 2026-09-09（続き）：ヒーローが画面を埋め、その足元で行き先を示す
 
 ヘッダーは sticky だが通常フローの場所は保持したままなので、ヒーローが引くべき高さは一つだけ——`--header-h`、デスクトップ 72px、720px 以下は 64px。セクションは `min-height: calc(100svh - var(--header-h))`、小ビューポート単位を持たない環境のために `100vh` の行を前に置く。`dvh` ではなく `svh` にしたのは、`dvh` の箱の底に固定した誘導がモバイルのツールバー再表示と同時にその下へ滑り込むからだ。`height` ではなく `min-height` なのは、背の低いノート PC、拡大されたページ、二つの半分を積み上げるスマートフォンでは、内容を切るのではなくセクションを伸ばすべきだからだ。
@@ -208,15 +223,17 @@ Page は 5 つの Size だけで組む。`web/src/styles.css` に `--fs-tag` か
 | `--fs-lead` | 17px | Hero の導入文、末尾の濃色帯の本文、Demo で Agent が話す言葉 |
 | `--fs-body` | 16px | 既定の本文。段落、List、Idea 入力欄 |
 | `--fs-small` | 14px | Caption、注記、左の道標、選択肢、アイデアマップ上の全ての語 |
-| `--fs-label` | 13px | 大文字 Monospace の Section Label、Eyebrow、用語 |
-| `--fs-tag` | 12px | 大文字 Monospace の Metadata Chip と Status Pill |
+| `--fs-label` | 13px | 大文字の Section Label、Eyebrow、用語 |
+| `--fs-tag` | 12px | Metadata Chip と Status Pill |
+
+2026-09-09 以降、この表の上に 2 段が加わった。`--fs-hero` と `--fs-h2` で、どちらも Fluid。見出しは、それが埋める窓で測るものだから。同じ日に、`--fs-small` に置かれていた本文（成果の List、3 つの手順、3 つの原則）は `--fs-body` に戻した。
 
 **本文は 16px、下限は 14px。** Material 3 は body-large を 16sp、body-medium を 14sp
 と定め、読ませる Text をそこで止める。GOV.UK の Scale は 16px を下限とし、小さい画面
 でも縮めない方針に変わった。Apple iOS の Body は 17pt。操作 Label も同じ規則に従い、
 Button と Navigation は 10px の Monospace ではなく 14〜15px になった。
 
-**12〜13px は全て大文字の Monospace Metadata に限る。** 全て大文字の並びはどの字も
+**12〜13px は全て大文字の短い Label に限る。**（2026-09-09 以降、これらは Monospace ではない。Monospace は Code のためのもので、番号や時刻のためのものではない。） 全て大文字の並びはどの字も
 Cap Height なので、12px の Label は 16px の小文字とほぼ同じ Cap Height を持ち、読む
 負荷は持たない。これらは 1〜4 語の状態表示であって文ではない。12px 未満で残っている
 のは `aria-hidden` の装飾記号だけ。

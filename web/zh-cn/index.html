@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fffaf7" />
+    <!-- The page is set in one face and this is it, so it is fetched with the
+         first response rather than after the stylesheet is parsed. Only this
+         language's file is named here; the other two are never requested. -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/noto-sans-sc.woff2" crossorigin />
+    <meta name="theme-color" content="#faf8f2" />
     <meta name="description" content="给准备用 AI 写代码的人。研究、UX 和工程 Agent 各自提出建议，GoodIdea 整理出关键选择，你来决定。公开页面是一段固定案例。" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="GoodIdea — 和 AI 团队一起，把想法推敲成可以开工的产品" />

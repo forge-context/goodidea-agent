@@ -115,7 +115,9 @@ function App() {
           <div className="hero-lead">
             <div className="hero-copy">
               <p className="eyebrow">{t.heroEyebrow}</p>
-              <h1>{t.heroTitle.map((line) => <span key={line}>{line}</span>)}</h1>
+              <h1>{t.heroTitle.map((line) => (
+                <span key={line}>{markPromise(line, t.heroTitleMark)}</span>
+              ))}</h1>
               <p className="hero-intro">
                 {t.heroIntro.map((line) => <span key={line}>{line}</span>)}
               </p>
@@ -227,7 +229,7 @@ function App() {
           <div className="section-shell closing-panel">
             <p className="eyebrow">{t.closingEyebrow}</p>
             <h2>{t.closingTitle}</h2>
-            <p>{withSeconds(t.closingText, seconds)}</p>
+            <p className="closing-lead">{withSeconds(t.closingText, seconds)}</p>
             <div className="closing-actions">
               <a className="button button-primary" href="#demo">{t.closingPrimary}<ArrowUpIcon /></a>
               <a className="button button-quiet" href="#brief">{t.closingSecondary}<ArrowUpIcon /></a>
@@ -244,6 +246,30 @@ function App() {
         <p>{t.footer}</p>
         <a href={REPO}>github.com/forge-context/goodidea-agent ↗</a>
       </footer>
+    </>
+  );
+}
+
+/**
+ * One line of the headline, with the words that carry the promise underlined.
+ *
+ * The rule under them is the page's one bright accent, and it is drawn the way the
+ * illustration draws a rule — one slightly uneven stroke, not a border. The mark is a
+ * `<b>` rather than a `<mark>`: `<mark>` means relevance to the reader's current
+ * search, which this is not, and its default yellow ground would have to be undone
+ * anyway. Weight is unchanged, so the accent is the only thing that carries it.
+ *
+ * A line that does not contain the phrase comes back untouched, so a locale whose
+ * mark sits on line three costs nothing on lines one and two.
+ */
+function markPromise(line: string, mark: string) {
+  const at = mark ? line.indexOf(mark) : -1;
+  if (at < 0) return line;
+  return (
+    <>
+      {line.slice(0, at)}
+      <b className="hero-mark">{mark}</b>
+      {line.slice(at + mark.length)}
     </>
   );
 }
