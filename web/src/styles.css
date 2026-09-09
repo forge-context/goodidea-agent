@@ -395,6 +395,13 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
 /* ---- the three phrases on the paper ---- */
 
 .hero-ink {
+  /* The handwriting scales with the drawing, and the drawing gets as narrow as 544px
+     in the narrowest two-column layout — where a plain `cqw` size lands under the
+     page's own 14px floor for anything that is a word. Every size below is a floor
+     and a proportion, so it keeps its relation to the paper until that would make it
+     unreadable, and then stops. */
+  --ink-floor: 14px;
+
   position: absolute;
   margin: 0;
   color: #494339;
@@ -412,7 +419,7 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
   top: 25.5%;
   width: max-content;
   max-width: 36%;
-  font-size: 3.4cqw;
+  font-size: max(var(--ink-floor), 3.4cqw);
   letter-spacing: .05em;
   color: #3f3a31;
   transform: translate(-50%, -100%) rotate(7deg);
@@ -427,7 +434,7 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
   top: 53.8%;
   width: max-content;
   max-width: 22%;
-  font-size: 2.5cqw;
+  font-size: max(var(--ink-floor), 2.5cqw);
   transform: translate(-50%, -50%) rotate(2deg);
 }
 
@@ -437,18 +444,18 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
   top: 81.5%;
   width: max-content;
   max-width: 30%;
-  font-size: 2.6cqw;
+  font-size: max(var(--ink-floor), 2.6cqw);
   transform: translate(-50%, -100%) rotate(-3deg);
 }
 
 /* Each language writes a different number of characters into the same ring and onto
    the same two rules, so each gets its own size. */
-html[lang="en"] .hero-ink-title { font-size: 2.9cqw; letter-spacing: .01em; }
-html[lang="ja"] .hero-ink-title { font-size: 2.8cqw; letter-spacing: .02em; }
-html[lang="en"] .hero-ink-circled { font-size: 2.4cqw; }
-html[lang="ja"] .hero-ink-circled { font-size: 2.5cqw; }
-html[lang="en"] .hero-ink-first { font-size: 2.1cqw; }
-html[lang="ja"] .hero-ink-first { font-size: 2.3cqw; }
+html[lang="en"] .hero-ink-title { font-size: max(var(--ink-floor), 2.9cqw); letter-spacing: .01em; }
+html[lang="ja"] .hero-ink-title { font-size: max(var(--ink-floor), 2.8cqw); letter-spacing: .02em; }
+html[lang="en"] .hero-ink-circled { font-size: max(var(--ink-floor), 2.4cqw); }
+html[lang="ja"] .hero-ink-circled { font-size: max(var(--ink-floor), 2.5cqw); }
+html[lang="en"] .hero-ink-first { font-size: max(var(--ink-floor), 2.15cqw); }
+html[lang="ja"] .hero-ink-first { font-size: max(var(--ink-floor), 2.3cqw); }
 
 /* The drawing is a drawing before it is anything else: when a visitor asks for less
    movement it simply stops moving. Nothing is hidden, because nothing was ever
@@ -950,9 +957,17 @@ html[lang="zh-CN"] .site-header nav,
 html[lang="ja"] .site-header nav,
 html[lang="zh-CN"] .button,
 html[lang="ja"] .button { font-size: 15px; font-weight: 600; }
-html[lang="zh-CN"] :is(.eyebrow, .studio-mode, .rail-title, .canvas-title, .canvas-node-caption, .branch-context > span, .canvas-node-note),
+/* 13px is only ever allowed for the all-caps monospace labels, where every glyph is
+   at cap height and 13px carries roughly the weight of 16px lowercase. The rule above
+   takes those labels back to ordinary sans for Chinese and Japanese, which removes
+   exactly what made 13px legible — so anything in that list steps up to the page's
+   own floor here. `.brief-block h3` and `.brief-input-label` were reset above but
+   left at 13px, which is how eight CJK labels ended up under the floor. */
+html[lang="zh-CN"] :is(.eyebrow, .brief-block h3, .brief-input-label, .studio-mode, .rail-title, .canvas-title, .canvas-node-caption, .branch-context > span, .canvas-node-note),
 html[lang="ja"] :is(
   .eyebrow,
+  .brief-block h3,
+  .brief-input-label,
   .studio-mode,
   .rail-title,
   .canvas-title,
@@ -1075,8 +1090,13 @@ html[lang="ja"] .map-copy h1 { word-break: normal; }
   /* Only the title survives here. The ring and the foot rule are small parts of a
      small picture at this width, and their phrases would land well under the page's
      own reading floor; the title is the one that carries the idea. */
-  .hero-ink-title { font-size: 3.8cqw; }
-  html[lang="en"] .hero-ink-title, html[lang="ja"] .hero-ink-title { font-size: 3.2cqw; }
+  /* On a phone the whole drawing is 390px wide. Holding its handwriting to the 14px
+     floor would push the title off the paper and under the figure, so here the marks
+     drop to the page's absolute minimum — the size reserved for metadata — and the
+     two phrases that would fall furthest are hidden entirely rather than shrunk. */
+  .hero-ink { --ink-floor: 12px; }
+  .hero-ink-title { font-size: max(var(--ink-floor), 3.8cqw); }
+  html[lang="en"] .hero-ink-title, html[lang="ja"] .hero-ink-title { font-size: max(var(--ink-floor), 3.4cqw); }
   .hero-ink-circled, .hero-ink-first { display: none; }
   .map-closing { margin-top: 18px; }
   .demo-section, .work-section { padding: 60px 0 64px; }
