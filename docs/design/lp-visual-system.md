@@ -6,6 +6,40 @@ This record explains the current LP design decisions. It does not claim that a c
 
 The detailed walkthrough and live workspace share tokens, Studio styles and the map renderer in `shared/studio/`. The public concept film lives separately in `web/src/studio/paper/`, under its own `gip-` class and custom-property prefix, and does not change the shared product interface.
 
+## 2026-09-09 (later): the hero fills the window, and says so at its foot
+
+The header is sticky but still holds its place in normal flow, so the hero has exactly
+one thing to subtract: `--header-h`, 72px on a desktop and 64px below 720px. The
+section is `min-height: calc(100svh - var(--header-h))`, with a `100vh` line in front
+of it for anything that lacks the small-viewport unit. `svh` and not `dvh`, because a
+hint pinned to the bottom of a `dvh` box slides under a mobile toolbar the moment it
+reappears; `min-height` and never `height`, because a short laptop, a zoomed page or a
+phone that stacks the two halves has to grow the section rather than crop it.
+
+The copy and the drawing are now one block — `.hero-lead` — centred in what is left
+after the hint has taken its own row, with 8px of padding above and 34px below so the
+pair reads a little above the middle of the screen rather than exactly on it. Nothing
+was scaled up to fill the height: the columns, the illustration and the three phrases
+on it are unchanged.
+
+The hint is an ordinary link to the same place the button goes. It gets its own row at
+the foot of the section, so it can never sit over the drawing, and it scrolls away with
+the hero instead of following the page down — a hint that stays is a control, and this
+is not one. Its visible part clears the bottom of the window by 28px plus whatever a
+phone's home indicator needs. The arrow makes one slow 5px move and returns, gated on
+an `IntersectionObserver` so it stops the moment the hint leaves the screen, and
+`prefers-reduced-motion` removes the animation and leaves smooth scrolling already
+turned off by the page's existing reset.
+
+Anchors now carry `scroll-margin-top: calc(var(--header-h) + 10px)`. Every in-page
+link on the page had been landing underneath the sticky header; this fixes the two
+hero actions as well as the new hint.
+
+On a phone the two halves stack and the hero is taller than the window on its own, so
+the hint sits at the end of the section rather than at the bottom of the first screen.
+That is the trade the brief asks for: readable content first, and no compression to
+force one screen.
+
 ## 2026-09-09: the hero is one illustration, with three phrases written on it
 
 The hero used to build its right half out of parts: the film's paper texture, a pose

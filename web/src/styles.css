@@ -41,6 +41,10 @@
   --radius-card: 14px;
   --radius-control: 10px;
 
+  /* The sticky header keeps its place in normal flow, so its height is both what
+     the full-height hero subtracts and what every in-page anchor has to clear. */
+  --header-h: 72px;
+
   /* The professional identities, carried through from the film. */
   --role-research: #8a7331;
   --role-ux: #4f7784;
@@ -49,6 +53,11 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
+/* The header is sticky, so a section scrolled to by its id would otherwise arrive
+   underneath it. */
+:target, .demo-section, .brief-section, .work-section, .closing-section {
+  scroll-margin-top: calc(var(--header-h) + 10px);
+}
 body {
   margin: 0;
   min-width: 320px;
@@ -238,13 +247,31 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
 /* ------------------------------------------------------------------- hero */
 
 .hero {
+  display: flex;
+  flex-direction: column;
+  /* Header plus hero fill exactly one screen, so nothing of the demo shows above the
+     fold and nothing has to be guessed at. `svh` is the small viewport — the height
+     with the mobile browser's bars showing — so the hint never lands under a toolbar
+     that is about to appear; `vh` is the fallback for anything that lacks it.
+     `min-height`, never `height`: a short laptop, a zoomed page or a phone that
+     stacks the two halves grows the section instead of cropping it. */
+  min-height: calc(100vh - var(--header-h));
+  min-height: calc(100svh - var(--header-h));
+  padding: 28px 0 0;
+}
+/* The copy and the drawing are one block, centred in what is left after the hint has
+   taken its row. Slightly more air below than above, so the pair reads a little above
+   the middle of the screen rather than exactly on it. */
+.hero-lead {
+  flex: 1;
   display: grid;
   /* 45 / 55. The headline needs enough of the row to stay the heavier thing at its
      own size; past that the drawing starts reading as a poster with a caption. */
   grid-template-columns: minmax(0, 45fr) minmax(360px, 55fr);
   align-items: center;
+  align-content: center;
   gap: 44px;
-  padding: 54px 0 70px;
+  padding-block: 8px 34px;
 }
 .hero-copy { min-width: 0; }
 .hero h1 {
@@ -281,6 +308,48 @@ html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
 /* Derived from the timeline, so it is a fact about the film rather than a claim on
    the button; it sits under the actions rather than between them. */
 .hero-length { margin: 16px 0 0; color: var(--muted); font-size: var(--fs-small); }
+
+/* ---- the way out of a full screen ---- */
+
+/* Quiet enough not to be a third button, dark enough to read: a sage grey that is
+   the page's own green desaturated towards the body colour. It keeps its own row at
+   the foot of the section, so it can never sit over the drawing, and it scrolls away
+   with the hero rather than following the page. */
+.hero-scroll {
+  align-self: center;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  /* Roughly 28px of clearance to the bottom of the window, plus whatever a phone's
+     home indicator needs. */
+  margin-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  border-radius: var(--radius-control);
+  color: #5f6b57;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: .01em;
+}
+.hero-scroll:hover { color: var(--primary-dark); }
+.hero-scroll-arrow {
+  width: 17px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* One slow nudge down and back. It runs only while the hint is on screen, which is
+   the whole of its useful life. */
+@keyframes hero-scroll-hint {
+  0%, 62%, 100% { transform: translateY(0); }
+  31% { transform: translateY(5px); }
+}
+.hero-scroll[data-onscreen="true"] .hero-scroll-arrow {
+  animation: hero-scroll-hint 2.6s var(--ease-out) infinite;
+}
 
 /* ------------------------------------------------- the hero's drawing ----
    One supplied illustration, and the three phrases written on it.
@@ -386,6 +455,7 @@ html[lang="ja"] .hero-ink-first { font-size: 2.3cqw; }
    revealed by the motion. */
 @media (prefers-reduced-motion: reduce) {
   .hero-scene { --hero-p: 0; }
+  .hero-scroll-arrow { animation: none !important; }
 }
 
 .sr-only {
@@ -949,7 +1019,7 @@ html[lang="ja"] .map-copy h1 { word-break: normal; }
 @media (max-width: 1080px) {
   /* Stacked, and the drawing keeps a size it can still be read at rather than a
      column's worth of width. */
-  .hero { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+  .hero-lead { grid-template-columns: minmax(0, 1fr); gap: 30px; padding-block: 8px 26px; }
   .hero-scene { width: 100%; max-width: 720px; margin-inline: auto; }
   .brief-layout { grid-template-columns: minmax(0, 1fr); }
   .brief-side { grid-template-columns: 1fr 1fr; }
@@ -968,6 +1038,8 @@ html[lang="ja"] .map-copy h1 { word-break: normal; }
 @media (max-width: 720px) {
   .section-shell { width: min(100% - 32px, 1180px); }
   .site-header { min-height: 64px; padding-inline: 16px; grid-template-columns: 1fr auto; }
+  /* The header is shorter here, so the hero has that much more to fill. */
+  :root { --header-h: 64px; }
   .site-header nav { display: none; }
   .locale-switch a { min-width: 31px; padding: 5px; }
   /* On a phone the column is narrower than one unbroken Chinese clause at heading
@@ -988,7 +1060,11 @@ html[lang="ja"] .map-copy h1 { word-break: normal; }
   /* The hero copy is the page's argument, so it keeps its words and gives up its
      spacing instead. */
   .map-hero { padding: 34px 0 44px; gap: 20px; }
-  .hero { padding: 26px 0 36px; gap: 22px; }
+  /* Stacked on a phone the two halves are taller than the window, so the section
+     grows past one screen rather than squeezing either of them — the hint travels
+     down with it and is reached by scrolling, which is what it asks for anyway. */
+  .hero { padding-top: 22px; }
+  .hero-lead { gap: 22px; padding-block: 4px 22px; }
   .hero-intro { line-height: 1.7; }
   .hero-actions { margin-top: 22px; gap: 14px; }
   .hero-actions .button { width: 100%; }

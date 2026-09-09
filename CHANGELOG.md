@@ -2,6 +2,16 @@
 
 仅记录公开官网、固定 Demo 与通用 UI 的任务变化，最新在前。此前完整产品任务记录已在产品仓库保留。
 
+## 2026-09-09（后续）— 首屏铺满一屏，底部加一处下滑引导
+
+- **导航 + Hero 正好等于一个可视区域。** 导航是 `position: sticky`，仍占据正常文档空间，所以高度只需减一次：`--header-h`（桌面 72px、≤720px 时 64px）成为唯一来源，`.hero` 用 `min-height: calc(100svh - var(--header-h))`，前面留一行 `100vh` 版本兜底。用 `min-height` 而不是 `height`：矮屏、放大文字或手机堆叠时区块自己长高，不裁切。实测 1366×768 / 1440×900 / 1920×1080 下 Hero 底边分别是 768 / 900 / 1080，`#demo` 的 top 与之相等——正常首屏看不到下一节。
+- **文字与插画作为一块居中。** 新增 `.hero-lead` 包住左右两栏，`flex: 1` + `align-content: center`；上下留白 8px / 34px 不对称，所以这块的视觉重心比几何中心略高。左右比例、插画尺寸与叠字位置都没动——没有为了填满高度把图放大。
+- **底部下滑引导。** 「向下探索」+ 一支细箭头，水平居中，独占 Hero 最后一行（不会压到插画），可见部分距窗口底 28px，另加 `env(safe-area-inset-bottom)`。它是指向 `#demo` 的普通 `<a>`：可 Tab 聚焦、可访问名就是可见文字、跟随 Hero 一起滚走而不是钉在页面底部。颜色 `#5f6b57`，在 `#fbf8f2` 上对比度 5.32:1。箭头做一次 5px 的缓慢下移再回位，2.6s 循环，只在 `data-onscreen="true"` 时运行（IntersectionObserver 控制）；`prefers-reduced-motion` 下动画为 `none`，平滑滚动也已经由既有规则退回 `auto`。三语言文案：向下探索 / Explore below / 下へ進む。
+- **锚点不再落到导航底下。** 新增 `scroll-margin-top: calc(var(--header-h) + 10px)`，作用于 `:target` 与四个区块。首屏两个按钮和下滑引导现在都停在导航下方 10px（实测 `#demo` 顶部落在 82px，标题在 183px）。
+- **未改动：** 插画与叠字的 16px 同步位移、Demo 的内容 / 时间轴 / 播放触发、Demo 标题那一次淡入，全部保持原样。仍是正常文档滚动，没有吸附或滚动劫持。
+- **验证：** `npm --prefix web run build`、`npm --prefix web test`（90 项）、`python3 scripts/check-public-boundary.py` 通过。浏览器实测 1366×768 / 1440×900 / 1920×1080 / 390×844 四种视口 × 中英日：文档宽度等于窗口宽度，无横向溢出；390px 下 `min-height` 解析为 780px（844−64），实际高度 846px（内容更高时自然撑开）；1280×600 矮屏同样是撑高而不是裁切。点击引导后 `location.hash` 为 `#demo`，Demo 标题完整落在导航下方；引导滚出视野后 `data-onscreen` 变 `false`、`animation-name` 变 `none`，滚回首屏后恢复。
+- **未完成 / 未验证：** 手机竖屏下左右两栏堆叠后 Hero 本来就高于一屏，下滑引导落在 Hero 末尾（约两屏处）——按要求它随 Hero 走、不固定在视口，因此在手机上更像「首屏结束」的标记而不是即时可见的引导。`prefers-reduced-motion` 的两条规则（箭头动画、平滑滚动）只做了 CSS 层面确认，未在开启该系统设置的机器上实测。
+
 ## 2026-09-09 — 首屏改为一张完整插画，加三处可本地化叠字
 
 - **右侧不再是拼出来的场景，而是一张供稿插画。** `web/public/hero/goodidea-hero-illustration.webp`（1374×1145，104 KB，自带米白底 `#faf8f2`）里已经包含两个人物、主草稿、后层纸张、便签、植物、线框、划掉的一版与绿色圈线；页面不再用 CSS/SVG 重画其中任何一样。此前那版把纸张纹理、人物图集与手绘线框拼在一起，人物只能露出半个身子、线框是规整几何、纸内内容会飘到纸外——整套 `hero-draft` / `hero-figure` / `hero-plant` / `hero-spare` / `hero-wire` / `hero-cut` 实现连同 `OutcomePreview.tsx` 一起删除。

@@ -47,6 +47,9 @@ export type SiteCopy = {
   /** The quiet label under the actions; carries the derived length. */
   heroPrimaryNote: string;
   heroSecondary: string;
+  /** The quiet way out of a hero that fills the window: it says which direction the
+   *  page goes, and it is a link to the demo like the button above it. */
+  heroScrollCue: string;
 
   /* The three phrases laid over the drawing beside the headline. The artwork ships
      without words on purpose, because the same picture serves three languages and a
@@ -158,6 +161,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     heroPrimary: "看一个想法如何成形",
     heroPrimaryNote: "{seconds} 秒 · 无需注册",
     heroSecondary: "看看最终成果",
+    heroScrollCue: "向下探索",
 
     scene: {
       alt: "一张摊开的手绘产品草稿：纸上有界面线框、被划掉的一版和更简单的下一版、圈出的一句话和几道绿线；一位女性拿着铅笔靠在纸的上边思考，一个人站在纸前看着它。",
@@ -280,6 +284,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     heroPrimary: "Watch an idea take shape",
     heroPrimaryNote: "{seconds} seconds · no sign-up",
     heroSecondary: "See the finished outcome",
+    heroScrollCue: "Explore below",
 
     scene: {
       alt: "A large hand-drawn product draft spread out on a desk: an interface sketch, one version crossed out beside a simpler one, a circled note and a few green rules; a woman leans on the top edge with a pencil, and someone stands in front of the paper looking at it.",
@@ -399,6 +404,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     heroPrimary: "アイデアが形になる過程を見る",
     heroPrimaryNote: "{seconds} 秒 · 登録不要",
     heroSecondary: "最終的な成果を見る",
+    heroScrollCue: "下へ進む",
 
     scene: {
       alt: "机に広げた大きな手描きの製品ドラフト。画面のラフ、線を引いて外した案とより簡単な次の案、丸で囲んだ一文と数本の緑の線が描かれ、鉛筆を持った女性が紙の上端にもたれ、もう一人が紙の前に立って眺めている。",

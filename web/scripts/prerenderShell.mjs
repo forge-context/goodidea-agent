@@ -42,6 +42,7 @@ const REPO = "https://github.com/forge-context/goodidea-agent";
 const BRAND_MARK = `<span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 36 36"><path class="brand-loop" d="M26.4 10.8A10.5 10.5 0 1 0 27.7 24" /><path class="brand-turn" d="M18.8 18.2h8.7v7.5" /><circle class="brand-spark" cx="28.3" cy="7.6" r="2.5" /></svg></span>`;
 const ARROW_DOWN = `<svg class="action-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3.5v12.2m0 0-4-4m4 4 4-4" /></svg>`;
 const ARROW_UP = `<svg class="action-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16.5V4.3m0 0-4 4m4-4 4 4" /></svg>`;
+const SCROLL_HINT = `<svg class="hero-scroll-arrow" viewBox="0 0 24 30" aria-hidden="true"><path d="M12 2v23m0 0-7-7.4m7 7.4 7-7.4" /></svg>`;
 const ARROW_UP_RIGHT = `<svg class="action-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.2 14.8 14.8 5.2M7.2 5.2h7.6v7.6" /></svg>`;
 
 /**
@@ -72,6 +73,7 @@ export function renderShell(t, { locale, homePath, seconds, withSeconds }) {
       </header>
       <main id="main">
         <section class="hero section-shell" id="top">
+          <div class="hero-lead">
           <div class="hero-copy">
             <p class="eyebrow">${escape(t.heroEyebrow)}</p>
             <h1>${t.heroTitle.map((line) => `<span>${escape(line)}</span>`).join("")}</h1>
@@ -91,6 +93,8 @@ export function renderShell(t, { locale, homePath, seconds, withSeconds }) {
               <img class="hero-art-image" src="/hero/goodidea-hero-illustration.webp" width="1374" height="1145" alt="" fetchpriority="high" decoding="async" />
             </div>
           </div>
+          </div>
+          <a class="hero-scroll" href="#demo" data-onscreen="true">${escape(t.heroScrollCue)}${SCROLL_HINT}</a>
         </section>
         <section class="demo-section" id="demo">
           <div class="section-shell">

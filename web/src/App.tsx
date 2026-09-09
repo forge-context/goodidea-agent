@@ -44,6 +44,29 @@ function useRevealOnce() {
 }
 
 /**
+ * True while the element is on screen, as a data attribute.
+ *
+ * The hint below the hero moves, and there is no reason for it to keep moving once it
+ * has scrolled away — the attribute is what the animation is gated on. Without an
+ * observer, or before mount, it is simply on: a hint that animates is the normal
+ * case, and a page that never runs script still gets a working link.
+ */
+function useOnScreen() {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const [onScreen, setOnScreen] = useState(true);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, "data-onscreen": onScreen } as const;
+}
+
+/**
  * The page, in the order it has to be read.
  *
  * Position, then the demo, then what the demo leaves behind, then who decides, then a
@@ -60,6 +83,7 @@ function App() {
   const seconds = PAPER_SECONDS;
   const groups = groupBrief(brief.blocks, t);
   const demoHeading = useRevealOnce();
+  const scrollCue = useOnScreen();
 
   return (
     <>
@@ -88,20 +112,31 @@ function App() {
         {/* One promise, one action, and a drawing of the thing being promised. The
             mechanism is the film's job, one screen down. */}
         <section className="hero section-shell" id="top">
-          <div className="hero-copy">
-            <p className="eyebrow">{t.heroEyebrow}</p>
-            <h1>{t.heroTitle.map((line) => <span key={line}>{line}</span>)}</h1>
-            <p className="hero-intro">
-              {t.heroIntro.map((line) => <span key={line}>{line}</span>)}
-            </p>
-            <div className="hero-actions">
-              <a className="button button-primary" href="#demo">{t.heroPrimary}<ArrowDownIcon /></a>
-              {/* Quiet on purpose: the outcome is worth a link, not a second button. */}
-              <a className="hero-aside-link" href="#brief">{t.heroSecondary}<ArrowUpRightIcon /></a>
+          <div className="hero-lead">
+            <div className="hero-copy">
+              <p className="eyebrow">{t.heroEyebrow}</p>
+              <h1>{t.heroTitle.map((line) => <span key={line}>{line}</span>)}</h1>
+              <p className="hero-intro">
+                {t.heroIntro.map((line) => <span key={line}>{line}</span>)}
+              </p>
+              <div className="hero-actions">
+                <a className="button button-primary" href="#demo">{t.heroPrimary}<ArrowDownIcon /></a>
+                {/* Quiet on purpose: the outcome is worth a link, not a second button. */}
+                <a className="hero-aside-link" href="#brief">{t.heroSecondary}<ArrowUpRightIcon /></a>
+              </div>
+              <p className="hero-length">{withSeconds(t.heroPrimaryNote, seconds)}</p>
             </div>
-            <p className="hero-length">{withSeconds(t.heroPrimaryNote, seconds)}</p>
+            <HeroScene copy={t} />
           </div>
-          <HeroScene copy={t} />
+
+          {/* A hero that fills the window has to say that the page continues. It is
+              an ordinary link to the same place the button goes, given its own row
+              at the foot of the screen so it never sits over the drawing, and it
+              leaves with the hero rather than following the page down. */}
+          <a className="hero-scroll" href="#demo" {...scrollCue}>
+            {t.heroScrollCue}
+            <ScrollHintIcon />
+          </a>
         </section>
 
         <section className="demo-section" id="demo">
@@ -274,6 +309,16 @@ function ArrowUpIcon() {
   return (
     <svg className="action-icon" viewBox="0 0 20 20" aria-hidden="true">
       <path d="M10 16.5V4.3m0 0-4 4m4-4 4 4" />
+    </svg>
+  );
+}
+
+/** A thin arrow under the hint. Longer and lighter than the action icons, because it
+ *  points at the page rather than labelling a control. */
+function ScrollHintIcon() {
+  return (
+    <svg className="hero-scroll-arrow" viewBox="0 0 24 30" aria-hidden="true">
+      <path d="M12 2v23m0 0-7-7.4m7 7.4 7-7.4" />
     </svg>
   );
 }
