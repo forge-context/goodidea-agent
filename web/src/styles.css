@@ -221,278 +221,173 @@ button:focus-visible, a:focus-visible, textarea:focus-visible, summary:focus-vis
   font-size: var(--fs-lead);
   line-height: 1.72;
 }
+/* A heading that arrives once, from a little below, when it first comes into view.
+   The attribute is only written by script after mount, so the prerendered page and a
+   visitor without JavaScript never meet the hidden state at all; reduced motion and a
+   heading that was already on screen go straight to `in`. */
+.section-heading[data-reveal="pending"] { opacity: 0; transform: translateY(16px); }
+.section-heading[data-reveal="in"] {
+  opacity: 1;
+  transform: none;
+  transition: opacity .5s var(--ease-out), transform .5s var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-heading[data-reveal] { opacity: 1; transform: none; transition: none; }
+}
 
 /* ------------------------------------------------------------------- hero */
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(340px, .95fr);
+  /* 45 / 55. The headline needs enough of the row to stay the heavier thing at its
+     own size; past that the drawing starts reading as a poster with a caption. */
+  grid-template-columns: minmax(0, 45fr) minmax(360px, 55fr);
   align-items: center;
-  gap: 56px;
-  padding: 62px 0 78px;
+  gap: 44px;
+  padding: 54px 0 70px;
 }
 .hero-copy { min-width: 0; }
 .hero h1 {
-  max-width: 15em;
-  margin: 0 0 20px;
-  font-size: clamp(30px, 3.2vw, 44px);
+  margin: 0 0 22px;
+  font-size: clamp(29px, 3.7vw, 53px);
   font-weight: 600;
-  line-height: 1.24;
+  line-height: 1.2;
   letter-spacing: -.032em;
 }
-.hero-intro { max-width: 40em; margin: 0; color: var(--muted); font-size: var(--fs-lead); line-height: 1.74; }
-.hero-audience { max-width: 40em; margin: 14px 0 0; color: var(--muted); font-size: var(--fs-small); line-height: 1.7; }
-.hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 14px; margin-top: 30px; }
-/* Derived from the timeline, so it is a fact about the film rather than a claim on
-   the button; it sits beside the action rather than inside it. */
-.hero-length { color: var(--muted); font-size: var(--fs-small); }
-
-/* ------------------------------------------- the outcome, standing still */
-
-.outcome {
-  display: grid;
-  gap: 16px;
-  padding: 24px 24px 22px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-panel);
-  background: var(--surface);
-  box-shadow: var(--shadow-small);
-}
-.outcome-kicker {
-  margin: 0;
-  color: var(--muted);
-  font-size: var(--fs-label);
-  font-weight: 700;
-  letter-spacing: .04em;
-}
-/* ---- the one scene on the page ------------------------------------------
-
-   Three specialists hand something in, GoodIdea gathers it, one decision is put to
-   the visitor, and the draft fills in. Staged the way the film below is staged:
-   discrete beats with a hold on each, paper that overshoots and settles rather than
-   glides, and a dot that runs the path a contribution takes. It runs once. Nothing
-   here floats and nothing loops — when it has finished, every word it revealed is
-   ordinary text on the page. */
-
-.outcome-stage {
-  position: relative;
-  height: 158px;
-}
-.outcome-credits { display: grid; grid-template-columns: repeat(3, 1fr); justify-items: center; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.outcome-credits li {
+/* One clause per line, taken from the copy rather than from wherever the column
+   happens to run out. A clause wider than the column still wraps inside its own
+   line, so no language overflows. */
+.hero h1 span { display: block; }
+/* The English headline is one long sentence rather than three short clauses, so it
+   needs a step down to still read as three lines in the same column. */
+html[lang="en"] .hero h1 { font-size: clamp(30px, 3.2vw, 46px); }
+/* Two clauses, two lines: what the team does, and what stays yours. They are separate
+   strings rather than one wrapped paragraph so each language ends its own line. */
+.hero-intro { max-width: 34em; margin: 0; color: var(--muted); font-size: var(--fs-lead); line-height: 1.74; }
+.hero-intro span { display: block; }
+.hero-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 26px; margin-top: 32px; }
+/* The outcome is worth a link, not a second button: one solid action per screen. */
+.hero-aside-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 10px 3px 4px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface);
-  font-size: var(--fs-tag);
-  color: #4d4940;
-  opacity: 0;
-  transform: translateY(-5px);
-  /* Three steps rather than a curve: a mark arrives, it does not drift in. */
-  transition: opacity .18s steps(3, end), transform .18s steps(3, end), border-color .3s ease;
-}
-.outcome-credits li[data-in="true"] { opacity: 1; transform: none; border-color: var(--line-strong); }
-.outcome-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 6px 6px 6px 2px;
-  background: var(--role-research);
-  color: #fdfaf2;
-  font-size: 10px;
-  font-weight: 700;
-}
-.outcome-credits li[data-role="experience"] .outcome-mark { background: var(--role-ux); }
-.outcome-credits li[data-role="engineering"] .outcome-mark { background: var(--role-engineering); }
-
-/* The contribution itself, as the slip of paper it is written on. */
-.outcome-slips { position: absolute; inset: 32px 0 auto; height: 76px; }
-.outcome-slip {
-  position: absolute;
-  top: 0;
-  width: 30%;
-  min-height: 62px;
-  padding: 9px 10px 8px;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--role-research);
-  border-radius: 4px;
-  background: var(--surface);
-  box-shadow: 0 1px 0 rgba(255, 255, 255, .7) inset, 0 3px 8px rgba(58, 50, 40, .07);
-  opacity: 0;
-  transform: translate(-50%, -14px) rotate(-4deg) scale(.9);
-  transform-origin: 50% 0;
-  transition:
-    opacity .2s steps(3, end),
-    transform .26s steps(4, end),
-    filter .3s ease;
-}
-.outcome-slip[data-role="research"] { left: 16.66%; }
-.outcome-slip[data-role="experience"] { left: 50%; border-left-color: var(--role-ux); }
-.outcome-slip[data-role="engineering"] { left: 83.33%; border-left-color: var(--role-engineering); }
-/* Set down by hand: each one lands at its own slight angle. */
-.outcome-slip[data-state="down"] { opacity: 1; transform: translate(-50%, 0) rotate(-1.6deg) scale(1); }
-.outcome-slip[data-role="experience"][data-state="down"] { transform: translate(-50%, 2px) rotate(1.2deg) scale(1); }
-.outcome-slip[data-role="engineering"][data-state="down"] { transform: translate(-50%, 0) rotate(-.8deg) scale(1); }
-/* Gathered: the three travel down into GoodIdea and are taken in. */
-.outcome-slip[data-state="gone"] {
-  left: 50%;
-  opacity: 0;
-  transform: translate(-50%, 96px) rotate(0deg) scale(.26);
-  transition: opacity .3s ease .12s, transform .44s steps(5, end), left .44s steps(5, end);
-}
-.outcome-slip[data-role="experience"][data-state="gone"] { transition-delay: .06s, .06s, .06s; }
-.outcome-slip[data-role="engineering"][data-state="gone"] { transition-delay: .12s, .12s, .12s; }
-.outcome-slip-rule { display: block; height: 1px; margin-bottom: 5px; background: var(--line); }
-.outcome-slip-rule:nth-child(2) { width: 68%; }
-.outcome-slip b { display: block; margin-top: 7px; font-size: var(--fs-tag); font-weight: 650; line-height: 1.35; color: #4d4940; }
-
-.outcome-tracks { position: absolute; inset: auto 0 18px; width: 100%; height: 56px; overflow: visible; }
-.outcome-track {
-  fill: none;
-  stroke: var(--line-strong);
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition: stroke-dashoffset .44s var(--ease-out), stroke .44s ease;
-}
-.outcome-track[data-drawn="true"] { stroke-dashoffset: 0; }
-.outcome-track[data-role="research"][data-drawn="true"] { stroke: color-mix(in srgb, var(--role-research) 45%, var(--line)); }
-.outcome-track[data-role="experience"][data-drawn="true"] { stroke: color-mix(in srgb, var(--role-ux) 45%, var(--line)); }
-.outcome-track[data-role="engineering"][data-drawn="true"] { stroke: color-mix(in srgb, var(--role-engineering) 45%, var(--line)); }
-.outcome-dot { display: none; }
-/* The dot is positioned only by `offset-path`. Where that is not supported it is not
-   drawn at all, rather than parked at the origin: the slip falling and the arc drawing
-   already say what happened. */
-@supports (offset-path: path("M 0 0 L 1 1")) {
-  .outcome-dot {
-    display: block;
-    offset-distance: 0%;
-    offset-rotate: 0deg;
-    opacity: 0;
-    fill: var(--role-research);
-    transition: offset-distance .44s var(--ease-out), opacity .2s ease;
-  }
-  .outcome-dot[data-role="experience"] { fill: var(--role-ux); }
-  .outcome-dot[data-role="engineering"] { fill: var(--role-engineering); }
-  .outcome-dot[data-moving="true"] { offset-distance: 100%; opacity: 1; }
-}
-
-.outcome-hub {
-  position: absolute;
-  left: 50%;
-  bottom: 4px;
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  color: var(--line-strong);
-  transform: translate(-50%, 0) scale(.9);
-  transition: color .3s ease, transform .3s steps(3, end);
-}
-.outcome-hub svg { width: 100%; height: 100%; overflow: visible; }
-.outcome-hub[data-lit="true"] { color: var(--primary); transform: translate(-50%, 0) scale(1.12); }
-
-.outcome-replay {
-  justify-self: start;
-  padding: 5px 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface);
+  gap: 7px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid var(--line-strong);
   color: var(--muted);
-  cursor: pointer;
-  font-size: var(--fs-tag);
-}
-.outcome-replay:hover { border-color: var(--primary); color: var(--primary-dark); }
-
-/* ---- the decision, and the draft filling in behind it -------------------- */
-
-.outcome-decision {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  margin: 0;
-  padding: 11px 14px;
-  border: 1px solid #ddd4b8;
-  border-radius: var(--radius-card);
-  background: #faf5e6;
-  color: #6f6027;
   font-size: var(--fs-small);
-  font-weight: 650;
-  opacity: 0;
-  transition: opacity .3s ease, background .4s ease, border-color .4s ease, color .4s ease;
+  font-weight: 600;
 }
-.outcome-decision[data-shown="true"] { opacity: 1; }
-.outcome-decision[data-adopted="true"] {
-  border-color: #cbd8c0;
-  background: var(--primary-soft);
-  color: var(--primary-dark);
-}
-.outcome-decision-mark {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 16px;
-  height: 16px;
-  border: 1.5px solid currentColor;
-  border-radius: 50%;
-  color: inherit;
-  font-size: 10px;
-  line-height: 1;
-  transition: background .4s ease, border-color .4s ease, color .4s ease;
-}
-.outcome-decision[data-adopted="true"] .outcome-decision-mark {
-  border-color: var(--primary);
-  background: var(--primary);
-  color: var(--surface);
-}
-.outcome-decision[data-adopted="true"] .outcome-decision-mark::before { content: "\2713"; }
+.hero-aside-link:hover { border-color: var(--primary); color: var(--primary-dark); }
+/* Derived from the timeline, so it is a fact about the film rather than a claim on
+   the button; it sits under the actions rather than between them. */
+.hero-length { margin: 16px 0 0; color: var(--muted); font-size: var(--fs-small); }
 
-.outcome-sheet {
-  padding: 16px 18px 18px;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--line-strong);
-  border-radius: var(--radius-card);
-  background: var(--paper);
-  transition: border-left-color .45s ease;
-}
-.outcome-sheet[data-written="true"] { border-left-color: var(--primary); }
-.outcome-sheet-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.outcome-chip { color: var(--primary-dark); font-size: var(--fs-label); font-weight: 700; letter-spacing: .05em; }
-.outcome-version { color: var(--muted); font: var(--fs-tag) var(--mono); }
-.outcome-sheet-label { margin: 12px 0 10px; color: var(--muted); font-size: var(--fs-tag); font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.outcome-deliverables {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 16px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.outcome-deliverables li {
+/* ------------------------------------------------- the hero's drawing ----
+   One supplied illustration, and the three phrases written on it.
+
+   The picture is not a composite: the two people, the sheets, the note, the plant,
+   the wireframes and the green marks are all inside the file, on its own cream
+   ground (#faf8f2 — the page's paper colour, so there is no rectangle to hide). It
+   has no layers, so nothing here pretends it does: the image and the text over it
+   move as one object and never rotate, because turning a rectangular picture on a
+   flat ground is exactly what would show its edges.
+
+   Every overlay is placed as a percentage of the image and turned to the angle of
+   the paper beneath it, measured off the artwork itself: the long rule near the top
+   runs at +7 degrees, the short rule at the foot at -3, and the ring in between sits
+   almost flat.
+   -------------------------------------------------------------------------- */
+
+.hero-scene {
+  --hero-p: 0;
+  /* The handwriting role, as the film sets it: no web font ships with this page, and
+     a Chinese-only subset would leave English and Japanese half-rendered. */
+  --hand: "Kaiti SC", STKaiti, KaiTi, "Yu Mincho", "Hiragino Mincho ProN", Georgia, serif;
+
+  container-type: inline-size;
   position: relative;
-  padding-left: 16px;
-  color: #4a4740;
-  font-size: var(--fs-small);
-  line-height: 1.5;
-  opacity: .28;
-  transition: opacity .3s ease;
+  /* The artwork's own ratio, so the box is the right shape before it loads. */
+  aspect-ratio: 1374 / 1145;
 }
-.outcome-deliverables li[data-shown="true"] { opacity: 1; }
-.outcome-deliverables li::before {
+/* The measured box stays still and the inner one moves, so the scroll position and
+   the offset it produces never chase each other. */
+.hero-art {
   position: absolute;
-  top: .58em;
-  left: 1px;
-  width: 6px;
-  height: 6px;
-  border-radius: 2px;
-  background: var(--primary);
-  content: "";
+  inset: 0;
+  transform: translate3d(0, calc(var(--hero-p) * 16px), 0);
 }
+.hero-art-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
+/* ---- the three phrases on the paper ---- */
+
+.hero-ink {
+  position: absolute;
+  margin: 0;
+  color: #494339;
+  font-family: var(--hand);
+  line-height: 1.42;
+  text-align: center;
+  white-space: pre-line;
+  pointer-events: none;
+}
+
+/* Above the long rule, which the artwork draws from (31%, 26%) to (69%, 31%). The
+   phrase sits on that line's midpoint and rises from it. */
+.hero-ink-title {
+  left: 50%;
+  top: 25.5%;
+  width: max-content;
+  max-width: 36%;
+  font-size: 3.4cqw;
+  letter-spacing: .05em;
+  color: #3f3a31;
+  transform: translate(-50%, -100%) rotate(7deg);
+}
+
+/* Inside the ring, whose box in the artwork is (57.7%, 43.5%) to (83.9%, 64%) —
+   centre (70.8%, 53.8%), radii 13.1% and 10.25%. The block is sized so its corners
+   stay inside that curve, which is why the line breaks are in the copy: a ring is
+   only wide across its middle. */
+.hero-ink-circled {
+  left: 70.8%;
+  top: 53.8%;
+  width: max-content;
+  max-width: 22%;
+  font-size: 2.5cqw;
+  transform: translate(-50%, -50%) rotate(2deg);
+}
+
+/* Above the short rule at the foot of the sheet. */
+.hero-ink-first {
+  left: 65.5%;
+  top: 81.5%;
+  width: max-content;
+  max-width: 30%;
+  font-size: 2.6cqw;
+  transform: translate(-50%, -100%) rotate(-3deg);
+}
+
+/* Each language writes a different number of characters into the same ring and onto
+   the same two rules, so each gets its own size. */
+html[lang="en"] .hero-ink-title { font-size: 2.9cqw; letter-spacing: .01em; }
+html[lang="ja"] .hero-ink-title { font-size: 2.8cqw; letter-spacing: .02em; }
+html[lang="en"] .hero-ink-circled { font-size: 2.4cqw; }
+html[lang="ja"] .hero-ink-circled { font-size: 2.5cqw; }
+html[lang="en"] .hero-ink-first { font-size: 2.1cqw; }
+html[lang="ja"] .hero-ink-first { font-size: 2.3cqw; }
+
+/* The drawing is a drawing before it is anything else: when a visitor asks for less
+   movement it simply stops moving. Nothing is hidden, because nothing was ever
+   revealed by the motion. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-scene { --hero-p: 0; }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -946,7 +841,6 @@ html[lang="zh-CN"] :is(
   .eyebrow,
   .brief-block h3,
   .brief-input-label,
-  .outcome-sheet-label,
   .button,
   .studio-mode,
   .rail-title,
@@ -967,7 +861,6 @@ html[lang="ja"] :is(
   .eyebrow,
   .brief-block h3,
   .brief-input-label,
-  .outcome-sheet-label,
   .button,
   .studio-mode,
   .rail-title,
@@ -1045,13 +938,19 @@ html[lang="ja"] :is(
   text-wrap: balance;
 }
 
-/* The copy is plain text, so CJK headings need natural line breaks at every width. */
-html[lang="ja"] :is(.hero h1, .map-copy h1) { word-break: normal; }
+/* The retired walkthrough's heading sits in a much narrower box, where phrase
+   breaking fragments it into six short lines; it keeps the ordinary rule. The hero
+   heading is wide enough for phrases to fit, and phrase breaking is what stops a
+   Japanese verb being split across two lines — on a phone it gives that back, in the
+   720px block below, because there phrases no longer fit either. */
+html[lang="ja"] .map-copy h1 { word-break: normal; }
 
 
 @media (max-width: 1080px) {
-  .hero { grid-template-columns: minmax(0, 1fr); gap: 34px; }
-  .outcome { max-width: 560px; }
+  /* Stacked, and the drawing keeps a size it can still be read at rather than a
+     column's worth of width. */
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+  .hero-scene { width: 100%; max-width: 720px; margin-inline: auto; }
   .brief-layout { grid-template-columns: minmax(0, 1fr); }
   .brief-side { grid-template-columns: 1fr 1fr; }
   .brief-details-grid { grid-template-columns: 1fr 1fr; }
@@ -1081,20 +980,29 @@ html[lang="ja"] :is(.hero h1, .map-copy h1) { word-break: normal; }
   /* A phone column is narrower than one Chinese clause at full heading size, and a
      clause split down the middle of a word is worse than a smaller heading. */
   html[lang="zh-CN"] .hero h1, html[lang="ja"] .hero h1 { font-size: 27px; }
+  /* At this width a Japanese phrase is wider than the column, and phrase breaking
+     turns the heading into six short lines. */
+  html[lang="ja"] .hero h1 { word-break: normal; }
   html[lang="zh-CN"] .section-heading h2, html[lang="ja"] .section-heading h2 { font-size: 25px; }
   html[lang="zh-CN"] .brief-input-text, html[lang="ja"] .brief-input-text { font-size: 17px; }
   /* The hero copy is the page's argument, so it keeps its words and gives up its
      spacing instead. */
   .map-hero { padding: 34px 0 44px; gap: 20px; }
-  .hero { padding: 30px 0 40px; gap: 26px; }
+  .hero { padding: 26px 0 36px; gap: 22px; }
   .hero-intro { line-height: 1.7; }
-  .hero-actions { margin-top: 24px; }
+  .hero-actions { margin-top: 22px; gap: 14px; }
   .hero-actions .button { width: 100%; }
-  .hero-length { order: 3; }
+  .hero-length { margin-top: 14px; }
+  /* Edge to edge: the drawing is scenery, and at this width a 16px margin either
+     side is the difference between a readable sheet and a thumbnail. */
+  .hero-scene { width: 100vw; max-width: none; margin-inline: -16px; }
+  /* Only the title survives here. The ring and the foot rule are small parts of a
+     small picture at this width, and their phrases would land well under the page's
+     own reading floor; the title is the one that carries the idea. */
+  .hero-ink-title { font-size: 3.8cqw; }
+  html[lang="en"] .hero-ink-title, html[lang="ja"] .hero-ink-title { font-size: 3.2cqw; }
+  .hero-ink-circled, .hero-ink-first { display: none; }
   .map-closing { margin-top: 18px; }
-  .outcome { padding: 20px 18px 18px; }
-  .outcome-sheet { padding: 16px 16px 18px; }
-  .outcome-deliverables { grid-template-columns: 1fr; }
   .demo-section, .work-section { padding: 60px 0 64px; }
   .brief-section { padding: 60px 0 64px; }
   .brief-sheet { padding: 20px 18px 20px; }
@@ -1153,8 +1061,6 @@ html[lang="ja"] :is(.hero h1, .map-copy h1) { word-break: normal; }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .outcome-track { stroke-dashoffset: 0; }
-  .outcome-dot { opacity: 1; offset-distance: 100%; }
   *, *::before, *::after {
     scroll-behavior: auto !important;
     animation-duration: .01ms !important;

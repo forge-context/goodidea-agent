@@ -32,28 +32,39 @@ export type SiteCopy = {
   nav: { demo: string; brief: string; how: string; github: string };
 
   heroEyebrow: string;
-  heroTitle: string;
-  heroIntro: string;
-  /** Who this is for. One line, between the intro and the actions. */
-  heroAudience: string;
+  /** The headline, one clause per line.
+   *
+   *  Chinese and Japanese may break between any two characters, and at headline size
+   *  that regularly splits a two-character word down the middle — `auto-phrase` is
+   *  Chrome-only and does not segment Chinese. So the copy carries its own lines:
+   *  each part is a block, and a language whose clause is wider than the column (in
+   *  practice English) still wraps inside its own part. */
+  heroTitle: string[];
+  /** Two short lines: what the team does, and what stays the visitor's to decide.
+   *  Kept as two strings so each language breaks where its own clause ends. */
+  heroIntro: [string, string];
   heroPrimary: string;
-  /** The quiet label beside the primary action; carries the derived length. */
+  /** The quiet label under the actions; carries the derived length. */
   heroPrimaryNote: string;
   heroSecondary: string;
 
-  /* Beside the hero: how GoodIdea works and what comes out of it. Deliberately not
-     the case — the case belongs to the demo and to the outcome section below, and in
-     the hero it made the page look like the website of a quoting tool. */
-  previewLabel: string;
-  previewContribLabel: string;
-  /** What each discipline hands in, said generically: the case is the demo's job. */
-  previewContributions: [string, string, string];
-  previewDecision: string;
-  previewDecisionDone: string;
-  previewDraftLabel: string;
-  previewFormingLabel: string;
-  previewDeliverables: string[];
-  previewReplay: string;
+  /* The three phrases laid over the drawing beside the headline. The artwork ships
+     without words on purpose, because the same picture serves three languages and a
+     slab of one of them is not an illustration to the other two. Short and few: the
+     drawing has to read at a glance, not become a second thing to read, and every
+     one of these is also said in plain text elsewhere on the page. */
+  scene: {
+    /** The whole picture, said once, for anyone who is not looking at it. */
+    alt: string;
+    /** Above the long green rule near the top of the sheet. */
+    title: string;
+    /** Inside the ring on the right. A ring is only wide across its middle, so the
+     *  breaks are written into the copy: three short lines fit, a paragraph does
+     *  not. */
+    circled: string;
+    /** Above the short green rule at the foot of the sheet. */
+    first: string;
+  };
 
   demoEyebrow: string;
   demoTitle: string;
@@ -139,23 +150,21 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     nav: { demo: "Demo", brief: "成果", how: "协作机制", github: "GitHub" },
 
     heroEyebrow: "给准备用 AI 写代码的人",
-    heroTitle: "和 AI 团队一起，把想法推敲成可以开工的产品。",
-    heroIntro:
-      "研究、UX 和工程 Agent 各自提出建议，GoodIdea 整理出关键选择。你做决定，产品方向、草图与第一版范围逐渐清楚。",
-    heroAudience: "适合已经能让 AI 写代码，却还没想清第一版该做什么的人。",
+    heroTitle: ["和 AI 团队一起，", "把想法推敲成", "可以开工的产品。"],
+    heroIntro: [
+      "研究、设计与工程，一起帮你理清方向。",
+      "你来做决定，把想法变成可开发的方案。",
+    ],
     heroPrimary: "看一个想法如何成形",
     heroPrimaryNote: "{seconds} 秒 · 无需注册",
-    heroSecondary: "看最后留下什么",
+    heroSecondary: "看看最终成果",
 
-    previewLabel: "Agent 提案 · GoodIdea 综合 · 你来决定",
-    previewContribLabel: "三位专业 Agent 的贡献",
-    previewContributions: ["待验证假设", "概念草图", "实现代价"],
-    previewDecision: "1 项待你决定",
-    previewDecisionDone: "你已采用 · 写入产品稿",
-    previewDraftLabel: "产品稿",
-    previewFormingLabel: "逐渐清楚的，是这几样",
-    previewDeliverables: ["产品方向", "概念草图", "第一版范围", "开发交接材料"],
-    previewReplay: "再看一次",
+    scene: {
+      alt: "一张摊开的手绘产品草稿：纸上有界面线框、被划掉的一版和更简单的下一版、圈出的一句话和几道绿线；一位女性拿着铅笔靠在纸的上边思考，一个人站在纸前看着它。",
+      title: "一个值得做的想法",
+      circled: "让好想法\n更容易变成\n真实的产品。",
+      first: "第一版，先做到这里",
+    },
 
     demoEyebrow: "主 Demo",
     demoTitle: "三份贡献，一项由你决定。",
@@ -260,23 +269,24 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     nav: { demo: "Demo", brief: "Output", how: "How it works", github: "GitHub" },
 
     heroEyebrow: "For people about to build with AI",
-    heroTitle: "Work an idea out with an AI team, until it is something you can start building.",
-    heroIntro:
-      "Research, UX and engineering agents each propose. GoodIdea states where they agree and what is still a choice. You decide — and the direction, the sketch and the scope of version one get clearer.",
-    heroAudience: "For people who can already get AI to write the code, and still have to decide what version one is.",
+    /* English has spaces to break at, so it stays one sentence and wraps where the
+       column ends; the forced clauses exist for the two scripts that would otherwise
+       break inside a word. */
+    heroTitle: ["Work an idea out with an AI team, until it is something you can start building."],
+    heroIntro: [
+      "Research, design and engineering, working out the direction with you.",
+      "You decide, and the idea becomes something a coding agent can build.",
+    ],
     heroPrimary: "Watch an idea take shape",
     heroPrimaryNote: "{seconds} seconds · no sign-up",
-    heroSecondary: "See what is left at the end",
+    heroSecondary: "See the finished outcome",
 
-    previewLabel: "Agents propose · GoodIdea combines · you decide",
-    previewContribLabel: "Three specialist agents",
-    previewContributions: ["Assumption to test", "Concept sketch", "Build cost"],
-    previewDecision: "1 decision, and it is yours",
-    previewDecisionDone: "Adopted · written into the draft",
-    previewDraftLabel: "Product draft",
-    previewFormingLabel: "What gets clearer",
-    previewDeliverables: ["Direction", "Concept sketch", "Version-one scope", "Handoff package"],
-    previewReplay: "Show it again",
+    scene: {
+      alt: "A large hand-drawn product draft spread out on a desk: an interface sketch, one version crossed out beside a simpler one, a circled note and a few green rules; a woman leans on the top edge with a pencil, and someone stands in front of the paper looking at it.",
+      title: "An idea worth building",
+      circled: "Make good ideas\neasier to build.",
+      first: "Version one stops here",
+    },
 
     demoEyebrow: "The demo",
     demoTitle: "Three contributions. One decision, and it is yours.",
@@ -381,23 +391,21 @@ export const siteCopy: Record<Locale, SiteCopy> = {
     nav: { demo: "Demo", brief: "成果物", how: "進め方", github: "GitHub" },
 
     heroEyebrow: "AI と一緒に作り始める人へ",
-    heroTitle: "AI チームと一緒に、アイデアを着手できる製品まで詰める。",
-    heroIntro:
-      "調査・UX・実装の Agent がそれぞれ提案し、GoodIdea が大事な選択をまとめます。決めるのはあなた。方向・スケッチ・初版の範囲が、だんだんはっきりします。",
-    heroAudience: "コードは AI に書かせられる。でも初版の中身がまだ決まっていない——そんな人に。",
+    heroTitle: ["AI チームと一緒に、", "アイデアを着手できる", "製品まで詰める。"],
+    heroIntro: [
+      "調査・デザイン・エンジニアリングが、方向を一緒に整理する。",
+      "決めるのはあなた。アイデアを、開発できる案にする。",
+    ],
     heroPrimary: "アイデアが形になる過程を見る",
     heroPrimaryNote: "{seconds} 秒 · 登録不要",
-    heroSecondary: "最後に何が残るかを見る",
+    heroSecondary: "最終的な成果を見る",
 
-    previewLabel: "Agent が提案 · GoodIdea がまとめ · あなたが決める",
-    previewContribLabel: "3 名の専門 Agent の提案",
-    previewContributions: ["検証前の仮説", "コンセプト案", "実装コスト"],
-    previewDecision: "あなたの決定 1 件",
-    previewDecisionDone: "採用 · ドラフトに反映",
-    previewDraftLabel: "製品ドラフト",
-    previewFormingLabel: "はっきりしてくるもの",
-    previewDeliverables: ["製品の方向", "コンセプトスケッチ", "初版の範囲", "引き渡し一式"],
-    previewReplay: "もう一度",
+    scene: {
+      alt: "机に広げた大きな手描きの製品ドラフト。画面のラフ、線を引いて外した案とより簡単な次の案、丸で囲んだ一文と数本の緑の線が描かれ、鉛筆を持った女性が紙の上端にもたれ、もう一人が紙の前に立って眺めている。",
+      title: "つくる価値のあるアイデア",
+      circled: "良いアイデアを\n形にしやすく。",
+      first: "初版は、ここまで",
+    },
 
     demoEyebrow: "デモ",
     demoTitle: "提案は 3 件。決めるのは、1 件のあなたの判断。",
