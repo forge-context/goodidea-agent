@@ -1,10 +1,47 @@
-import { OutcomePreview } from "./OutcomePreview";
+import { useEffect, useRef, useState } from "react";
+
+import { HeroScene } from "./HeroScene";
 import { siteCopy, withSeconds, type Locale, type SiteCopy } from "./siteCopy";
 import { buildPaperBrief, paperHandoffMarkdown } from "./studio/paper/paperBrief";
 import { PaperFilm } from "./studio/paper/PaperFilm";
 import { PAPER_SECONDS } from "./studio/paper/paperTimeline";
 
 const REPO = "https://github.com/forge-context/goodidea-agent";
+
+/**
+ * A heading that arrives from 16px below, once, when it first reaches the viewport.
+ *
+ * The attribute is only added after mount, so the prerendered shell and any visitor
+ * without JavaScript get the heading already in place rather than an invisible one;
+ * `reduce` and a browser without `IntersectionObserver` skip straight to "in". It
+ * fires once and then stops observing, so scrolling back up never replays it.
+ */
+function useRevealOnce() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [state, setState] = useState<"idle" | "pending" | "in">("idle");
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined"
+      || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) {
+      setState("in");
+      return;
+    }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      setState("in");
+      observer.disconnect();
+    }, { threshold: 0.2 });
+    // Anything already on screen at mount is not an arrival; it is just there.
+    const rect = el.getBoundingClientRect();
+    setState(rect.top < window.innerHeight * 0.9 ? "in" : "pending");
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return { ref, "data-reveal": state } as const;
+}
 
 /**
  * The page, in the order it has to be read.
@@ -22,6 +59,7 @@ function App() {
   const brief = buildPaperBrief(locale);
   const seconds = PAPER_SECONDS;
   const groups = groupBrief(brief.blocks, t);
+  const demoHeading = useRevealOnce();
 
   return (
     <>
@@ -47,24 +85,28 @@ function App() {
       </header>
 
       <main id="main">
+        {/* One promise, one action, and a drawing of the thing being promised. The
+            mechanism is the film's job, one screen down. */}
         <section className="hero section-shell" id="top">
           <div className="hero-copy">
             <p className="eyebrow">{t.heroEyebrow}</p>
-            <h1>{t.heroTitle}</h1>
-            <p className="hero-intro">{t.heroIntro}</p>
-            <p className="hero-audience">{t.heroAudience}</p>
+            <h1>{t.heroTitle.map((line) => <span key={line}>{line}</span>)}</h1>
+            <p className="hero-intro">
+              {t.heroIntro.map((line) => <span key={line}>{line}</span>)}
+            </p>
             <div className="hero-actions">
               <a className="button button-primary" href="#demo">{t.heroPrimary}<ArrowDownIcon /></a>
-              <span className="hero-length">{withSeconds(t.heroPrimaryNote, seconds)}</span>
-              <a className="button button-quiet" href="#brief">{t.heroSecondary}<ArrowDownIcon /></a>
+              {/* Quiet on purpose: the outcome is worth a link, not a second button. */}
+              <a className="hero-aside-link" href="#brief">{t.heroSecondary}<ArrowUpRightIcon /></a>
             </div>
+            <p className="hero-length">{withSeconds(t.heroPrimaryNote, seconds)}</p>
           </div>
-          <OutcomePreview locale={locale} copy={t} />
+          <HeroScene copy={t} />
         </section>
 
         <section className="demo-section" id="demo">
           <div className="section-shell">
-            <div className="section-heading">
+            <div className="section-heading" {...demoHeading}>
               <p className="eyebrow">{t.demoEyebrow}</p>
               <h2>{t.demoTitle}</h2>
               <p className="section-lead">{t.demoIntro}</p>

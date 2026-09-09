@@ -74,21 +74,23 @@ export function renderShell(t, { locale, homePath, seconds, withSeconds }) {
         <section class="hero section-shell" id="top">
           <div class="hero-copy">
             <p class="eyebrow">${escape(t.heroEyebrow)}</p>
-            <h1>${escape(t.heroTitle)}</h1>
-            <p class="hero-intro">${escape(t.heroIntro)}</p>
-            <p class="hero-audience">${escape(t.heroAudience)}</p>
+            <h1>${t.heroTitle.map((line) => `<span>${escape(line)}</span>`).join("")}</h1>
+            <p class="hero-intro">${t.heroIntro.map((line) => `<span>${escape(line)}</span>`).join("")}</p>
             <div class="hero-actions">
               <a class="button button-primary" href="#demo">${escape(t.heroPrimary)}${ARROW_DOWN}</a>
-              <span class="hero-length">${seconded(t.heroPrimaryNote)}</span>
-              <a class="button button-quiet" href="#brief">${escape(t.heroSecondary)}${ARROW_DOWN}</a>
+              <a class="hero-aside-link" href="#brief">${escape(t.heroSecondary)}${ARROW_UP_RIGHT}</a>
+            </div>
+            <p class="hero-length">${seconded(t.heroPrimaryNote)}</p>
+          </div>
+          <!-- One picture with one description. The image itself is in the shell so
+               the browser starts fetching the hero artwork from the first response
+               rather than after the bundle runs; React replaces the container on
+               mount and the file is already in cache. -->
+          <div class="hero-scene" role="img" aria-label="${escape(t.scene.alt)}">
+            <div class="hero-art">
+              <img class="hero-art-image" src="/hero/goodidea-hero-illustration.webp" width="1374" height="1145" alt="" fetchpriority="high" decoding="async" />
             </div>
           </div>
-          <aside class="outcome" aria-label="${escape(t.previewLabel)}">
-            <p class="outcome-kicker">${escape(t.previewLabel)}</p>
-            <ul class="outcome-deliverables">
-              ${t.previewDeliverables.map((item) => `<li>${escape(item)}</li>`).join("\n              ")}
-            </ul>
-          </aside>
         </section>
         <section class="demo-section" id="demo">
           <div class="section-shell">

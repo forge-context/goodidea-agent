@@ -6,6 +6,58 @@ This record explains the current LP design decisions. It does not claim that a c
 
 The detailed walkthrough and live workspace share tokens, Studio styles and the map renderer in `shared/studio/`. The public concept film lives separately in `web/src/studio/paper/`, under its own `gip-` class and custom-property prefix, and does not change the shared product interface.
 
+## 2026-09-09: the hero is one illustration, with three phrases written on it
+
+The hero used to build its right half out of parts: the film's paper texture, a pose
+lifted from the film's character sheet, a hand-rolled SVG wireframe, a plant, and five
+handwritten annotations positioned against a rotated box. It never held together. The
+person could only ever show half a torso, because the sheet had to hide where the
+sprite ended; the wireframe was ruled and regular next to hand-drawn paper; and the
+annotations sat close enough to the torn edges to read as separate floating layers.
+
+It is now one supplied illustration — `web/public/hero/goodidea-hero-illustration.webp`,
+1374×1145, 104 KB — that already contains both people, the draft, the spare sheets, the
+note, the plant, the wireframes, the crossed-out version and the green marks. Nothing
+in CSS or SVG redraws any of it, and nothing pretends the file has layers it does not
+have.
+
+**The file is not transparent, and it does not need to be.** Its ground is `#faf8f2`;
+the page's `--paper` is `#fbf8f2`. Sampled across all four edges of a rendered
+1440×900 screenshot, the largest difference is one step in the red channel — there is
+no rectangle to hide, so there is no mask and no blend mode. Blend modes were the
+tempting fix and they are the wrong one: they would shift the skin and paper colours
+to hide an edge nobody can see.
+
+**The words are DOM, because the picture serves three languages.** The artwork ships
+without lettering on purpose. Three phrases are laid over it, each positioned as a
+percentage of the image and turned to the angle of the paper under it, measured off
+the artwork itself: the long rule near the top runs from (31.3%, 25.6%) to
+(69.1%, 31.2%), so the title above it turns +7°; the ring is centred at (70.8%, 53.8%)
+with radii 13.1% and 10.25%, and the phrase inside it barely turns at all; the short
+rule at the foot runs at -3°. One rotation for all three would put at least two of
+them at a visible angle to the line they belong to.
+
+**The ring's line breaks are in the copy.** An ellipse is only wide across its middle,
+so a block of text set to a width will always push its first and last lines out
+through the curve. The three languages carry their own breaks, and each block's
+corner distance is checked against the ellipse: 0.77, 0.61 and 0.66 of the way to it.
+
+**45 / 55, and a headline that can carry its half.** The drawing is the wider element
+and the headline is the heavier one; a large drawing beside small type reads as
+decoration with a caption. The headline cap went from 42px to 53px, and the Chinese
+and Japanese headlines now carry one clause per line in the copy itself, because
+`word-break: auto-phrase` is Chrome-only and does not segment Chinese — it had been
+splitting 可以 and 着手できる down the middle. English stays one sentence and wraps
+where the column ends.
+
+**The movement is 16px, and it is one object.** The image and the three phrases sit in
+the same transformed element, so they cannot drift apart; there is no rotation,
+because turning a rectangular picture on a flat ground is exactly what would show its
+edges. Scrolling writes one custom property and CSS does the rest, so no component
+state changes while scrolling; it stops entirely off screen, on phones, and under
+`prefers-reduced-motion`. On a phone only the title stays: the other two phrases would
+land under the page's own reading floor at that width.
+
 ## 2026-09-08 (later): one page language, and the demo first
 
 The page was carrying three visual systems at once — a purple-and-coral marketing
