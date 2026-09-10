@@ -523,17 +523,101 @@ html[lang="ja"] .hero-ink-circled { font-size: max(var(--ink-floor), 2.4cqw); }
 
 /* ------------------------------------------------------------------- demo */
 
+/* The demo is one thing to look at, and it has to arrive as one: the sentence that
+   says what is about to happen, the picture, and the transport that plays it. A
+   visitor who lands on the title and then has to go looking for the play button has
+   been asked to hold the first in their head while they scroll for the second.
+
+   So on a desk this section is laid out against the window's height rather than
+   against the column's width. The sticky header, this section's own air, the heading
+   and the transport each take a share, and the film gets what is left — its width
+   following from its own 16:9. Nothing is scaled and nothing is clipped: the window
+   is simply narrower, and the film's own observer redraws the stage at that size.
+   What sits under the transport — the note about the film and the written version —
+   is not part of the budget; it is read after the film, not with it. */
+
 .demo-section {
-  padding: 84px 0 92px;
+  /* The section's own air. On a desk it is measured against the window it competes
+     with rather than set once and left. */
+  --demo-pad-top: 84px;
+  --demo-pad-bottom: 92px;
+  --demo-head-gap: 26px;
+  /* Written by script from the rendered text — a heading is one line in one language
+     and two in the next, and the transport is one row on a desk and two on a phone.
+     The values here are what the page uses until then, and what it keeps if script
+     never runs; both are close enough that the untouched page is imprecise rather
+     than wrong. */
+  --demo-head-h: 118px;
+  --demo-transport-h: 66px;
+  /* The transport should not sit exactly on the fold. */
+  --demo-foot-air: 14px;
+  /* How far the film is allowed to shrink before it stops being worth watching. The
+     stage is authored 1600 units wide, so an 820px film sets the sheets' headings at
+     about 12px and their running copy at 9 — which is the floor, not the target. On
+     every desk that has the height for it the budget below asks for more than this
+     and gets it; the floor exists so that a window too short to hold the film at a
+     readable size lets the transport fall below the fold instead of shrinking the
+     picture until nothing written on it can be read. */
+  --demo-film-min: 820px;
+
+  padding-block: var(--demo-pad-top) var(--demo-pad-bottom);
   border-block: 1px solid var(--line);
   background: var(--surface);
+  /* The heading is the top of this section, so the section's own edge is where the
+     scroll stops: the air above the eyebrow is `--demo-pad-top`, which the budget
+     already counts, rather than that plus a gap the budget knows nothing about. */
+  scroll-margin-top: var(--header-h);
 }
+/* Heading and film share one box, so a film narrower than the column keeps the title
+   on its own left edge instead of stranding it across the page. */
+.demo-frame { margin-inline: auto; }
+.demo-section .section-heading { margin-bottom: var(--demo-head-gap); }
+.demo-section .eyebrow { margin-bottom: 10px; }
+.demo-section .section-lead { margin-top: 10px; }
 .demo-window {
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: var(--radius-panel);
   background: var(--paper);
   color: var(--ink);
+}
+
+@media (min-width: 1081px) {
+  .demo-section { --demo-pad-top: clamp(28px, 5vh, 76px); }
+  .demo-frame {
+    /* What the film has left, and the width its 16:9 makes of it. The 2px is the
+       window's own hairline, which is outside the picture. `100svh` is the small
+       viewport; a browser without it falls out of this declaration entirely and gets
+       the full column, which is where the page started. */
+    --demo-film-h: calc(
+      100svh - var(--header-h) - var(--demo-pad-top) - var(--demo-head-h)
+      - var(--demo-head-gap) - var(--demo-transport-h) - var(--demo-foot-air)
+    );
+    width: min(100%, max(var(--demo-film-min), var(--demo-film-h) * 16 / 9 + 2px));
+  }
+}
+
+/* A 768px-tall desk cannot hold the heading, a 16:9 film at a readable size and the
+   transport at once — 72px of header and a 16:9 picture leave about 470px for a film
+   that needs 540 — and the answer to that is not a smaller film. What this window can
+   do is give up its air, so that what falls below the fold is as little as possible
+   and is the transport rather than the picture. */
+@media (min-width: 1081px) and (max-height: 820px) {
+  .demo-section {
+    --demo-pad-top: 24px;
+    --demo-pad-bottom: 64px;
+    --demo-head-gap: 18px;
+    --demo-foot-air: 8px;
+  }
+  .demo-section .eyebrow { margin-bottom: 8px; }
+  .demo-section .section-lead { margin-top: 8px; }
+  /* The same step the headline takes on a short window, for the same reason: at 38px
+     the Japanese title is wider than the column and takes a second line, and a second
+     line here is 47px taken straight off the picture. At 32px every language says it
+     on one, and 32 against the 16px line under it is still plainly a heading. */
+  .demo-section .section-heading h2 { font-size: clamp(26px, 2.4vw, 32px); }
+  /* The transport keeps its 40px controls; it is the padding around them that goes. */
+  .demo-window .gip-controls { padding-block: 10px; }
 }
 
 /* ------------------------------------------------------------------ output */
@@ -1143,7 +1227,10 @@ html[lang="ja"] .map-copy h1 { word-break: normal; }
      phrase says what the headline two inches above it already said. */
   .hero-ink-circled { display: none; }
   .map-closing { margin-top: 18px; }
+  /* A phone reads the page straight down, so the demo goes back to ordinary
+     section spacing and the film keeps the full column. */
   .demo-section, .work-section { padding: 60px 0 64px; }
+  .demo-section { --demo-head-gap: 30px; }
   .brief-section { padding: 60px 0 64px; }
   .brief-sheet { padding: 20px 18px 20px; }
   .brief-side { grid-template-columns: 1fr; }

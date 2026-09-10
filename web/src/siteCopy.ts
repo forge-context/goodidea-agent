@@ -174,8 +174,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
 
     demoEyebrow: "主 Demo",
     demoTitle: "看一个报价工具的想法，如何变得具体。",
-    demoIntro:
-      "研究、UX 与工程三位 Agent 各交出一份署名贡献，GoodIdea 写出共同方向和一处需要拍板的取舍。你确认之后，产品稿才改写。",
+    demoIntro: "三份署名贡献，收成一处需要你拍板的取舍。",
 
     briefEyebrow: "成果",
     briefTitle: "同一个案例，最终留下什么。",
@@ -296,8 +295,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
 
     demoEyebrow: "The demo",
     demoTitle: "Watch one quoting-tool idea get specific.",
-    demoIntro:
-      "Research, UX and engineering agents each hand in a signed contribution, and GoodIdea states where they agree and the one trade-off that still needs a person. The product draft changes only after you confirm it.",
+    demoIntro: "Three signed contributions, and one trade-off left for you to call.",
 
     briefEyebrow: "Output",
     briefTitle: "The same case. This is what is left.",
@@ -415,8 +413,7 @@ export const siteCopy: Record<Locale, SiteCopy> = {
 
     demoEyebrow: "デモ",
     demoTitle: "見積もりツールのアイデアが、具体になるまで。",
-    demoIntro:
-      "調査・UX・実装の 3 名の Agent が署名つきの提案を出し、GoodIdea が共通する方向と、人が決めるべき 1 つの取捨をまとめる。製品ドラフトが変わるのは、あなたが確認したあとです。",
+    demoIntro: "3 つの署名つき貢献が、あなたの決める 1 つの取捨になります。",
 
     briefEyebrow: "成果物",
     briefTitle: "同じ事例から、最後に残るもの。",

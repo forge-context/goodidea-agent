@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import { HeroScene } from "./HeroScene";
 import { siteCopy, withSeconds, type Locale, type SiteCopy } from "./siteCopy";
@@ -44,6 +44,42 @@ function useRevealOnce() {
 }
 
 /**
+ * Tells the stylesheet how tall the demo's two blocks of text actually are.
+ *
+ * The film is sized by what the screen has left once the header, the section's air,
+ * the heading and the transport have taken theirs — see the demo block in
+ * `styles.css`. Every part of that budget is a constant the stylesheet owns except
+ * these two, which are text: a heading is one line in one language and two in the
+ * next, and the transport is one row on a desk and two on a phone. So they are
+ * measured rather than guessed, and re-measured whenever either changes.
+ *
+ * Nothing here can loop: the heading's width comes from the section column and the
+ * transport's from the film, and neither is what this writes.
+ */
+function useDemoFit() {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const frame = ref.current;
+    if (!frame || typeof ResizeObserver === "undefined") return;
+    const heading = frame.querySelector<HTMLElement>(".section-heading");
+    const transport = frame.querySelector<HTMLElement>(".gip-controls");
+    if (!heading || !transport) return;
+    const write = () => {
+      frame.style.setProperty("--demo-head-h", `${Math.ceil(heading.getBoundingClientRect().height)}px`);
+      frame.style.setProperty("--demo-transport-h", `${Math.ceil(transport.getBoundingClientRect().height)}px`);
+    };
+    write();
+    const observer = new ResizeObserver(write);
+    observer.observe(heading);
+    observer.observe(transport);
+    return () => observer.disconnect();
+  }, []);
+
+  return ref;
+}
+
+/**
  * True while the element is on screen, as a data attribute.
  *
  * The hint below the hero moves, and there is no reason for it to keep moving once it
@@ -83,6 +119,7 @@ function App() {
   const seconds = PAPER_SECONDS;
   const groups = groupBrief(brief.blocks, t);
   const demoHeading = useRevealOnce();
+  const demoFrame = useDemoFit();
   const scrollCue = useOnScreen();
 
   return (
@@ -141,15 +178,19 @@ function App() {
           </a>
         </section>
 
+        {/* Heading and film share one box, so that when the film is narrower than the
+            column the title sits over its left edge rather than off to one side. */}
         <section className="demo-section" id="demo">
           <div className="section-shell">
-            <div className="section-heading" {...demoHeading}>
-              <p className="eyebrow">{t.demoEyebrow}</p>
-              <h2>{t.demoTitle}</h2>
-              <p className="section-lead">{t.demoIntro}</p>
-            </div>
-            <div className="demo-window">
-              <PaperFilm locale={locale} />
+            <div className="demo-frame" ref={demoFrame}>
+              <div className="section-heading" {...demoHeading}>
+                <p className="eyebrow">{t.demoEyebrow}</p>
+                <h2>{t.demoTitle}</h2>
+                <p className="section-lead">{t.demoIntro}</p>
+              </div>
+              <div className="demo-window">
+                <PaperFilm locale={locale} />
+              </div>
             </div>
           </div>
         </section>
